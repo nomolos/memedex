@@ -1,0 +1,15 @@
+{
+    "bofa": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-memedex-bofa-152306-authRole",
+            "UnauthRoleArn": "arn:aws:iam::560871491257:role/amplify-memedex-bofa-152306-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::560871491257:role/amplify-memedex-bofa-152306-authRole",
+            "Region": "us-east-2",
+            "DeploymentBucketName": "amplify-memedex-bofa-152306-deployment",
+            "UnauthRoleName": "amplify-memedex-bofa-152306-unauthRole",
+            "StackName": "amplify-memedex-bofa-152306",
+            "StackId": "arn:aws:cloudformation:us-east-2:560871491257:stack/amplify-memedex-bofa-152306/6d7d5120-7844-11ea-b3bb-0abbead6f3aa",
+            "AmplifyAppId": "dfhrug9oiqklt"
+        }
+    }
+}

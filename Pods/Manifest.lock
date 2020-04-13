@@ -1,0 +1,128 @@
+PODS:
+  - AppSyncRealTimeClient (1.1.5):
+    - Starscream (= 3.0.6)
+  - AWSAppSync (3.1.0):
+    - AppSyncRealTimeClient (~> 1.1)
+    - AWSCore (~> 2.13.0)
+    - ReachabilitySwift (~> 5.0.0)
+    - SQLite.swift (~> 0.12.2)
+  - AWSAutoScaling (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSCloudWatch (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSCognito (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSCognitoIdentityProvider (2.13.1):
+    - AWSCognitoIdentityProviderASF (= 1.0.1)
+    - AWSCore (= 2.13.1)
+  - AWSCognitoIdentityProviderASF (1.0.1)
+  - AWSCore (2.13.1)
+  - AWSDynamoDB (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSEC2 (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSElasticLoadBalancing (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSIoT (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSKinesis (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSLambda (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSMachineLearning (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSMobileAnalytics (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSS3 (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSSES (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSSimpleDB (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSSNS (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSSQS (2.13.1):
+    - AWSCore (= 2.13.1)
+  - ReachabilitySwift (5.0.0)
+  - SQLite.swift (0.12.2):
+    - SQLite.swift/standard (= 0.12.2)
+  - SQLite.swift/standard (0.12.2)
+  - Starscream (3.0.6)
+
+DEPENDENCIES:
+  - AWSAppSync
+  - AWSAutoScaling
+  - AWSCloudWatch
+  - AWSCognito
+  - AWSCognitoIdentityProvider
+  - AWSCore
+  - AWSDynamoDB
+  - AWSEC2
+  - AWSElasticLoadBalancing
+  - AWSIoT
+  - AWSKinesis
+  - AWSLambda
+  - AWSMachineLearning
+  - AWSMobileAnalytics
+  - AWSS3
+  - AWSSES
+  - AWSSimpleDB
+  - AWSSNS
+  - AWSSQS
+
+SPEC REPOS:
+  https://github.com/CocoaPods/Specs.git:
+    - AppSyncRealTimeClient
+    - AWSAppSync
+    - AWSAutoScaling
+    - AWSCloudWatch
+    - AWSCognito
+    - AWSCognitoIdentityProvider
+    - AWSCognitoIdentityProviderASF
+    - AWSCore
+    - AWSDynamoDB
+    - AWSEC2
+    - AWSElasticLoadBalancing
+    - AWSIoT
+    - AWSKinesis
+    - AWSLambda
+    - AWSMachineLearning
+    - AWSMobileAnalytics
+    - AWSS3
+    - AWSSES
+    - AWSSimpleDB
+    - AWSSNS
+    - AWSSQS
+    - ReachabilitySwift
+    - SQLite.swift
+    - Starscream
+
+SPEC CHECKSUMS:
+  AppSyncRealTimeClient: 610da868f8c56539a840ee848f968120a07a7b6f
+  AWSAppSync: 269c0f5ab575ef072c3ea91bcb14354cbc348f0c
+  AWSAutoScaling: 7c4046c852348bb85731baf787ecc9d6e789bb7f
+  AWSCloudWatch: 72972be043b698da3f5969968a06ef356c0f0bf4
+  AWSCognito: c6311e35fe74c9ee490fff3e03548afae629dc5c
+  AWSCognitoIdentityProvider: 78f240befbd2e47a8e644946a9dd19812b0e5044
+  AWSCognitoIdentityProviderASF: f94f1a502e72ef3d0a1de93e10bf7a79c8698118
+  AWSCore: ec394695d054fa4136b20ccd22d8901faea5de04
+  AWSDynamoDB: e672a3f1053a7aa28d9393d49589c4b0f6d2cb22
+  AWSEC2: b0af6c70701dc882cd9c2ee9fee98fde1b2aaa46
+  AWSElasticLoadBalancing: 9d9f0c4e7e424363d5f2980c37f45f30e88bafb4
+  AWSIoT: 0edc81defb5721e0a8c4352b938d3baad329b8c8
+  AWSKinesis: 47cbcb004963f536a3531127d4cf371ecae4941a
+  AWSLambda: 06e7dc0206f8ccef6380f096ab92503d5c96e96b
+  AWSMachineLearning: ef26bf81369b705ef87485aed408bb3788550094
+  AWSMobileAnalytics: 7b62b7c2d8257c423d0b3ac45b3558fc6363ca37
+  AWSS3: 03511ee2f0482f1674b864d7f6ceddc7184f8491
+  AWSSES: 8813f22f111a27714bf916d02be63641781c5b42
+  AWSSimpleDB: 3f0dedf4ab6288bab30f2976fac704c3a597a9fa
+  AWSSNS: e6b9b684aec01af0f161670d3e1ebfe445b80426
+  AWSSQS: 75d9ed6ca59502445f3ca6c519335b8f5022849b
+  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
+  SQLite.swift: d2b4642190917051ce6bd1d49aab565fe794eea3
+  Starscream: ef3ece99d765eeccb67de105bfa143f929026cf5
+
+PODFILE CHECKSUM: 25f26c46025c8d8cbc870fdddcb37ee94c192651
+
+COCOAPODS: 1.9.1
