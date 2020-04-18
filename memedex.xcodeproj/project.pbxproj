@@ -72,6 +72,8 @@
 		BDA6FD522433F35500D5BDD5 /* CognitoConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDA6FD512433F35500D5BDD5 /* CognitoConfig.swift */; };
 		BDCD5C45243BC7BC00B95DAD /* awsconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = BDCD5C44243BC7BC00B95DAD /* awsconfiguration.json */; };
 		BDCD5C47243BD62E00B95DAD /* Meme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDCD5C46243BD62E00B95DAD /* Meme.swift */; };
+		BDE7EA2C2448DCA3008A603B /* GetAWSObjectURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDE7EA2B2448DCA3008A603B /* GetAWSObjectURL.swift */; };
+		BDE7EA2E244A45EB008A603B /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDE7EA2D244A45EB008A603B /* VideoPlayerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -144,6 +146,8 @@
 		BDA6FD512433F35500D5BDD5 /* CognitoConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CognitoConfig.swift; sourceTree = "<group>"; };
 		BDCD5C44243BC7BC00B95DAD /* awsconfiguration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = awsconfiguration.json; path = memedex/awsconfiguration.json; sourceTree = "<group>"; };
 		BDCD5C46243BD62E00B95DAD /* Meme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meme.swift; sourceTree = "<group>"; };
+		BDE7EA2B2448DCA3008A603B /* GetAWSObjectURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetAWSObjectURL.swift; sourceTree = "<group>"; };
+		BDE7EA2D244A45EB008A603B /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -211,6 +215,8 @@
 				BDCD5C46243BD62E00B95DAD /* Meme.swift */,
 				BD25D750243FBDD8002A03BF /* VerificationViewController.swift */,
 				BD4B85402442410D00C67E09 /* TextField.swift */,
+				BDE7EA2B2448DCA3008A603B /* GetAWSObjectURL.swift */,
+				BDE7EA2D244A45EB008A603B /* VideoPlayerView.swift */,
 			);
 			path = memedex;
 			sourceTree = "<group>";
@@ -453,10 +459,12 @@
 				BDA6FD522433F35500D5BDD5 /* CognitoConfig.swift in Sources */,
 				BD220CF823F4B3A200D93CBE /* ViewController.swift in Sources */,
 				BD4B85412442410D00C67E09 /* TextField.swift in Sources */,
+				BDE7EA2C2448DCA3008A603B /* GetAWSObjectURL.swift in Sources */,
 				BDCD5C47243BD62E00B95DAD /* Meme.swift in Sources */,
 				BD220CE123F4B25800D93CBE /* AppDelegate.swift in Sources */,
 				BD25D751243FBDD8002A03BF /* VerificationViewController.swift in Sources */,
 				BD220CE623F4B25800D93CBE /* memedex.xcdatamodeld in Sources */,
+				BDE7EA2E244A45EB008A603B /* VideoPlayerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
