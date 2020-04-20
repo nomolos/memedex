@@ -36,18 +36,37 @@ class ViewController: UIViewController {
     
     }
     
-    @IBOutlet weak var slider: UISlider!
+    @objc func sliderValueDidChange(sender:UISlider) {
+        if sender.value >= 4.5 {
+           self.slider.minimumTrackTintColor = UIColor(red: 0.71, green: 0.44, blue: 0.95, alpha: 1.00)
+        } else if sender.value >= 3.5 {
+            self.slider.minimumTrackTintColor = UIColor(red: 0.49, green: 0.83, blue: 0.13, alpha: 1.00)
+         } else if sender.value >= 1.5 {
+            self.slider.minimumTrackTintColor = UIColor(red: 0.97, green: 0.91, blue: 0.11, alpha: 1.00)
+         } else {
+              self.slider.minimumTrackTintColor = UIColor(red: 0.82, green: 0.01, blue: 0.11, alpha: 1.00)
+         }
+    }
+    
+    @IBOutlet weak var slider: CustomSlider!
     
     @IBAction func next(_ sender: Any) {
+        self.slider.isEnabled = false
         print("printing index below")
         print(self.index)
         print("printing number of keys below")
         print(self.keys.count)
         print("printing all keys")
         if(self.keys.count == index){
+            //vibration indicating failure to go forward
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.error)
             print("End of list")
             return
         }
+        //vibration indicating success
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
         // the meme view is hidden because we had a video last time
         // We need to get rid of the AVPlayer used last time
         // Whether or not we initialize another AVPlayer
@@ -60,7 +79,7 @@ class ViewController: UIViewController {
         //print(self.keys[index])
         let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
         let meme = Meme()
-        meme?.meme = self.keys[index]
+        meme?.sub = user?.username
         meme?.rating = slider.value as NSNumber
         let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
         updateMapperConfig.saveBehavior = .updateSkipNullAttributes
@@ -80,7 +99,8 @@ class ViewController: UIViewController {
             print("grabbing image from S3")
             print("printing current index")
             //print(self.index)
-            //print(self.keys[self.index])
+            print("image/video name below")
+            print(self.keys[self.index])
             //print("wtf is goin on")
             if error != nil{
                 print(error!)
@@ -88,14 +108,24 @@ class ViewController: UIViewController {
                 return
             }
             DispatchQueue.main.sync(execute: {
-                let imageExtensions = ["png", "jpg", "gif"]
+                let imageExtensions = ["png", "jpg", "gif", "ifv"]
                 let last3 = self.keys[self.index].suffix(3)
                 if imageExtensions.contains(String(last3)){
-                    let test = UIImage(data: data!)
-                    self.image = test
+                    //we've got a gif
+                    if last3.contains("gif") || last3.contains("ifv"){
+                        print("Gif son")
+                        let gif = UIImage.gifImageWithData(data!)
+                        self.image = gif
+                    }
+                    else{ //we have a normal image
+                        print("normal image")
+                        let pic = UIImage(data: data!)
+                        self.image = pic
+                    }
                     self.meme.isHidden = false
                     self.updateUI()
                     self.index = self.index + 1
+                    self.slider.isEnabled = true
                     return
                 }
                 else{
@@ -108,40 +138,20 @@ class ViewController: UIViewController {
                     self.playerViewController = AVPlayerViewController()
                     self.playerViewController!.player = player
                     self.playerViewController!.view.frame = self.meme.frame
-                    //self.view.addSubview(playerViewController)
-                    //let player_frame = self.meme.frame
-                    //let videoPlayerView = VideoPlayerView(frame: player_frame)
-                    //videoPlayerView.player = player
                     self.addChild(self.playerViewController!)
                     self.view.addSubview(self.playerViewController!.view)
                     self.playerViewController!.didMove(toParent: self)
                     player.play()
                     self.meme.isHidden = true
                     print("hiding meme")
-                    /*self.present(playerViewController, animated: true){
-                        playerViewController.player!.play()
-                    }*/
                     self.updateUI()
                     self.index = self.index + 1
+                    self.slider.isEnabled = true
                     return
                 }
             })
         }
-        //self.index = self.index + 1
     }
-    
-    func getDocumentsDirectory() -> URL {
-        let paths = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)
-        let documentsDirectory = paths[0]
-        return documentsDirectory
-    }
-    
-    
-    /*var image = UIImage(){
-        didSet{
-            updateUI()
-        }
-    }*/
     
     override func viewDidLoad() {
         print("view controller view did load")
@@ -149,6 +159,7 @@ class ViewController: UIViewController {
         slider.isContinuous = false
         slider.minimumValue = 0
         slider.maximumValue = 5
+        slider.addTarget(self, action:#selector(sliderValueDidChange(sender:)), for: .allEvents)
         // printing off objects, might have to change key
         let s3 = AWSS3.s3(forKey: "defaultKey")
         let listRequest: AWSS3ListObjectsRequest = AWSS3ListObjectsRequest()
@@ -163,18 +174,11 @@ class ViewController: UIViewController {
         }
         sleep(5)
         self.fetchUserAttributes()
-        /*
-        Print off image names
-         for key in self.keys{
-            print(key)
-        }
-        */
         return
     }
     
     func fetchUserAttributes() {
         print("here19")
-        //self.resetAttributeValues()
         user = AppDelegate.defaultUserPool().currentUser()
         user?.getDetails().continueOnSuccessWith(block: { (task) -> Any? in
             guard task.result != nil else {
@@ -185,7 +189,6 @@ class ViewController: UIViewController {
                 print("Name: " + attribute.name!)
             })
             DispatchQueue.main.async {
-                //self.setAttributeValues()
                 print("fetched attribute values")
             }
             return nil
@@ -196,3 +199,4 @@ class ViewController: UIViewController {
         meme.image = image
     }
 }
+
