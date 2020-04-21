@@ -76,10 +76,13 @@ class ViewController: UIViewController {
             self.playerViewController?.view.removeFromSuperview()
             self.playerViewController?.removeFromParent()
         }
-        //print(self.keys[index])
+        
+        
+        // previous meme being rated
         let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
         let meme = Meme()
-        meme?.sub = user?.username
+        meme?.username = user?.username as! NSString
+        meme?.meme = self.keys[self.index] as NSString
         meme?.rating = slider.value as NSNumber
         let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
         updateMapperConfig.saveBehavior = .updateSkipNullAttributes
@@ -92,6 +95,8 @@ class ViewController: UIViewController {
             return 0
         })
         
+        // load the next meme
+        self.index = self.index + 1
         let transferUtility = AWSS3TransferUtility.default()
         let expression = AWSS3TransferUtilityDownloadExpression()
         //let url: URL? = URL(string: self.keys[self.index])
@@ -124,7 +129,6 @@ class ViewController: UIViewController {
                     }
                     self.meme.isHidden = false
                     self.updateUI()
-                    self.index = self.index + 1
                     self.slider.isEnabled = true
                     return
                 }
@@ -145,7 +149,6 @@ class ViewController: UIViewController {
                     self.meme.isHidden = true
                     print("hiding meme")
                     self.updateUI()
-                    self.index = self.index + 1
                     self.slider.isEnabled = true
                     return
                 }
@@ -174,7 +177,64 @@ class ViewController: UIViewController {
         }
         sleep(5)
         self.fetchUserAttributes()
-        return
+        
+        // Go ahead and load first item
+        let transferUtility = AWSS3TransferUtility.default()
+        let expression = AWSS3TransferUtilityDownloadExpression()
+        transferUtility.downloadData(fromBucket: s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
+            print("grabbing image from S3")
+            print("printing current index")
+            //print(self.index)
+            print("image/video name below")
+            print(self.keys[self.index])
+            //print("wtf is goin on")
+            if error != nil{
+                print(error!)
+                print("error")
+                return
+            }
+            DispatchQueue.main.sync(execute: {
+                let imageExtensions = ["png", "jpg", "gif", "ifv"]
+                let last3 = self.keys[self.index].suffix(3)
+                if imageExtensions.contains(String(last3)){
+                    //we've got a gif
+                    if last3.contains("gif") || last3.contains("ifv"){
+                        print("Gif son")
+                        let gif = UIImage.gifImageWithData(data!)
+                        self.image = gif
+                    }
+                    else{ //we have a normal image
+                        print("normal image")
+                        let pic = UIImage(data: data!)
+                        self.image = pic
+                    }
+                    self.meme.isHidden = false
+                    self.updateUI()
+                    self.slider.isEnabled = true
+                    return
+                }
+                else{
+                    print("This is a video")
+                    let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
+                    print("url of object below (hopefully)")
+                    print(temp0_url)
+                    let temp_url = URL(string: temp0_url)
+                    let player = AVPlayer(url: temp_url!)
+                    self.playerViewController = AVPlayerViewController()
+                    self.playerViewController!.player = player
+                    self.playerViewController!.view.frame = self.meme.frame
+                    self.addChild(self.playerViewController!)
+                    self.view.addSubview(self.playerViewController!.view)
+                    self.playerViewController!.didMove(toParent: self)
+                    player.play()
+                    self.meme.isHidden = true
+                    print("hiding meme")
+                    self.updateUI()
+                    self.slider.isEnabled = true
+                    return
+                }
+            })
+        }
     }
     
     func fetchUserAttributes() {

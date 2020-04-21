@@ -10,14 +10,19 @@ import UIKit
 import AWSDynamoDB
 
 class Meme: AWSDynamoDBObjectModel, AWSDynamoDBModeling {
-    @objc var sub:String?
+    @objc var username:NSString?
     @objc var rating:NSNumber?
+    @objc var meme:NSString?
     
     class func dynamoDBTableName() -> String {
-        return "users"
+        return "users2"
     }
 
     class func hashKeyAttribute() -> String {
-        return "sub"
+        return "username"
+    }
+    
+    class func rangeKeyAttribute() -> String {
+        return "meme"
     }
 }
