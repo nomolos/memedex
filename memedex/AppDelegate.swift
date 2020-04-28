@@ -52,6 +52,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         print("In App Delegate1")
+    //navigationController?.view.backgroundColor = UIColor.clear
+        //self.window?.tintColor = UIColor.white
         let credentialsProvider = AWSCognitoCredentialsProvider(regionType:.USEast2,
         identityPoolId:"us-east-2:7ddd079c-2a06-460d-975c-7fbf8c32c4d8")
         

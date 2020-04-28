@@ -66,16 +66,70 @@
                                 <action selector="logout:" destination="S7V-t3-R7L" id="qZd-eV-VJe"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" image="info" id="G1d-0F-QjK"/>
+                        <barButtonItem key="rightBarButtonItem" image="goldenset" id="G1d-0F-QjK">
+                            <connections>
+                                <action selector="gotogolden:" destination="S7V-t3-R7L" id="O1d-Ur-RsI"/>
+                            </connections>
+                        </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="goldensetbutton" destination="G1d-0F-QjK" id="EGj-7h-qdM"/>
                         <outlet property="meme" destination="lgf-WC-pYg" id="Vko-9a-jE2"/>
                         <outlet property="slider" destination="cJ0-0F-YPD" id="zoH-DZ-rGj"/>
+                        <segue destination="tpt-Ut-3aV" kind="show" identifier="goldensegue" id="DEh-Nw-dcj"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="tEr-TZ-qrS" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="734.78260869565224" y="-415.17857142857139"/>
+        </scene>
+        <!--Golden Set View Controller-->
+        <scene sceneID="h5b-cW-XF3">
+            <objects>
+                <viewController id="tpt-Ut-3aV" customClass="GoldenSetViewController" customModule="memedex" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="C0W-rB-XcC">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="9fq-YK-Hzk" customClass="CustomSlider" customModule="memedex" customModuleProvider="target">
+                                <rect key="frame" x="18" y="810" width="378" height="31"/>
+                                <connections>
+                                    <action selector="next:" destination="tpt-Ut-3aV" eventType="valueChanged" id="ZuO-2g-JGw"/>
+                                </connections>
+                            </slider>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="6cU-73-Mrw">
+                                <rect key="frame" x="0.0" y="156" width="414" height="595"/>
+                            </imageView>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="memedex" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GyA-cw-7wx">
+                                <rect key="frame" x="66" y="88" width="282" height="59"/>
+                                <fontDescription key="fontDescription" name="SFUIDisplay-Bold" family="SF UI Display" pointSize="50"/>
+                                <color key="textColor" red="0.6513403096" green="0.3436376867" blue="0.85544528769999995" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="GyA-cw-7wx" firstAttribute="centerX" secondItem="HvJ-cs-8Bx" secondAttribute="centerX" id="6f9-TN-gdd"/>
+                            <constraint firstItem="6cU-73-Mrw" firstAttribute="width" secondItem="C0W-rB-XcC" secondAttribute="width" id="G4H-A0-cfX"/>
+                            <constraint firstItem="HvJ-cs-8Bx" firstAttribute="bottom" secondItem="9fq-YK-Hzk" secondAttribute="bottom" constant="22" id="LpV-F2-pPA"/>
+                            <constraint firstItem="9fq-YK-Hzk" firstAttribute="top" secondItem="6cU-73-Mrw" secondAttribute="bottom" constant="59" id="MZI-J3-mtz"/>
+                            <constraint firstItem="6cU-73-Mrw" firstAttribute="centerX" secondItem="HvJ-cs-8Bx" secondAttribute="centerX" id="TH6-Sq-ufk"/>
+                            <constraint firstItem="HvJ-cs-8Bx" firstAttribute="trailing" secondItem="9fq-YK-Hzk" secondAttribute="trailing" constant="20" id="f9v-Zg-dQm"/>
+                            <constraint firstItem="6cU-73-Mrw" firstAttribute="top" secondItem="HvJ-cs-8Bx" secondAttribute="top" constant="68" id="mvc-pb-uWu"/>
+                            <constraint firstItem="GyA-cw-7wx" firstAttribute="top" secondItem="HvJ-cs-8Bx" secondAttribute="top" id="pzR-2c-ag1"/>
+                            <constraint firstItem="9fq-YK-Hzk" firstAttribute="leading" secondItem="HvJ-cs-8Bx" secondAttribute="leading" constant="20" id="xYn-C0-d7K"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="HvJ-cs-8Bx"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="Xsn-4i-fn4"/>
+                    <connections>
+                        <outlet property="meme" destination="6cU-73-Mrw" id="hZi-3Q-3pN"/>
+                        <outlet property="slider" destination="9fq-YK-Hzk" id="Ppq-Sc-cLG"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="HVd-fA-jxM" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1692.753623188406" y="-415.17857142857139"/>
         </scene>
         <!--Login View Controller-->
         <scene sceneID="c0V-Qu-guB">
@@ -233,7 +287,7 @@
     </scenes>
     <resources>
         <image name="LoginSignup" width="343" height="48"/>
-        <image name="info" width="35" height="35"/>
+        <image name="goldenset" width="37" height="34"/>
         <image name="logout" width="37" height="36"/>
         <image name="textfield" width="343" height="48"/>
         <image name="violate" width="35" height="35"/>

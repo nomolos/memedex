@@ -19,6 +19,7 @@ class ViewController: UIViewController {
     
     
     
+    @IBOutlet weak var goldensetbutton: UIBarButtonItem!
     let s3bucket = "memedexbucket"
     var keys = [String]()
     var index = 0
@@ -26,6 +27,10 @@ class ViewController: UIViewController {
     var userAttributes:[AWSCognitoIdentityProviderAttributeType]?
     var image:UIImage?
     var playerViewController:AVPlayerViewController?
+    var user_to_pair_with:String?
+    let myGroup = DispatchGroup()
+    let mySecondGroup = DispatchGroup()
+    let dispatchQueue = DispatchQueue(label: "com.queue.Serial")
     
     @IBOutlet weak var meme: UIImageView!
     
@@ -34,6 +39,11 @@ class ViewController: UIViewController {
         user?.signOut()
         self.fetchUserAttributes()
     
+    }
+    
+    @IBAction func gotogolden(_ sender: Any) {
+        print("Going to golden set")
+        self.performSegue(withIdentifier: "goldensegue", sender: self)
     }
     
     @objc func sliderValueDidChange(sender:UISlider) {
@@ -52,16 +62,28 @@ class ViewController: UIViewController {
     
     @IBAction func next(_ sender: Any) {
         self.slider.isEnabled = false
-        print("printing index below")
-        print(self.index)
-        print("printing number of keys below")
-        print(self.keys.count)
-        print("printing all keys")
-        if(self.keys.count == index){
+        
+        // This user is active for the first time today
+        // Send a notification to Dynamo
+        if(self.index == 0){
+            var active_user = ActiveUser()
+            active_user?.username = user?.username as! NSString
+            let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+            let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+            updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+            dynamoDBObjectMapper.save(active_user!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
+                if let error = task.error as NSError? {
+                    print("The request failed. Error: \(error)")
+                } else {
+                    // Do something with task.result or perform other operations.
+                }
+                return 0
+            })
+        }
+        if(self.keys.count == index-1){
             //vibration indicating failure to go forward
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.error)
-            print("End of list")
             return
         }
         //vibration indicating success
@@ -71,13 +93,10 @@ class ViewController: UIViewController {
         // We need to get rid of the AVPlayer used last time
         // Whether or not we initialize another AVPlayer
         if(self.meme.isHidden){
-            print("meme was hidden")
             self.playerViewController?.willMove(toParent: nil)
             self.playerViewController?.view.removeFromSuperview()
             self.playerViewController?.removeFromParent()
         }
-        
-        
         // previous meme being rated
         let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
         let meme = Meme()
@@ -99,14 +118,7 @@ class ViewController: UIViewController {
         self.index = self.index + 1
         let transferUtility = AWSS3TransferUtility.default()
         let expression = AWSS3TransferUtilityDownloadExpression()
-        //let url: URL? = URL(string: self.keys[self.index])
         transferUtility.downloadData(fromBucket: s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
-            print("grabbing image from S3")
-            print("printing current index")
-            //print(self.index)
-            print("image/video name below")
-            print(self.keys[self.index])
-            //print("wtf is goin on")
             if error != nil{
                 print(error!)
                 print("error")
@@ -118,12 +130,10 @@ class ViewController: UIViewController {
                 if imageExtensions.contains(String(last3)){
                     //we've got a gif
                     if last3.contains("gif") || last3.contains("ifv"){
-                        print("Gif son")
                         let gif = UIImage.gifImageWithData(data!)
                         self.image = gif
                     }
-                    else{ //we have a normal image
-                        print("normal image")
+                    else{
                         let pic = UIImage(data: data!)
                         self.image = pic
                     }
@@ -133,10 +143,7 @@ class ViewController: UIViewController {
                     return
                 }
                 else{
-                    print("This is a video")
                     let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
-                    print("url of object below (hopefully)")
-                    print(temp0_url)
                     let temp_url = URL(string: temp0_url)
                     let player = AVPlayer(url: temp_url!)
                     self.playerViewController = AVPlayerViewController()
@@ -147,7 +154,6 @@ class ViewController: UIViewController {
                     self.playerViewController!.didMove(toParent: self)
                     player.play()
                     self.meme.isHidden = true
-                    print("hiding meme")
                     self.updateUI()
                     self.slider.isEnabled = true
                     return
@@ -157,16 +163,55 @@ class ViewController: UIViewController {
     }
     
     override func viewDidLoad() {
-        print("view controller view did load")
         super.viewDidLoad()
+        self.navigationItem.rightBarButtonItem?.image = UIImage(named: "goldenset")?.withRenderingMode(.alwaysOriginal)
         slider.isContinuous = false
         slider.minimumValue = 0
         slider.maximumValue = 5
         slider.addTarget(self, action:#selector(sliderValueDidChange(sender:)), for: .allEvents)
+        self.fetchUserAttributes()
+        let queryExpression = AWSDynamoDBQueryExpression()
+        queryExpression.keyConditionExpression = "username = :username"
+        queryExpression.expressionAttributeValues = [":username": self.user?.username]
+        let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+        let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+        updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+        var matches:AWSTask<AWSDynamoDBPaginatedOutput>?
+        matches = dynamoDBObjectMapper.query(PartnerMatches.self, expression: queryExpression)
+        sleep(5)
+        let matches2 = matches?.result?.items
+        print(matches2)
+        var found_match = false
+        if matches2?.count ?? 0 == 1 {
+            let user_list = matches2![0] as! PartnerMatches
+            let user_list_strings = user_list.getUsers()
+            print("printing list of users that we matched with (not necessarily active today)")
+            print(user_list_strings)
+            for paired_user in user_list_strings{
+                print("We are now looking for the first matched user who was active today")
+                queryExpression.expressionAttributeValues = [":username": paired_user]
+                let active_matches = dynamoDBObjectMapper.query(ActiveUser.self, expression: queryExpression)
+                sleep(2)
+                let returned_matches = active_matches.result?.items
+                if returned_matches?.count ?? 0 == 1 {
+                    print("We found a user match who was active today!")
+                    print("Their user id is " + paired_user)
+                    found_match = true
+                    self.user_to_pair_with = paired_user
+                }
+            }
+        }
+        else {
+            let alert = UIAlertController(title: "Fill Out the Golden Set!", message: "Click on the treasure chest icon and rate 13 memes in order to get the most out of our recommendation system :)", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
+            self.present(alert, animated: true)
+        }
+        
         // printing off objects, might have to change key
         let s3 = AWSS3.s3(forKey: "defaultKey")
         let listRequest: AWSS3ListObjectsRequest = AWSS3ListObjectsRequest()
         listRequest.bucket = s3bucket
+        listRequest.prefix = "actualmemes/"
         s3.listObjects(listRequest).continueWith { (task) -> AnyObject? in
             let listObjectsOutput = task.result;
             for object in (listObjectsOutput?.contents)! {
@@ -175,70 +220,122 @@ class ViewController: UIViewController {
             }
             return nil
         }
-        sleep(5)
-        self.fetchUserAttributes()
-        
-        // Go ahead and load first item
-        let transferUtility = AWSS3TransferUtility.default()
-        let expression = AWSS3TransferUtilityDownloadExpression()
-        transferUtility.downloadData(fromBucket: s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
-            print("grabbing image from S3")
-            print("printing current index")
-            //print(self.index)
-            print("image/video name below")
-            print(self.keys[self.index])
-            //print("wtf is goin on")
-            if error != nil{
-                print(error!)
-                print("error")
-                return
+        sleep(2)
+        if found_match{
+            queryExpression.keyConditionExpression = "username = :username"
+            queryExpression.expressionAttributeValues = [":username": self.user_to_pair_with]
+            let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+            let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+            updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+            var matches5: AWSTask<AWSDynamoDBPaginatedOutput>?
+            self.myGroup.enter()
+            self.mySecondGroup.enter()
+            self.dispatchQueue.async{
+                print("here1 in dispatch queue sync 1")
+                matches5 = dynamoDBObjectMapper.query(Meme.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+                if (task.error != nil){
+                    print("error")
+                }
+                if (task.result != nil){
+                    print("here2")
+                    self.myGroup.leave()
+                }
+                print("here3")
+                return task.result
+                }) as! AWSTask<AWSDynamoDBPaginatedOutput>
             }
-            DispatchQueue.main.sync(execute: {
-                let imageExtensions = ["png", "jpg", "gif", "ifv"]
-                let last3 = self.keys[self.index].suffix(3)
-                if imageExtensions.contains(String(last3)){
-                    //we've got a gif
-                    if last3.contains("gif") || last3.contains("ifv"){
-                        print("Gif son")
-                        let gif = UIImage.gifImageWithData(data!)
-                        self.image = gif
+            self.myGroup.notify(queue: self.dispatchQueue){
+                print(self.myGroup)
+                //self.myGroup.enter()
+                print("here4")
+                var all_ratings_of_partner = matches5?.result?.items
+                print("our partner has labeled a total of " + String(all_ratings_of_partner!.count) + " memes")
+                var temp_keys = [String]()
+                print("here5")
+                for meme_rating_pair in all_ratings_of_partner!{
+                    var meme_rating_pair2 = meme_rating_pair as! Meme
+                    // We want this rating
+                    if(self.keys.contains(meme_rating_pair2.meme as! String)){
+                        print("Our partners rating below")
+                        print(String(Double(meme_rating_pair2.rating!)))
+                        if(Double(meme_rating_pair2.rating ?? 3) > 4){
+                            temp_keys.append(meme_rating_pair2.meme as! String)
+                            let index_of_boi = self.keys.firstIndex(of: meme_rating_pair2.meme as! String)
+                            self.keys.remove(at: index_of_boi!)
+                        }
+                        else if(Double(meme_rating_pair2.rating ?? 3) < 2){
+                            let index_of_boi = self.keys.firstIndex(of: meme_rating_pair2.meme as! String)!
+                            self.keys.remove(at: index_of_boi)
+                        }
                     }
-                    else{ //we have a normal image
-                        print("normal image")
-                        let pic = UIImage(data: data!)
-                        self.image = pic
-                    }
-                    self.meme.isHidden = false
-                    self.updateUI()
-                    self.slider.isEnabled = true
+                }
+                print("We should have " + String(temp_keys.count) + " memes shifted to the front")
+                for keyster in self.keys{
+                    temp_keys.append(keyster)
+                }
+                self.keys = temp_keys
+                print("This meme should be at the front " + self.keys[0])
+                self.mySecondGroup.leave()
+                //self.myGroup.leave()
+                }
+        }
+        else{
+            let alert = UIAlertController(title: "No Matched User", message: "We could not find a user to match you with :( Your ratings will be immensely helpeful in recommending memes to other users today", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
+            self.present(alert, animated: true)
+        }
+        //self.myGroup.wait()
+        // Go ahead and load first item
+        self.mySecondGroup.notify(queue: .main){
+            print("This meme is at the front " + self.keys[0])
+            let transferUtility = AWSS3TransferUtility.default()
+            let expression = AWSS3TransferUtilityDownloadExpression()
+            transferUtility.downloadData(fromBucket: self.s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
+                if error != nil{
+                    print(error!)
+                    print("error")
                     return
                 }
-                else{
-                    print("This is a video")
-                    let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
-                    print("url of object below (hopefully)")
-                    print(temp0_url)
-                    let temp_url = URL(string: temp0_url)
-                    let player = AVPlayer(url: temp_url!)
-                    self.playerViewController = AVPlayerViewController()
-                    self.playerViewController!.player = player
-                    self.playerViewController!.view.frame = self.meme.frame
-                    self.addChild(self.playerViewController!)
-                    self.view.addSubview(self.playerViewController!.view)
-                    self.playerViewController!.didMove(toParent: self)
-                    player.play()
-                    self.meme.isHidden = true
-                    print("hiding meme")
-                    self.updateUI()
-                    self.slider.isEnabled = true
-                    return
-                }
-            })
+                DispatchQueue.main.sync(execute: {
+                    let imageExtensions = ["png", "jpg", "gif", "ifv"]
+                    let last3 = self.keys[self.index].suffix(3)
+                    if imageExtensions.contains(String(last3)){
+                        //we've got a gif
+                        if last3.contains("gif") || last3.contains("ifv"){
+                            let gif = UIImage.gifImageWithData(data!)
+                            self.image = gif
+                        }
+                        else{
+                            let pic = UIImage(data: data!)
+                            self.image = pic
+                        }
+                        self.meme.isHidden = false
+                        self.updateUI()
+                        self.slider.isEnabled = true
+                        return
+                    }
+                    else{
+                        let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
+                        let temp_url = URL(string: temp0_url)
+                        let player = AVPlayer(url: temp_url!)
+                        self.playerViewController = AVPlayerViewController()
+                        self.playerViewController!.player = player
+                        self.playerViewController!.view.frame = self.meme.frame
+                        self.addChild(self.playerViewController!)
+                        self.view.addSubview(self.playerViewController!.view)
+                        self.playerViewController!.didMove(toParent: self)
+                        player.play()
+                        self.meme.isHidden = true
+                        self.updateUI()
+                        self.slider.isEnabled = true
+                        return
+                    }
+                })
+            }
         }
     }
     
     func fetchUserAttributes() {
-        print("here19")
         user = AppDelegate.defaultUserPool().currentUser()
         user?.getDetails().continueOnSuccessWith(block: { (task) -> Any? in
             guard task.result != nil else {
