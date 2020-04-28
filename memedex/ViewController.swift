@@ -31,6 +31,7 @@ class ViewController: UIViewController {
     let myGroup = DispatchGroup()
     let mySecondGroup = DispatchGroup()
     let dispatchQueue = DispatchQueue(label: "com.queue.Serial")
+    var emitter = CAEmitterLayer()
     
     @IBOutlet weak var meme: UIImageView!
     
@@ -49,11 +50,17 @@ class ViewController: UIViewController {
     @objc func sliderValueDidChange(sender:UISlider) {
         if sender.value >= 4.5 {
            self.slider.minimumTrackTintColor = UIColor(red: 0.71, green: 0.44, blue: 0.95, alpha: 1.00)
+            // false == purple
+            self.startSpewing(color: false)
         } else if sender.value >= 3.5 {
             self.slider.minimumTrackTintColor = UIColor(red: 0.49, green: 0.83, blue: 0.13, alpha: 1.00)
+            // true == green
+            self.startSpewing(color: true)
          } else if sender.value >= 1.5 {
+            self.emitter.removeFromSuperlayer()
             self.slider.minimumTrackTintColor = UIColor(red: 0.97, green: 0.91, blue: 0.11, alpha: 1.00)
          } else {
+              self.emitter.removeFromSuperlayer()
               self.slider.minimumTrackTintColor = UIColor(red: 0.82, green: 0.01, blue: 0.11, alpha: 1.00)
          }
     }
@@ -89,6 +96,9 @@ class ViewController: UIViewController {
         //vibration indicating success
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
+        
+        
+        //emitter.emitterShape = kcAEmitt
         // the meme view is hidden because we had a video last time
         // We need to get rid of the AVPlayer used last time
         // Whether or not we initialize another AVPlayer
@@ -354,6 +364,49 @@ class ViewController: UIViewController {
     
     func updateUI() {
         meme.image = image
+    }
+    
+    func startSpewing(color: Bool) {
+        let trackRect =  self.slider.trackRect(forBounds: self.slider.bounds)
+        let thumbRect = self.slider.thumbRect(forBounds: self.slider.bounds, trackRect: trackRect, value: self.slider.value)
+        self.emitter.emitterPosition = CGPoint(x: thumbRect.origin.x + self.slider.frame.origin.x - 80, y: self.slider.frame.origin.y + 20)
+        self.emitter.emitterShape = CAEmitterLayerEmitterShape.line
+        self.emitter.emitterSize = CGSize(width: 50.0, height: 2.0)
+        self.emitter.emitterCells = generateEmitterCells(color: color)
+        self.view.layer.addSublayer(emitter)
+    }
+    
+    func generateEmitterCells(color: Bool) -> [CAEmitterCell] {
+    var cells:[CAEmitterCell] = [CAEmitterCell]()
+        var x = 0
+        while x < 20{
+            let cell = CAEmitterCell()
+            cell.birthRate = 4.0
+            cell.lifetime = 1.0
+            cell.lifetimeRange = 0
+            cell.velocity = 100.0
+            cell.velocityRange = 0
+            cell.emissionLongitude = getRandomNumber()
+            cell.emissionLatitude = getRandomNumber()
+            cell.emissionRange = 0.5
+            cell.spin = 3.5
+            cell.spinRange = 0
+            if(color){
+                cell.contents = UIImage(named: "greencircle")?.cgImage
+            }
+            else{
+                cell.contents = UIImage(named: "purplecircle")?.cgImage
+            }
+            cell.scaleRange = 0.25
+            cell.scale = 0.1
+            cells.append(cell)
+            x = x + 1
+        }
+        return cells
+    }
+    
+    func getRandomNumber() -> CGFloat {
+        return CGFloat(arc4random_uniform(4))
     }
 }
 
