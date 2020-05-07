@@ -44,6 +44,9 @@
                                     <constraint firstAttribute="height" constant="35" id="nyY-5q-uSQ"/>
                                 </constraints>
                                 <state key="normal" image="share"/>
+                                <connections>
+                                    <action selector="share:" destination="S7V-t3-R7L" eventType="touchUpInside" id="3JK-e7-PxB"/>
+                                </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Qpl-nK-YsW">
                                 <rect key="frame" x="360" y="749" width="28" height="36"/>
@@ -88,6 +91,7 @@
                     </navigationItem>
                     <connections>
                         <outlet property="meme" destination="lgf-WC-pYg" id="Vko-9a-jE2"/>
+                        <outlet property="shareButton" destination="Ktu-rx-elc" id="LWU-j8-fbl"/>
                         <outlet property="slider" destination="cJ0-0F-YPD" id="zoH-DZ-rGj"/>
                         <segue destination="tpt-Ut-3aV" kind="show" identifier="goldensegue" id="DEh-Nw-dcj"/>
                     </connections>

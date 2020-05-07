@@ -40,6 +40,7 @@ class ViewController: UIViewController {
     var found_match = false
     var userAttributes:[AWSCognitoIdentityProviderAttributeType]?
     
+    @IBOutlet weak var shareButton: UIButton!
     @IBOutlet weak var meme: UIImageView!
     
     @IBAction func logout(_ sender: Any) {
@@ -50,6 +51,25 @@ class ViewController: UIViewController {
         AppDelegate.defaultUserPool().currentUser()?.signOut()
         self.fetchUserAttributes()
     }
+    
+    
+    
+    @IBAction func share(_ sender: Any) {
+        print("inside share")
+        var share_me = self.meme.image as! UIImage
+        // Reduce image quality substantially through compression
+        // Otherwise sharing takes for fucking ever
+        // Can change in the future
+        // Scale of quality is from 0.0 to 1.0
+        share_me = UIImage(data: share_me.jpegData(compressionQuality: 0.1)!)!
+        //let url = URL(fileURLWithPath: "http://www.google.com")
+        let share_me_text = "Here's a meme I found on memedex - available on the App Store :)"
+        let share_me_container = [share_me_text, share_me] as [Any]
+        let activityViewController = UIActivityViewController(activityItems: share_me_container, applicationActivities: nil)
+        activityViewController.popoverPresentationController?.sourceView = self.view
+        self.present(activityViewController, animated: true, completion: nil)
+    }
+    
     
     @IBAction func back(_ sender: Any) {
         if(self.index > 1){
@@ -367,6 +387,7 @@ class ViewController: UIViewController {
             var num_checked_users = 0
             for paired_user in user_list_strings{
                 print("in this for loop")
+                print("this is the user we are looking for " + paired_user)
                 queryExpression.expressionAttributeValues = [":username": paired_user]
                 // SECOND QUERY FOR PARTNER WHO WAS ACTIVE
                 // 222222222
@@ -388,12 +409,16 @@ class ViewController: UIViewController {
                         print("potentially active partner")
                         num_checked_users = num_checked_users + 1
                         let returned_matches = active_matches.result?.items
+                        print("printing out returned matches!")
+                        print(active_matches)
+                        print(returned_matches)
                         if returned_matches?.count ?? 0 == 1 {
                             self.found_match = true
                             self.user_to_pair_with = paired_user
                             print("Found final partner")
                             print("Am I in here twice?")
                             self.waitFinalPartner.leave()
+                            print("That was the problem")
                             return;
                         }
                             // we need to free the queue even though
