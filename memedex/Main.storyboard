@@ -10,53 +10,72 @@
         <array key="SF-Pro-Text-Medium.otf">
             <string>SFProText-Medium</string>
         </array>
-        <array key="SFUIDisplay-Bold.ttf">
-            <string>SFUIDisplay-Bold</string>
-        </array>
     </customFonts>
     <scenes>
         <!--View Controller-->
         <scene sceneID="RBr-uB-Nrv">
             <objects>
-                <viewController id="S7V-t3-R7L" customClass="ViewController" customModule="memedex" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="ViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="S7V-t3-R7L" customClass="ViewController" customModule="memedex" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="KZY-56-BW2">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <slider opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="cJ0-0F-YPD" customClass="CustomSlider" customModule="memedex" customModuleProvider="target">
-                                <rect key="frame" x="18" y="811" width="378" height="30"/>
+                            <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="cJ0-0F-YPD" customClass="CustomSlider" customModule="memedex" customModuleProvider="target">
+                                <rect key="frame" x="18" y="810" width="378" height="31"/>
                                 <connections>
                                     <action selector="next:" destination="S7V-t3-R7L" eventType="valueChanged" id="uEk-bx-K6r"/>
                                 </connections>
                             </slider>
-                            <button opaque="NO" contentMode="scaleToFill" misplaced="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ial-n3-3Xz">
-                                <rect key="frame" x="190" y="757" width="35" height="35"/>
-                                <state key="normal" image="violate"/>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="U9x-wI-Qrz">
+                                <rect key="frame" x="26" y="751" width="37" height="34"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="37" id="TOe-DX-rZ7"/>
+                                    <constraint firstAttribute="height" constant="34" id="aaV-LE-q9Q"/>
+                                </constraints>
+                                <state key="normal" title="Button" image="back"/>
+                                <connections>
+                                    <action selector="back:" destination="S7V-t3-R7L" eventType="touchUpInside" id="HjK-G9-ElM"/>
+                                </connections>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ktu-rx-elc">
+                                <rect key="frame" x="189.5" y="750" width="35" height="35"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="35" id="SST-JY-kkV"/>
+                                    <constraint firstAttribute="height" constant="35" id="nyY-5q-uSQ"/>
+                                </constraints>
+                                <state key="normal" image="share"/>
+                            </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Qpl-nK-YsW">
+                                <rect key="frame" x="360" y="749" width="28" height="36"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="28" id="aBS-TC-puM"/>
+                                    <constraint firstAttribute="height" constant="36" id="saj-Oe-WYh"/>
+                                </constraints>
+                                <state key="normal" title="Button" image="set"/>
+                                <connections>
+                                    <action selector="gotogolden:" destination="S7V-t3-R7L" eventType="touchUpInside" id="H5x-QM-iir"/>
+                                </connections>
                             </button>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="lgf-WC-pYg">
-                                <rect key="frame" x="0.0" y="156" width="414" height="580"/>
+                                <rect key="frame" x="0.0" y="49" width="414" height="666"/>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="memedex" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="dYR-IC-ibU">
-                                <rect key="frame" x="66" y="88" width="282" height="59"/>
-                                <fontDescription key="fontDescription" name="SFUIDisplay-Bold" family="SF UI Display" pointSize="50"/>
-                                <color key="textColor" red="0.65134030964650769" green="0.34363768673956091" blue="0.85544528769705575" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="lgf-WC-pYg" firstAttribute="centerX" secondItem="cMa-ep-yj5" secondAttribute="centerX" id="3Bh-sC-yBR"/>
-                            <constraint firstItem="Ial-n3-3Xz" firstAttribute="top" secondItem="lgf-WC-pYg" secondAttribute="bottom" constant="20" id="ANk-Bv-YwJ"/>
-                            <constraint firstItem="lgf-WC-pYg" firstAttribute="top" secondItem="cMa-ep-yj5" secondAttribute="top" constant="68" id="CLL-Gd-8v8"/>
-                            <constraint firstItem="cJ0-0F-YPD" firstAttribute="top" secondItem="Ial-n3-3Xz" secondAttribute="bottom" constant="19" id="WJN-gZ-1og"/>
+                            <constraint firstItem="Ktu-rx-elc" firstAttribute="centerX" secondItem="cMa-ep-yj5" secondAttribute="centerX" id="Axb-4c-d9R"/>
+                            <constraint firstItem="cJ0-0F-YPD" firstAttribute="top" secondItem="Qpl-nK-YsW" secondAttribute="bottom" constant="25" id="Jwq-5o-v1v"/>
+                            <constraint firstItem="lgf-WC-pYg" firstAttribute="top" secondItem="cMa-ep-yj5" secondAttribute="top" constant="5" id="K29-kA-20f"/>
+                            <constraint firstItem="cMa-ep-yj5" firstAttribute="bottom" secondItem="lgf-WC-pYg" secondAttribute="bottom" constant="147" id="LYI-Pj-PzL"/>
+                            <constraint firstItem="U9x-wI-Qrz" firstAttribute="leading" secondItem="cMa-ep-yj5" secondAttribute="leading" constant="26" id="NkX-dT-htu"/>
                             <constraint firstItem="cMa-ep-yj5" firstAttribute="trailing" secondItem="cJ0-0F-YPD" secondAttribute="trailing" constant="20" id="YkE-aH-6Xf"/>
                             <constraint firstItem="cMa-ep-yj5" firstAttribute="bottom" secondItem="cJ0-0F-YPD" secondAttribute="bottom" constant="22" id="j75-F5-OIh"/>
                             <constraint firstItem="cJ0-0F-YPD" firstAttribute="centerX" secondItem="cMa-ep-yj5" secondAttribute="centerX" id="kRp-Kr-fxX"/>
-                            <constraint firstItem="dYR-IC-ibU" firstAttribute="top" secondItem="cMa-ep-yj5" secondAttribute="top" id="kcU-ZC-btg"/>
                             <constraint firstItem="lgf-WC-pYg" firstAttribute="width" secondItem="KZY-56-BW2" secondAttribute="width" id="nTN-3y-8UZ"/>
                             <constraint firstItem="cJ0-0F-YPD" firstAttribute="leading" secondItem="cMa-ep-yj5" secondAttribute="leading" constant="20" id="puT-KT-R7K"/>
-                            <constraint firstItem="dYR-IC-ibU" firstAttribute="centerX" secondItem="cMa-ep-yj5" secondAttribute="centerX" id="xbF-Ut-xlL"/>
-                            <constraint firstItem="Ial-n3-3Xz" firstAttribute="centerX" secondItem="cMa-ep-yj5" secondAttribute="centerX" id="zCl-HV-50K"/>
+                            <constraint firstItem="cMa-ep-yj5" firstAttribute="trailing" secondItem="Qpl-nK-YsW" secondAttribute="trailing" constant="26" id="uJt-2B-n6Z"/>
+                            <constraint firstItem="cJ0-0F-YPD" firstAttribute="top" secondItem="U9x-wI-Qrz" secondAttribute="bottom" constant="25" id="zRH-d1-ZeI"/>
+                            <constraint firstItem="cJ0-0F-YPD" firstAttribute="top" secondItem="Ktu-rx-elc" secondAttribute="bottom" constant="25" id="zvF-s4-2ac"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="cMa-ep-yj5"/>
                     </view>
@@ -66,14 +85,8 @@
                                 <action selector="logout:" destination="S7V-t3-R7L" id="qZd-eV-VJe"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" image="goldenset" id="G1d-0F-QjK">
-                            <connections>
-                                <action selector="gotogolden:" destination="S7V-t3-R7L" id="O1d-Ur-RsI"/>
-                            </connections>
-                        </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="goldensetbutton" destination="G1d-0F-QjK" id="EGj-7h-qdM"/>
                         <outlet property="meme" destination="lgf-WC-pYg" id="Vko-9a-jE2"/>
                         <outlet property="slider" destination="cJ0-0F-YPD" id="zoH-DZ-rGj"/>
                         <segue destination="tpt-Ut-3aV" kind="show" identifier="goldensegue" id="DEh-Nw-dcj"/>
@@ -88,35 +101,27 @@
             <objects>
                 <viewController id="tpt-Ut-3aV" customClass="GoldenSetViewController" customModule="memedex" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="C0W-rB-XcC">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="0.5" minValue="0.0" maxValue="1" translatesAutoresizingMaskIntoConstraints="NO" id="9fq-YK-Hzk" customClass="CustomSlider" customModule="memedex" customModuleProvider="target">
-                                <rect key="frame" x="18" y="810" width="378" height="31"/>
+                                <rect key="frame" x="18" y="756" width="378" height="31"/>
                                 <connections>
                                     <action selector="next:" destination="tpt-Ut-3aV" eventType="valueChanged" id="ZuO-2g-JGw"/>
                                 </connections>
                             </slider>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="6cU-73-Mrw">
-                                <rect key="frame" x="0.0" y="156" width="414" height="595"/>
+                                <rect key="frame" x="0.0" y="68" width="414" height="650"/>
                             </imageView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" misplaced="YES" text="memedex" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GyA-cw-7wx">
-                                <rect key="frame" x="66" y="88" width="282" height="59"/>
-                                <fontDescription key="fontDescription" name="SFUIDisplay-Bold" family="SF UI Display" pointSize="50"/>
-                                <color key="textColor" red="0.6513403096" green="0.3436376867" blue="0.85544528769999995" alpha="1" colorSpace="custom" customColorSpace="displayP3"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
-                            <constraint firstItem="GyA-cw-7wx" firstAttribute="centerX" secondItem="HvJ-cs-8Bx" secondAttribute="centerX" id="6f9-TN-gdd"/>
+                            <constraint firstItem="HvJ-cs-8Bx" firstAttribute="bottom" secondItem="6cU-73-Mrw" secondAttribute="bottom" constant="90" id="0va-u8-xgH"/>
                             <constraint firstItem="6cU-73-Mrw" firstAttribute="width" secondItem="C0W-rB-XcC" secondAttribute="width" id="G4H-A0-cfX"/>
                             <constraint firstItem="HvJ-cs-8Bx" firstAttribute="bottom" secondItem="9fq-YK-Hzk" secondAttribute="bottom" constant="22" id="LpV-F2-pPA"/>
-                            <constraint firstItem="9fq-YK-Hzk" firstAttribute="top" secondItem="6cU-73-Mrw" secondAttribute="bottom" constant="59" id="MZI-J3-mtz"/>
                             <constraint firstItem="6cU-73-Mrw" firstAttribute="centerX" secondItem="HvJ-cs-8Bx" secondAttribute="centerX" id="TH6-Sq-ufk"/>
                             <constraint firstItem="HvJ-cs-8Bx" firstAttribute="trailing" secondItem="9fq-YK-Hzk" secondAttribute="trailing" constant="20" id="f9v-Zg-dQm"/>
                             <constraint firstItem="6cU-73-Mrw" firstAttribute="top" secondItem="HvJ-cs-8Bx" secondAttribute="top" constant="68" id="mvc-pb-uWu"/>
-                            <constraint firstItem="GyA-cw-7wx" firstAttribute="top" secondItem="HvJ-cs-8Bx" secondAttribute="top" id="pzR-2c-ag1"/>
                             <constraint firstItem="9fq-YK-Hzk" firstAttribute="leading" secondItem="HvJ-cs-8Bx" secondAttribute="leading" constant="20" id="xYn-C0-d7K"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="HvJ-cs-8Bx"/>
@@ -140,7 +145,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Email" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="20" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="xqy-5f-7J6" customClass="TextField" customModule="memedex" customModuleProvider="target">
-                                <rect key="frame" x="35.5" y="226" width="343" height="48"/>
+                                <rect key="frame" x="35.5" y="248" width="343" height="48"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="jVM-sg-VZv"/>
                                     <constraint firstAttribute="width" constant="343" id="jiY-17-CDc"/>
@@ -149,7 +154,7 @@
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Password" textAlignment="justified" adjustsFontSizeToFit="NO" minimumFontSize="17" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="rWd-4i-b0l" customClass="TextField" customModule="memedex" customModuleProvider="target">
-                                <rect key="frame" x="35.5" y="302" width="343" height="48"/>
+                                <rect key="frame" x="35.5" y="324" width="343" height="48"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="343" id="9yE-2c-a6t"/>
                                     <constraint firstAttribute="height" constant="48" id="vkL-xF-ze3"/>
@@ -158,7 +163,7 @@
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QuQ-ph-NDW">
-                                <rect key="frame" x="35.5" y="429" width="343" height="48"/>
+                                <rect key="frame" x="35.5" y="451" width="343" height="48"/>
                                 <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="20"/>
                                 <state key="normal" title="Login" backgroundImage="LoginSignup">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -168,7 +173,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hxA-6k-x6W">
-                                <rect key="frame" x="36" y="497" width="343" height="48"/>
+                                <rect key="frame" x="36" y="519" width="343" height="48"/>
                                 <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="20"/>
                                 <state key="normal" title="Sign Up" backgroundImage="LoginSignup">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -217,11 +222,11 @@
             <objects>
                 <viewController id="o4i-G5-4bc" customClass="VerificationViewController" customModule="memedex" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="1lj-r4-J7b">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Verification code" textAlignment="natural" minimumFontSize="17" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="qSx-uT-4qY" customClass="TextField" customModule="memedex" customModuleProvider="target">
-                                <rect key="frame" x="36" y="380" width="343" height="48"/>
+                                <rect key="frame" x="36" y="451" width="343" height="48"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="AjH-z9-10I"/>
                                     <constraint firstAttribute="width" constant="343" id="MW9-Cf-I48"/>
@@ -230,7 +235,7 @@
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ck7-BK-4Fj">
-                                <rect key="frame" x="36" y="479" width="343" height="48"/>
+                                <rect key="frame" x="36" y="550" width="343" height="48"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="343" id="Qdq-uS-GPR"/>
                                     <constraint firstAttribute="height" constant="48" id="uYg-PZ-V7p"/>
@@ -277,19 +282,20 @@
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
                     <connections>
-                        <segue destination="S7V-t3-R7L" kind="relationship" relationship="rootViewController" id="wLl-It-FZw"/>
+                        <segue destination="vEL-r4-6PM" kind="relationship" relationship="rootViewController" id="sFF-Yg-NGL"/>
                     </connections>
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="28g-0Z-tGl" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="-294" y="-415"/>
+            <point key="canvasLocation" x="157" y="-1222"/>
         </scene>
     </scenes>
     <resources>
         <image name="LoginSignup" width="343" height="48"/>
-        <image name="goldenset" width="37" height="34"/>
+        <image name="back" width="39" height="34"/>
         <image name="logout" width="37" height="36"/>
+        <image name="set" width="30" height="38"/>
+        <image name="share" width="37" height="37"/>
         <image name="textfield" width="343" height="48"/>
-        <image name="violate" width="35" height="35"/>
     </resources>
 </document>

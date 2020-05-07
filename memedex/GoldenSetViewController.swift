@@ -160,8 +160,13 @@ class GoldenSetViewController: UIViewController {
                 }
                 return 0
             })
+            print("leaving golden set")
             let alert = UIAlertController(title: "All Set!", message: "Thank you for labeling the golden set! We now have the necessary data to recommend memes to you.", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: {(alert: UIAlertAction!) in self.navigationController?.popViewController(animated: true);self.dismiss(animated: true, completion: nil)}))
+            alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: {(alert: UIAlertAction!) in //self.navigationController?.popViewController(animated: true);
+                //self.dismiss(animated: true, completion: nil);
+                let appDelegate = UIApplication.shared.delegate as! AppDelegate
+                appDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
+            }))
             self.present(alert, animated: true)
             return
         }

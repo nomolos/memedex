@@ -25,17 +25,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var viewController: UIViewController?
     var loginViewController: LoginViewController?
     static var pool: AWSCognitoIdentityUserPool?
+    static var loggedIn: Bool?
     
     var storyboard: UIStoryboard? {
-        print("here2")
+        //print("here2")
         return UIStoryboard(name: "Main", bundle: nil)
     }
     
     class func defaultUserPool() -> AWSCognitoIdentityUserPool {
-        print("here1")
+        //print("here1")
         return AWSCognitoIdentityUserPool(forKey: userPoolID)
     }
-
+    
     var window: UIWindow?
     
     var cognitoConfig:CognitoConfig?
@@ -52,6 +53,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         print("In App Delegate1")
+        AppDelegate.loggedIn = false
+        //sleep(1)
     //navigationController?.view.backgroundColor = UIColor.clear
         //self.window?.tintColor = UIColor.white
         let credentialsProvider = AWSCognitoCredentialsProvider(regionType:.USEast2,
@@ -61,11 +64,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let configuration = AWSServiceConfiguration(region:.USWest1, credentialsProvider:credentialsProvider)
         AWSServiceManager.default().defaultServiceConfiguration = configuration
         AWSS3.register(with: configuration!, forKey: "defaultKey")
-        AWSDDLog.sharedInstance.logLevel = .verbose
-        AWSDDLog.add(AWSDDTTYLogger.sharedInstance)
+        //AWSDDLog.sharedInstance.logLevel = .verbose
+        //AWSDDLog.add(AWSDDTTYLogger.sharedInstance)
         self.cognitoConfig = CognitoConfig()
-        setupCognitoUserPool()
-        
+        self.setupCognitoUserPool()
+        print("End of application AppDelegate")
+        //print("this is the user in app delegate " + String((AppDelegate.defaultUserPool().currentUser()?.username!)!))
+        /*if(self.navigationController == nil) {
+            print("In App Delegate1")
+            print("navigation controller is nil inside application")
+            self.navigationController = self.window?.rootViewController as? UINavigationController
+            self.loginViewController = self.navigationController?.children[0] as! LoginViewController?
+        }
+        sleep(1)*/
         
         
         // Override point for customization after application launch.
@@ -76,7 +87,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func setupCognitoUserPool() {
-        print("here4")
+        print("setting up Cognito user pool in App Delegate")
         let clientId:String = self.cognitoConfig!.getClientId()
         let poolId:String = self.cognitoConfig!.getPoolId()
         let clientSecret:String = self.cognitoConfig!.getClientSecret()
@@ -136,28 +147,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
 }
 
+// This will be triggered when
+// 1. Set up cognito pool
+// 2. Log in
+// 3. Log out
 extension AppDelegate: AWSCognitoIdentityInteractiveAuthenticationDelegate {
     
     func startPasswordAuthentication() -> AWSCognitoIdentityPasswordAuthentication {
-        print("here5")
-        if(self.navigationController == nil) {
-            print("here5.1")
+        print("Just entered App Delegate Authentication Extension")
+        /*if(self.navigationController == nil) {
+            print("initializing navigation controller > this should never be called")
             self.navigationController = self.window?.rootViewController as? UINavigationController
         }
-        
-        if(self.loginViewController == nil) {
-            print("here5.2")
-            self.loginViewController = self.storyboard?.instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController
-            self.loginViewController?.isModalInPresentation = true
+        else if (!AppDelegate.loggedIn!){
+            print("You should be seeing ")
+        }*/
+        if(AppDelegate.loggedIn!){
+            print("logging out app delegate")
+            self.navigationController?.setViewControllers([self.loginViewController!], animated: true)
         }
-        
-        DispatchQueue.main.async {
-            print("here5.3")
-            if(self.loginViewController!.isViewLoaded || self.loginViewController!.view.window == nil) {
-                self.navigationController?.present(self.loginViewController!, animated: true, completion: nil)
-            }
+        else if (self.navigationController == nil) {
+            print("initializing navigation controller > this should never be called ?")
+            self.navigationController = self.window?.rootViewController as? UINavigationController
         }
-        
+        else{
+            print("No conditions satisified AppDelegate")
+        }
         return self.loginViewController!
     }
     

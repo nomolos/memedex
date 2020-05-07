@@ -11,8 +11,6 @@ import AWSCognito
 import AWSCognitoIdentityProvider
 
 class LoginViewController: UIViewController, UITextFieldDelegate {
-
-    
     
     @IBOutlet weak var email: UITextField!
     
@@ -24,32 +22,89 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     var cognitoConfig:CognitoConfig?
     
+    var userAttributes:[AWSCognitoIdentityProviderAttributeType]?
     
     var passwordAuthenticationCompletion: AWSTaskCompletionSource<AWSCognitoIdentityPasswordAuthenticationDetails>?
     
+    //let waitUserInfo = DispatchGroup()
+    
     override func viewWillAppear(_ animated: Bool) {
-        print("here7")
+        print("In loginViewController")
         super.viewWillAppear(animated)
-        self.password?.addTarget(self, action: #selector(inputDidChange(_:)), for: .editingChanged)
-        self.email?.addTarget(self, action: #selector(inputDidChange(_:)), for: .editingChanged)
-        self.cognitoConfig = CognitoConfig()
-        self.password.delegate = self
-        self.email.delegate = self
-        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
-        view.addGestureRecognizer(tap)
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        appDelegate.loginViewController = self
+        self.user = AppDelegate.defaultUserPool().currentUser()
+        print(self.user)
+        print(self.user?.username)
+        print(self.user?.isSignedIn)
+        if (appDelegate.navigationController == nil){
+            appDelegate.navigationController = appDelegate.window?.rootViewController as? UINavigationController
+        }
+        //self.waitUserInfo.enter()
+        //self.fetchUserAttributes()
+        //self.waitUserInfo.notify(queue: .main){
+        print("In loginViewController2")
+            if(self.user?.isSignedIn ?? false){
+                print("We have a user that's signed in")
+                //AppDelegate.loggedIn = true
+                appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                (appDelegate.viewController as! ViewController).user = self.user
+                appDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
+                //AppDelegate.loggedIn = true
+            }
+        print("In loginViewController3")
+            print("IN VIEW WILL APPEAR LOGIN")
+            self.password?.addTarget(self, action: #selector(self.inputDidChange(_:)), for: .editingChanged)
+            self.email?.addTarget(self, action: #selector(self.inputDidChange(_:)), for: .editingChanged)
+            self.cognitoConfig = CognitoConfig()
+            self.password.delegate = self
+            self.email.delegate = self
+            let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
+            self.view.addGestureRecognizer(tap)
+            print("End of view will appear login view")
+            //print("This is the user in the LoginViewController " + String((AppDelegate.defaultUserPool().currentUser()?.username!)!))
+            //print("Their attributes below")
+            //print(AppDelegate.defaultUserPool().currentUser()?.getDetails())
+            //print("Again but the local variable " + String(self.user!.username!))
+            print("Their attributes below")
+            //print(self.user!.getDetails())
         
+            if(AppDelegate.loggedIn!){
+                AppDelegate.loggedIn = false
+            }
+            self.user?.getDetails()
+        //}
     }
     
     @IBAction func login(_ sender: Any) {
-        print("here8")
+        //print("here8")
         if (self.email?.text != nil && self.password?.text != nil) {
-            print("here8.2")
+           // print("here8.2")
             let authDetails = AWSCognitoIdentityPasswordAuthenticationDetails(username: self.email!.text!, password: self.password!.text! )
-            print("here8.3")
+            print(authDetails)
+            //print("here8.3")
             self.passwordAuthenticationCompletion?.set(result: authDetails)
-            print("here8.4")
+            print(self.passwordAuthenticationCompletion)
+            /*if(self.user?.username == nil){
+                self.user?.getDetails()
+            }*/
+            //print("here8.4")
         }
+        print("End of login loginview")
     }
+    
+    /*func dismissMe() {
+        print("made it here")
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+        (appDelegate.viewController as! ViewController).user = self.user
+        (appDelegate.viewController as! ViewController).userAttributes = self.userAttributes
+        appDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
+        self.dismiss(animated: true, completion: {
+            self.email.text = nil
+            self.password.text = nil
+        })
+    }*/
     
     
     @IBOutlet weak var signup_button: UIButton!
@@ -69,7 +124,9 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         //password!.name = "password"
         //name!.value = self.email.text
         //name!.name = "username"
-        print(AppDelegate.pool)
+        let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+        //print(AppDelegate.pool)
         AppDelegate.pool?.signUp(self.email.text!, password: self.password.text!, userAttributes: [email!], validationData: nil).continueWith{ (response) -> Any? in
             if response.error != nil {
                 let alert = UIAlertController(title: "Error", message: (response.error! as NSError).userInfo["message"] as? String, preferredStyle: .alert)
@@ -77,11 +134,23 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 self.present(alert, animated: true, completion: nil)
             }
             else{
-                //let response = task.result!
-                print("here")
+                //guard let print_me = response.result; print(print_me); else print("wasn't printed")
+                //print("here")
+                print("INSIDE OF LOGINVIEW LOOKING AT SIGNUP STUFF")
+                print(response.result)
+                print(response.result?.user)
+                print(response.result?.userSub)
+                print(self.user)
+                print(AppDelegate.pool?.currentUser())
+                print(AppDelegate.pool?.getUser())
                 self.user = response.result?.user
-                print("herey")
-                print(response)
+                //AppDelegate.defaultUserPool().
+                //self.userAttributes = response.result?.user.a
+                // need to instantiate a viewcontroller in the event that they verify later
+                //print("herey")
+                //print(response)
+                //print(response.result)
+                //self.user = response.result?.user
                 DispatchQueue.main.async {
                     //self.codeDeliveryDetails = response.result?.codeDeliveryDetails
                     self.performSegue(withIdentifier: "VerifySegue", sender: self)
@@ -100,7 +169,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     }
     
     @objc func inputDidChange(_ sender:AnyObject) {
-        print("here9")
+        //print("here9")
         if (self.email?.text != nil && self.password?.text?.count ?? 0 > 7) {
             self.loginButton?.isEnabled = true
             self.signup_button?.isEnabled = true
@@ -120,6 +189,36 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     }
     
 
+    /*func fetchUserAttributes() {
+        //print("fetching user attributes")
+        print("beginning of fetch attributes")
+        user = AppDelegate.defaultUserPool().currentUser()
+        print(user?.username)
+        user?.getDetails().continueOnSuccessWith(block: { (task) -> Any? in
+            guard task.result != nil else {
+                print("end of fetch attributes [FAIL]")
+                //self.waitUserInfo.leave()
+                return nil
+            }
+            //print("22222in this part of fetchuserattributes")
+            self.userAttributes = task.result?.userAttributes
+            self.userAttributes?.forEach({ (attribute) in
+                print("Name: " + attribute.name!)
+                print("Value: " + attribute.value!)
+            })
+            print("end of fetch attributes [SUCCESS]")
+            //self.waitUserInfo.leave()
+            DispatchQueue.main.async {
+                print("fetch attributes is actually done")
+                print("end of fetch attributes [SUCCESS]")
+                //print("444444in this part of fetchuserattributes")
+                //print("fetched attribute values")
+            }
+            //print("fetch attributes is actually done")
+            return nil
+        })
+    }*/
+    
     /*
     // MARK: - Navigation
 
@@ -134,21 +233,19 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
 
 extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
     public func getDetails(_ authenticationInput: AWSCognitoIdentityPasswordAuthenticationInput, passwordAuthenticationCompletionSource: AWSTaskCompletionSource<AWSCognitoIdentityPasswordAuthenticationDetails>) {
-        print("here10")
+        print("here in login get details")
         self.passwordAuthenticationCompletion = passwordAuthenticationCompletionSource
         DispatchQueue.main.async {
             if (self.email.text == nil) {
                 //self.email.text = authenticationInput.lastKnownUsername
-                print("herey")
+                //print("herey")
             }
         }
     }
     
     public func didCompleteStepWithError(_ error: Error?) {
         DispatchQueue.main.async {
-            print("here11")
             if let error = error as NSError? {
-                print("here11.1")
                 let alertController = UIAlertController(title: error.userInfo["__type"] as? String,
                                                         message: error.userInfo["message"] as? String,
                                                         preferredStyle: .alert)
@@ -157,11 +254,26 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                 
                 self.present(alertController, animated: true, completion:  nil)
             } else {
-                print("here11.2")
-                self.dismiss(animated: true, completion: {
+                let appDelegate = UIApplication.shared.delegate as! AppDelegate
+                if (!AppDelegate.loggedIn!){
+                    print("logging in loginview")
                     self.email.text = nil
                     self.password.text = nil
-                })
+                    appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                    //(appDelegate.viewController as! ViewController).user = self.user
+                    //(appDelegate.viewController as! ViewController).userAttributes = self.userAttributes
+                    let temp_old_name = AppDelegate.defaultUserPool().currentUser()?.username
+                    // wait until user is updated
+                    // i am a piece of human garbage
+                    while(temp_old_name == AppDelegate.defaultUserPool().currentUser()?.username){
+                        continue;
+                    }
+                    appDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
+                    //AppDelegate.loggedIn = true
+                }
+                else{
+                    print("logging out loginview")
+                }
             }
         }
     }
