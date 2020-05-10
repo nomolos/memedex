@@ -22,6 +22,9 @@ class VerificationViewController: UIViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        let alert = UIAlertController(title: "Check your email!", message: "You should have received an email with a code. Type it in here to confirm your account.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
+        self.present(alert, animated: true)
         //let appDelegate = UIApplication.shared.delegate as! AppDelegate
         //print("These two users should be the same (hope to god)")
         //print(AppDelegate.defaultUserPool().getUser().username)

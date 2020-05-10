@@ -109,6 +109,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     @IBOutlet weak var signup_button: UIButton!
     @IBAction func signup(_ sender: Any) {
+        print("inside signup")
         //let staticCredentialProvider = AWSStaticCredentialsProvider.init(accessKey: self.cognitoConfig!.getClientId(), secretKey: self.cognitoConfig!.getClientSecret())
         
         //let credentialsProvider = AWSCognitoCredentialsProvider(regionType:.USEast2,
@@ -120,6 +121,14 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         let name = AWSCognitoIdentityUserAttributeType()
         email!.value = self.email.text
         email!.name = "email"
+        
+        if(self.email.text == nil || self.password.text == nil || self.email.text == "" || self.password.text == ""){
+            print("inside here in signup")
+            let alert = UIAlertController(title: "Fill out the fields!", message: "Enter your email and a password before clicking 'Sign Up'", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
+            self.present(alert, animated: true)
+            return
+        }
         //password!.value = self.password.text
         //password!.name = "password"
         //name!.value = self.email.text

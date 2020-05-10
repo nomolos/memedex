@@ -74,8 +74,7 @@ class ViewController: UIViewController {
         // Scale of quality is from 0.0 to 1.0
         share_me = UIImage(data: share_me.jpegData(compressionQuality: 0.1)!)!
         //let url = URL(fileURLWithPath: "http://www.google.com")
-        let share_me_text = "Here's a meme I found on memedex - available on the App Store :)"
-        let share_me_container = [share_me_text, share_me] as [Any]
+        let share_me_container = [share_me] as [Any]
         let activityViewController = UIActivityViewController(activityItems: share_me_container, applicationActivities: nil)
         activityViewController.popoverPresentationController?.sourceView = self.view
         self.present(activityViewController, animated: true, completion: nil)
