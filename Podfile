@@ -1,9 +1,10 @@
 source 'https://github.com/CocoaPods/Specs.git'
-
-platform :ios, '9.0'
+# was 9.0
+platform :ios, '11.0'
 use_frameworks!
 
 target :'memedex' do
+    pod 'AmplifyPlugins/AWSPinpointAnalyticsPlugin'
     pod 'AWSCore'
     pod 'AWSAppSync'
     pod 'AWSAutoScaling'
@@ -18,6 +19,8 @@ target :'memedex' do
     pod 'AWSLambda'
     pod 'AWSMachineLearning'
     pod 'AWSMobileAnalytics'
+    pod 'AWSMobileClient'
+    pod 'AWSPinpoint'
     pod 'AWSS3'
     pod 'AWSSES'
     pod 'AWSSimpleDB'

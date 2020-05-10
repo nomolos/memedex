@@ -1,0 +1,21 @@
+{
+    "appName": "memedex",
+    "roleName": "pinpointLambdaRole546aec8c",
+    "cloudformationPolicyName": "cloudformationPolicy546aec8c",
+    "cloudWatchPolicyName": "cloudWatchPolicy546aec8c",
+    "pinpointPolicyName": "pinpointPolicy546aec8c",
+    "authPolicyName": "pinpoint_amplify_546aec8c",
+    "unauthPolicyName": "pinpoint_amplify_546aec8c",
+    "authRoleName": {
+        "Ref": "AuthRoleName"
+    },
+    "unauthRoleName": {
+        "Ref": "UnauthRoleName"
+    },
+    "authRoleArn": {
+        "Fn::GetAtt": [
+            "AuthRole",
+            "Arn"
+        ]
+    }
+}

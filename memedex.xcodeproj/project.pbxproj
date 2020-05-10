@@ -71,9 +71,16 @@
 		BD29747E245505E000DBBF9E /* PartnerMatches.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD29747D245505E000DBBF9E /* PartnerMatches.swift */; };
 		BD4B85412442410D00C67E09 /* TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4B85402442410D00C67E09 /* TextField.swift */; };
 		BD767C4424328CE200A813C7 /* CognitoConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = BD767C4324328CE200A813C7 /* CognitoConfig.plist */; };
+		BD8DB8AC2466009F0066E055 /* AWSAuthCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD8DB8AB2466009F0066E055 /* AWSAuthCore.framework */; };
+		BD8DB8AE246600AA0066E055 /* AWSCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD8DB8AD246600AA0066E055 /* AWSCore.framework */; };
+		BD8DB8B0246600B50066E055 /* AWSMobileClient.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD8DB8AF246600B50066E055 /* AWSMobileClient.framework */; };
 		BD902EF4242D31C000D26FD7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD902EF3242D31C000D26FD7 /* Main.storyboard */; };
+		BD9D8F9124674946008AC0FE /* AWSPinpoint.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD9D8F9024674946008AC0FE /* AWSPinpoint.framework */; };
 		BDA6FD502433CEFC00D5BDD5 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDA6FD4F2433CEFC00D5BDD5 /* LoginViewController.swift */; };
 		BDA6FD522433F35500D5BDD5 /* CognitoConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDA6FD512433F35500D5BDD5 /* CognitoConfig.swift */; };
+		BDCC9F8224674F0A004BB8F5 /* Amplify.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BDCC9F8124674F0A004BB8F5 /* Amplify.framework */; };
+		BDCC9F8424674F10004BB8F5 /* AmplifyPlugins.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BDCC9F8324674F10004BB8F5 /* AmplifyPlugins.framework */; };
+		BDCC9F8624675048004BB8F5 /* amplifyconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = BDCC9F8524675048004BB8F5 /* amplifyconfiguration.json */; };
 		BDCD5C45243BC7BC00B95DAD /* awsconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = BDCD5C44243BC7BC00B95DAD /* awsconfiguration.json */; };
 		BDCD5C47243BD62E00B95DAD /* Meme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDCD5C46243BD62E00B95DAD /* Meme.swift */; };
 		BDE7EA2C2448DCA3008A603B /* GetAWSObjectURL.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDE7EA2B2448DCA3008A603B /* GetAWSObjectURL.swift */; };
@@ -151,9 +158,16 @@
 		BD29747D245505E000DBBF9E /* PartnerMatches.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerMatches.swift; sourceTree = "<group>"; };
 		BD4B85402442410D00C67E09 /* TextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextField.swift; sourceTree = "<group>"; };
 		BD767C4324328CE200A813C7 /* CognitoConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = CognitoConfig.plist; sourceTree = "<group>"; };
+		BD8DB8AB2466009F0066E055 /* AWSAuthCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AWSAuthCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD8DB8AD246600AA0066E055 /* AWSCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AWSCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BD8DB8AF246600B50066E055 /* AWSMobileClient.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AWSMobileClient.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD902EF3242D31C000D26FD7 /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
+		BD9D8F9024674946008AC0FE /* AWSPinpoint.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AWSPinpoint.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDA6FD4F2433CEFC00D5BDD5 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		BDA6FD512433F35500D5BDD5 /* CognitoConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CognitoConfig.swift; sourceTree = "<group>"; };
+		BDCC9F8124674F0A004BB8F5 /* Amplify.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Amplify.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BDCC9F8324674F10004BB8F5 /* AmplifyPlugins.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AmplifyPlugins.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		BDCC9F8524675048004BB8F5 /* amplifyconfiguration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = amplifyconfiguration.json; sourceTree = "<group>"; };
 		BDCD5C44243BC7BC00B95DAD /* awsconfiguration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; name = awsconfiguration.json; path = memedex/awsconfiguration.json; sourceTree = "<group>"; };
 		BDCD5C46243BD62E00B95DAD /* Meme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Meme.swift; sourceTree = "<group>"; };
 		BDE7EA2B2448DCA3008A603B /* GetAWSObjectURL.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GetAWSObjectURL.swift; sourceTree = "<group>"; };
@@ -167,6 +181,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BDCC9F8424674F10004BB8F5 /* AmplifyPlugins.framework in Frameworks */,
+				BDCC9F8224674F0A004BB8F5 /* Amplify.framework in Frameworks */,
+				BD9D8F9124674946008AC0FE /* AWSPinpoint.framework in Frameworks */,
+				BD8DB8B0246600B50066E055 /* AWSMobileClient.framework in Frameworks */,
+				BD8DB8AE246600AA0066E055 /* AWSCore.framework in Frameworks */,
+				BD8DB8AC2466009F0066E055 /* AWSAuthCore.framework in Frameworks */,
 				13FCC3E4357F39E49D8189C0 /* Pods_memedex.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -177,6 +197,12 @@
 		0916F8DB40DB6B22E34003FA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				BDCC9F8324674F10004BB8F5 /* AmplifyPlugins.framework */,
+				BDCC9F8124674F0A004BB8F5 /* Amplify.framework */,
+				BD9D8F9024674946008AC0FE /* AWSPinpoint.framework */,
+				BD8DB8AF246600B50066E055 /* AWSMobileClient.framework */,
+				BD8DB8AD246600AA0066E055 /* AWSCore.framework */,
+				BD8DB8AB2466009F0066E055 /* AWSAuthCore.framework */,
 				58E6254CF7366FE89AC4939C /* Pods_memedex.framework */,
 			);
 			name = Frameworks;
@@ -195,6 +221,7 @@
 			isa = PBXGroup;
 			children = (
 				BDCD5C44243BC7BC00B95DAD /* awsconfiguration.json */,
+				BDCC9F8524675048004BB8F5 /* amplifyconfiguration.json */,
 				BD220CDF23F4B25800D93CBE /* memedex */,
 				BD220CDE23F4B25800D93CBE /* Products */,
 				0916F8DB40DB6B22E34003FA /* Frameworks */,
@@ -393,6 +420,7 @@
 				BD25D7A62440C344002A03BF /* SF-Pro-Text-Semibold.otf in Resources */,
 				BD25D78D2440C344002A03BF /* SF-Pro-Display-MediumItalic.otf in Resources */,
 				BD25D79E2440C344002A03BF /* SF-Pro-Display-HeavyItalic.otf in Resources */,
+				BDCC9F8624675048004BB8F5 /* amplifyconfiguration.json in Resources */,
 				BD25D7A52440C344002A03BF /* SF-Pro-Text-Heavy.otf in Resources */,
 				BD25D78A2440C344002A03BF /* SFUIText-Semibold.ttf in Resources */,
 				BD25D7982440C344002A03BF /* SFUIDisplay-Black.ttf in Resources */,

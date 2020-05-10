@@ -10,6 +10,11 @@
             "StackName": "amplify-memedex-bofa-152306",
             "StackId": "arn:aws:cloudformation:us-east-2:560871491257:stack/amplify-memedex-bofa-152306/6d7d5120-7844-11ea-b3bb-0abbead6f3aa",
             "AmplifyAppId": "dfhrug9oiqklt"
+        },
+        "categories": {
+            "auth": {
+                "cognitod6dd35c5": {}
+            }
         }
     }
 }

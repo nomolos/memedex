@@ -13,9 +13,14 @@ import AWSCognitoIdentityProvider
 import AWSCore
 import AWSS3
 import AWSDynamoDB
+import AWSMobileClient
+import AWSPinpoint
+import Amplify
+import AmplifyPlugins
 
 
 let userPoolID = "SampleUserPool"
+var pinpoint: AWSPinpoint?
 
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -54,6 +59,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         print("In App Delegate1")
         AppDelegate.loggedIn = false
+        
+        // Initialize Pinpoint
+        pinpoint = AWSPinpoint(configuration:
+                AWSPinpointConfiguration.defaultPinpointConfiguration(launchOptions: launchOptions))
         //sleep(1)
     //navigationController?.view.backgroundColor = UIColor.clear
         //self.window?.tintColor = UIColor.white
@@ -64,11 +73,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let configuration = AWSServiceConfiguration(region:.USWest1, credentialsProvider:credentialsProvider)
         AWSServiceManager.default().defaultServiceConfiguration = configuration
         AWSS3.register(with: configuration!, forKey: "defaultKey")
-        //AWSDDLog.sharedInstance.logLevel = .verbose
-        //AWSDDLog.add(AWSDDTTYLogger.sharedInstance)
+        AWSDDLog.sharedInstance.logLevel = .verbose
+        AWSDDLog.add(AWSDDTTYLogger.sharedInstance)
         self.cognitoConfig = CognitoConfig()
         self.setupCognitoUserPool()
         print("End of application AppDelegate")
+        
+        do {
+            try Amplify.add(plugin: AWSPinpointAnalyticsPlugin())
+            try Amplify.configure()
+            print("Amplify configured with analytics plugin")
+        } catch {
+            print("Failed to initialize Amplify with \(error)")
+        }
         //print("this is the user in app delegate " + String((AppDelegate.defaultUserPool().currentUser()?.username!)!))
         /*if(self.navigationController == nil) {
             print("In App Delegate1")
@@ -82,8 +99,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Override point for customization after application launch.
 
         //let syncClient = AWSCognito.default()
-        
-        return true
+        // Create AWSMobileClient to connect with AWS
+        return AWSMobileClient.sharedInstance().interceptApplication(
+            application,
+            didFinishLaunchingWithOptions: launchOptions)
     }
     
     func setupCognitoUserPool() {

@@ -1,4 +1,8 @@
 PODS:
+  - Amplify (0.11.0)
+  - AmplifyPlugins/AWSPinpointAnalyticsPlugin (0.11.0):
+    - AWSPinpoint (~> 2.13.0)
+    - AWSPluginsCore (= 0.11.0)
   - AppSyncRealTimeClient (1.1.5):
     - Starscream (= 3.0.6)
   - AWSAppSync (3.1.0):
@@ -6,6 +10,8 @@ PODS:
     - AWSCore (~> 2.13.0)
     - ReachabilitySwift (~> 5.0.0)
     - SQLite.swift (~> 0.12.2)
+  - AWSAuthCore (2.13.1):
+    - AWSCore (= 2.13.1)
   - AWSAutoScaling (2.13.1):
     - AWSCore (= 2.13.1)
   - AWSCloudWatch (2.13.1):
@@ -33,6 +39,14 @@ PODS:
     - AWSCore (= 2.13.1)
   - AWSMobileAnalytics (2.13.1):
     - AWSCore (= 2.13.1)
+  - AWSMobileClient (2.13.1):
+    - AWSAuthCore (= 2.13.1)
+    - AWSCognitoIdentityProvider (= 2.13.1)
+  - AWSPinpoint (2.13.1):
+    - AWSCore (= 2.13.1)
+  - AWSPluginsCore (0.11.0):
+    - Amplify (= 0.11.0)
+    - AWSMobileClient (~> 2.13.0)
   - AWSS3 (2.13.1):
     - AWSCore (= 2.13.1)
   - AWSSES (2.13.1):
@@ -50,6 +64,7 @@ PODS:
   - Starscream (3.0.6)
 
 DEPENDENCIES:
+  - AmplifyPlugins/AWSPinpointAnalyticsPlugin
   - AWSAppSync
   - AWSAutoScaling
   - AWSCloudWatch
@@ -64,6 +79,8 @@ DEPENDENCIES:
   - AWSLambda
   - AWSMachineLearning
   - AWSMobileAnalytics
+  - AWSMobileClient
+  - AWSPinpoint
   - AWSS3
   - AWSSES
   - AWSSimpleDB
@@ -72,8 +89,11 @@ DEPENDENCIES:
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
+    - Amplify
+    - AmplifyPlugins
     - AppSyncRealTimeClient
     - AWSAppSync
+    - AWSAuthCore
     - AWSAutoScaling
     - AWSCloudWatch
     - AWSCognito
@@ -88,6 +108,9 @@ SPEC REPOS:
     - AWSLambda
     - AWSMachineLearning
     - AWSMobileAnalytics
+    - AWSMobileClient
+    - AWSPinpoint
+    - AWSPluginsCore
     - AWSS3
     - AWSSES
     - AWSSimpleDB
@@ -98,8 +121,11 @@ SPEC REPOS:
     - Starscream
 
 SPEC CHECKSUMS:
+  Amplify: 8df7d5a71945c57480c1bc3b353a936e908e4dc7
+  AmplifyPlugins: 00520be72202f55dbb2931bcfe0b05e104dd8334
   AppSyncRealTimeClient: 610da868f8c56539a840ee848f968120a07a7b6f
   AWSAppSync: 269c0f5ab575ef072c3ea91bcb14354cbc348f0c
+  AWSAuthCore: c15735eb14cccf2a26e371e3a6a841d613d411ef
   AWSAutoScaling: 7c4046c852348bb85731baf787ecc9d6e789bb7f
   AWSCloudWatch: 72972be043b698da3f5969968a06ef356c0f0bf4
   AWSCognito: c6311e35fe74c9ee490fff3e03548afae629dc5c
@@ -114,6 +140,9 @@ SPEC CHECKSUMS:
   AWSLambda: 06e7dc0206f8ccef6380f096ab92503d5c96e96b
   AWSMachineLearning: ef26bf81369b705ef87485aed408bb3788550094
   AWSMobileAnalytics: 7b62b7c2d8257c423d0b3ac45b3558fc6363ca37
+  AWSMobileClient: 8aede2dc1b0760709a2c02465e2b0c286b7cd00b
+  AWSPinpoint: a0f1f76cd88b64cb365cae40ed049bcb151f445d
+  AWSPluginsCore: 139f4e028dbe9b0cadb5540440eb675d49863e53
   AWSS3: 03511ee2f0482f1674b864d7f6ceddc7184f8491
   AWSSES: 8813f22f111a27714bf916d02be63641781c5b42
   AWSSimpleDB: 3f0dedf4ab6288bab30f2976fac704c3a597a9fa
@@ -123,6 +152,6 @@ SPEC CHECKSUMS:
   SQLite.swift: d2b4642190917051ce6bd1d49aab565fe794eea3
   Starscream: ef3ece99d765eeccb67de105bfa143f929026cf5
 
-PODFILE CHECKSUM: 25f26c46025c8d8cbc870fdddcb37ee94c192651
+PODFILE CHECKSUM: 737ed5b3a714726e8ae1781d755161d27f1bb5d5
 
 COCOAPODS: 1.9.1
