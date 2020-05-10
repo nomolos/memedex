@@ -26,6 +26,7 @@ class GoldenSetViewController: UIViewController {
     var index = 1
     let s3bucket = "memedexbucket"
     var image:UIImage?
+    let waitPotentialPartners = DispatchGroup()
     
     @IBOutlet weak var slider: CustomSlider!
     
@@ -152,70 +153,78 @@ class GoldenSetViewController: UIViewController {
             let partner_matches = PartnerMatches()
             partner_matches?.setUsers(users: sorted_distances)
             partner_matches?.username = user?.username as! NSString
+            self.waitPotentialPartners.enter()
             dynamoDBObjectMapper.save(partner_matches!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
                 if let error = task.error as NSError? {
                     print("The request failed. Error: \(error)")
                 } else {
                     // Do something with task.result or perform other operations.
                 }
+                self.waitPotentialPartners.leave()
                 return 0
             })
-            print("leaving golden set")
-            let alert = UIAlertController(title: "All Set!", message: "Thank you for labeling the golden set! We now have the necessary data to recommend memes to you.", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: {(alert: UIAlertAction!) in //self.navigationController?.popViewController(animated: true);
+            self.waitPotentialPartners.notify(queue: .main){
+                print("leaving golden set")
+                let alert = UIAlertController(title: "All Set!", message: "Thank you for labeling the golden set! We now have the necessary data to recommend memes to you.", preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: {(alert: UIAlertAction!) in //self.navigationController?.popViewController(animated: true);
                 //self.dismiss(animated: true, completion: nil);
                 let appDelegate = UIApplication.shared.delegate as! AppDelegate
+                appDelegate.viewController = nil
+                appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
                 appDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
-            }))
-            self.present(alert, animated: true)
-            return
+                }))
+                self.present(alert, animated: true)
+                return
+            }
         }
         
         // We haven't reached the end of the golden set yet
         // Load up a new meme
-        let transferUtility = AWSS3TransferUtility.default()
-        let expression = AWSS3TransferUtilityDownloadExpression()
-        transferUtility.downloadData(fromBucket: s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
-            if error != nil{
-                print(error!)
-                print("error")
-                return
-            }
-            DispatchQueue.main.sync(execute: {
-                let imageExtensions = ["png", "jpg", "gif", "ifv", "PNG", "JPG", "GIF", "IFV"]
-                let last3 = self.keys[self.index].suffix(3)
-                if imageExtensions.contains(String(last3)){
-                    //we've got a gif
-                    if last3.contains("gif") || last3.contains("ifv"){
-                        let gif = UIImage.gifImageWithData(data!)
-                        self.image = gif
+        else{
+            let transferUtility = AWSS3TransferUtility.default()
+            let expression = AWSS3TransferUtilityDownloadExpression()
+            transferUtility.downloadData(fromBucket: s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
+                if error != nil{
+                    print(error!)
+                    print("error")
+                    return
+                }
+                DispatchQueue.main.sync(execute: {
+                    let imageExtensions = ["png", "jpg", "gif", "ifv", "PNG", "JPG", "GIF", "IFV"]
+                    let last3 = self.keys[self.index].suffix(3)
+                    if imageExtensions.contains(String(last3)){
+                        //we've got a gif
+                        if last3.contains("gif") || last3.contains("ifv"){
+                            let gif = UIImage.gifImageWithData(data!)
+                            self.image = gif
+                        }
+                        else{
+                            let pic = UIImage(data: data!)
+                            self.image = pic
+                        }
+                        self.meme.isHidden = false
+                        self.updateUI()
+                        self.slider.isEnabled = true
+                        return
                     }
                     else{
-                        let pic = UIImage(data: data!)
-                        self.image = pic
+                        let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
+                        let temp_url = URL(string: temp0_url)
+                        let player = AVPlayer(url: temp_url!)
+                        self.playerViewController = AVPlayerViewController()
+                        self.playerViewController!.player = player
+                        self.playerViewController!.view.frame = self.meme.frame
+                        self.addChild(self.playerViewController!)
+                        self.view.addSubview(self.playerViewController!.view)
+                        self.playerViewController!.didMove(toParent: self)
+                        player.play()
+                        self.meme.isHidden = true
+                        self.updateUI()
+                        self.slider.isEnabled = true
+                        return
                     }
-                    self.meme.isHidden = false
-                    self.updateUI()
-                    self.slider.isEnabled = true
-                    return
-                }
-                else{
-                    let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
-                    let temp_url = URL(string: temp0_url)
-                    let player = AVPlayer(url: temp_url!)
-                    self.playerViewController = AVPlayerViewController()
-                    self.playerViewController!.player = player
-                    self.playerViewController!.view.frame = self.meme.frame
-                    self.addChild(self.playerViewController!)
-                    self.view.addSubview(self.playerViewController!.view)
-                    self.playerViewController!.didMove(toParent: self)
-                    player.play()
-                    self.meme.isHidden = true
-                    self.updateUI()
-                    self.slider.isEnabled = true
-                    return
-                }
-            })
+                })
+            }
         }
     }
     

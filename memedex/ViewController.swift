@@ -170,6 +170,7 @@ class ViewController: UIViewController {
             //print(AppDelegate.defaultUserPool().currentUser()?.username)
             //sleep(3)
             //print(AppDelegate.defaultUserPool().currentUser()?.username)
+            print("View is appearing viewcontroller")
             super.viewWillAppear(animated)
             //sleep(3)
             print("This is the user in the ViewController " + String((AppDelegate.defaultUserPool().currentUser()?.username!)!))
@@ -417,6 +418,7 @@ class ViewController: UIViewController {
                             self.user_to_pair_with = paired_user
                             print("Found final partner")
                             print("Am I in here twice?")
+                            print("exiting waitFinalPartner")
                             self.waitFinalPartner.leave()
                             print("That was the problem")
                             return;
@@ -424,6 +426,7 @@ class ViewController: UIViewController {
                             // we need to free the queue even though
                             // we didn't find a match
                         else if num_checked_users == user_list_strings.count{
+                            print("exiting waitFinalPartner")
                             self.waitFinalPartner.leave()
                             return;
                         }
