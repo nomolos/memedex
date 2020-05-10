@@ -54,8 +54,19 @@ class ViewController: UIViewController {
     
     
     
-    @IBAction func share(_ sender: Any) {
+    @IBAction func share(_ sender: UIButton) {
         print("inside share")
+        sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+        UIView.animate(withDuration: 2.0,
+                                   delay: 0,
+                                   usingSpringWithDamping: CGFloat(0.20),
+                                   initialSpringVelocity: CGFloat(6.0),
+                                   options: UIView.AnimationOptions.allowUserInteraction,
+                                   animations: {
+                                    sender.transform = CGAffineTransform.identity
+            },
+                                   completion: { Void in()  }
+        )
         var share_me = self.meme.image as! UIImage
         // Reduce image quality substantially through compression
         // Otherwise sharing takes for fucking ever
@@ -71,8 +82,19 @@ class ViewController: UIViewController {
     }
     
     
-    @IBAction func back(_ sender: Any) {
+    @IBAction func back(_ sender: UIButton) {
         if(self.index > 1){
+            sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+            UIView.animate(withDuration: 2.0,
+                                       delay: 0,
+                                       usingSpringWithDamping: CGFloat(0.20),
+                                       initialSpringVelocity: CGFloat(6.0),
+                                       options: UIView.AnimationOptions.allowUserInteraction,
+                                       animations: {
+                                        sender.transform = CGAffineTransform.identity
+                },
+                                       completion: { Void in()  }
+            )
             self.index = self.index - 2
         }
         else if (self.index == 1){ // change this eventually
@@ -84,8 +106,20 @@ class ViewController: UIViewController {
         self.next(self)
     }
     
-    @IBAction func gotogolden(_ sender: Any) {
+    @IBAction func gotogolden(_ sender: UIButton) {
         print("Going to golden set")
+        sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+        UIView.animate(withDuration: 2.0,
+                                   delay: 0,
+                                   usingSpringWithDamping: CGFloat(0.20),
+                                   initialSpringVelocity: CGFloat(6.0),
+                                   options: UIView.AnimationOptions.allowUserInteraction,
+                                   animations: {
+                                    sender.transform = CGAffineTransform.identity
+            },
+                                   completion: { Void in()  }
+        )
+        //sleep(1)
         self.performSegue(withIdentifier: "goldensegue", sender: self)
     }
     

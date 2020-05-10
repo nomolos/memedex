@@ -259,14 +259,17 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                     print("logging in loginview")
                     self.email.text = nil
                     self.password.text = nil
+                    //appDelegate.viewController = nil
                     appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
                     //(appDelegate.viewController as! ViewController).user = self.user
                     //(appDelegate.viewController as! ViewController).userAttributes = self.userAttributes
                     let temp_old_name = AppDelegate.defaultUserPool().currentUser()?.username
                     // wait until user is updated
                     // i am a piece of human garbage
-                    while(temp_old_name == AppDelegate.defaultUserPool().currentUser()?.username){
-                        continue;
+                    if(temp_old_name == AppDelegate.defaultUserPool().currentUser()?.username){
+                        //print("in here abcd")
+                        sleep(3)
+                        //continue;
                     }
                     appDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
                     //AppDelegate.loggedIn = true
