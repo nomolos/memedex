@@ -69,6 +69,7 @@
 		BD29747A2452005300DBBF9E /* GoldenMeme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD2974792452005300DBBF9E /* GoldenMeme.swift */; };
 		BD29747C24534BF000DBBF9E /* ActiveUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD29747B24534BF000DBBF9E /* ActiveUser.swift */; };
 		BD29747E245505E000DBBF9E /* PartnerMatches.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD29747D245505E000DBBF9E /* PartnerMatches.swift */; };
+		BD4921FC2468C541004F8408 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD4921FB2468C541004F8408 /* Launch Screen.storyboard */; };
 		BD4B85412442410D00C67E09 /* TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4B85402442410D00C67E09 /* TextField.swift */; };
 		BD767C4424328CE200A813C7 /* CognitoConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = BD767C4324328CE200A813C7 /* CognitoConfig.plist */; };
 		BD8DB8AC2466009F0066E055 /* AWSAuthCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD8DB8AB2466009F0066E055 /* AWSAuthCore.framework */; };
@@ -156,6 +157,7 @@
 		BD2974792452005300DBBF9E /* GoldenMeme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldenMeme.swift; sourceTree = "<group>"; };
 		BD29747B24534BF000DBBF9E /* ActiveUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveUser.swift; sourceTree = "<group>"; };
 		BD29747D245505E000DBBF9E /* PartnerMatches.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerMatches.swift; sourceTree = "<group>"; };
+		BD4921FB2468C541004F8408 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		BD4B85402442410D00C67E09 /* TextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextField.swift; sourceTree = "<group>"; };
 		BD767C4324328CE200A813C7 /* CognitoConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = CognitoConfig.plist; sourceTree = "<group>"; };
 		BD8DB8AB2466009F0066E055 /* AWSAuthCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AWSAuthCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -262,6 +264,7 @@
 				BD2974792452005300DBBF9E /* GoldenMeme.swift */,
 				BD29747B24534BF000DBBF9E /* ActiveUser.swift */,
 				BD29747D245505E000DBBF9E /* PartnerMatches.swift */,
+				BD4921FB2468C541004F8408 /* Launch Screen.storyboard */,
 			);
 			path = memedex;
 			sourceTree = "<group>";
@@ -446,6 +449,7 @@
 				BD25D7A22440C344002A03BF /* SF-Pro-Text-LightItalic.otf in Resources */,
 				BD25D79D2440C344002A03BF /* SF-Pro-Display-BlackItalic.otf in Resources */,
 				BD25D7AC2440C344002A03BF /* SFUIText-MediumItalic.ttf in Resources */,
+				BD4921FC2468C541004F8408 /* Launch Screen.storyboard in Resources */,
 				BD25D7B22440C344002A03BF /* SFUIDisplay-Medium.ttf in Resources */,
 				BD25D7922440C344002A03BF /* SF-Pro-Text-BoldItalic.otf in Resources */,
 				BD220CEA23F4B25A00D93CBE /* Assets.xcassets in Resources */,

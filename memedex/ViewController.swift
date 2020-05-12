@@ -21,6 +21,8 @@ class ViewController: UIViewController {
     let s3bucket = "memedexbucket"
     var keys = [String]()
     var index = 0
+    var downloaded_index = 0
+    var index_for_cache = 0
     var user:AWSCognitoIdentityUser?
     //var userAttributes:[AWSCognitoIdentityProviderAttributeType]?
     var image:UIImage?
@@ -32,6 +34,7 @@ class ViewController: UIViewController {
     let waitPotentialActivePartner = DispatchGroup()
     let waitFinalPartner = DispatchGroup()
     let waitMemeNamesS3 = DispatchGroup()
+    //let waitBackgroundMemes = DispatchGroup()
     let dispatchQueue = DispatchQueue(label: "com.queue.Serial")
     var emitter = CAEmitterLayer()
     var player: AVPlayer?
@@ -39,6 +42,9 @@ class ViewController: UIViewController {
     var matches: AWSTask<AWSDynamoDBPaginatedOutput>?
     var found_match = false
     var userAttributes:[AWSCognitoIdentityProviderAttributeType]?
+    var activityIndicator = UIActivityIndicatorView()
+    var meme_cache = [Data]()
+    let meme_cache_semaphore = DispatchSemaphore(value: 0)
     
     @IBOutlet weak var shareButton: UIButton!
     @IBOutlet weak var meme: UIImageView!
@@ -82,7 +88,7 @@ class ViewController: UIViewController {
     
     
     @IBAction func back(_ sender: UIButton) {
-        if(self.index > 1){
+        if(self.index > 0){
             sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
             UIView.animate(withDuration: 2.0,
                                        delay: 0,
@@ -95,14 +101,15 @@ class ViewController: UIViewController {
                                        completion: { Void in()  }
             )
             self.index = self.index - 2
+            self.index_for_cache = self.index_for_cache - 2
+            self.loadNextMeme(first: false)
         }
-        else if (self.index == 1){ // change this eventually
+        /*else if (self.index == 1){ // change this eventually
             return
-        }
+        }*/
         else{
             return
         }
-        self.next(self)
     }
     
     @IBAction func gotogolden(_ sender: UIButton) {
@@ -199,10 +206,25 @@ class ViewController: UIViewController {
         //self.callWhenViewing()
     }
     
+    //extension CGRect {
+    //    var center: CGPoint { return CGPoint(x: midX, y: midY) }
+    //}
+    
     override func viewWillAppear(_ animated: Bool) {
             //print(AppDelegate.defaultUserPool().currentUser()?.username)
             //sleep(3)
             //print(AppDelegate.defaultUserPool().currentUser()?.username)
+            //var midX = self.view.bounds.midX
+            //var midY = self.view.bounds.midY
+            self.activityIndicator = UIActivityIndicatorView()
+        //self.activityIndicator.
+            self.activityIndicator.color = UIColor.white
+            self.activityIndicator.style = UIActivityIndicatorView.Style.large
+            self.activityIndicator.frame = CGRect(x: self.view.bounds.midX - 50, y: self.view.bounds.midY - 100, width: 100, height: 100)
+            self.activityIndicator.hidesWhenStopped = true
+            self.activityIndicator.layer.zPosition = 1
+            view.addSubview(self.activityIndicator)
+        
             print("View is appearing viewcontroller")
             super.viewWillAppear(animated)
             //sleep(3)
@@ -299,6 +321,8 @@ class ViewController: UIViewController {
     func rateCurrentMeme() {
         let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
         let meme = Meme()
+        print("INDEX INSIDE OF RATECURRENTMEME " + String(self.index))
+        print("WE ARE LABELING THE MEME " + self.keys[self.index])
         meme?.username = user?.username as! NSString
         meme?.meme = self.keys[self.index] as NSString
         meme?.rating = slider.value as NSNumber
@@ -315,53 +339,154 @@ class ViewController: UIViewController {
     }
     
     func loadNextMeme(first: Bool) {
+        //self.meme.isHidden = true
+        self.activityIndicator.startAnimating()
         if(!first){
             self.index = self.index + 1
         }
+        print("INDEX INSIDE OF LOADNEXTMEME IS " + String(self.index) + " name is " + String(self.keys[self.index]))
+        //}
         let transferUtility = AWSS3TransferUtility.default()
         let expression = AWSS3TransferUtilityDownloadExpression()
-        transferUtility.downloadData(fromBucket: s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
-            if error != nil{
-                print(error!)
-                print("error")
-                return
-            }
-            DispatchQueue.main.sync(execute: {
-                let imageExtensions = ["png", "jpg", "gif", "ifv"]
-                let last3 = self.keys[self.index].suffix(3)
-                if imageExtensions.contains(String(last3)){
-                    //we've got a gif
-                    if last3.contains("gif") || last3.contains("ifv"){
-                        let gif = UIImage.gifImageWithData(data!)
-                        self.image = gif
+        if(!(self.downloaded_index > self.index || self.index_for_cache < 0)){
+            //print(self.downloaded_index)
+            //print(self.index)
+            print("our downloaded index " + String(self.downloaded_index) + " is not greater than our normal index " + String(self.index))
+            print("or we want back too far and our cache doesn't hold the image anymore")
+            print(" our cache index is : " + String(self.index_for_cache))
+            transferUtility.downloadData(fromBucket: s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
+                if error != nil{
+                    print(error!)
+                    print("error")
+                    return
+                }
+                DispatchQueue.main.sync(execute: {
+                    let imageExtensions = ["png", "jpg", "gif", "ifv"]
+                    let last3 = self.keys[self.index].suffix(3)
+                    if imageExtensions.contains(String(last3)){
+                        //we've got a gif
+                        if last3.contains("gif") || last3.contains("ifv"){
+                            let gif = UIImage.gifImageWithData(data!)
+                            self.image = gif
+                        }
+                        else{
+                            let pic = UIImage(data: data!)
+                            self.image = pic
+                        }
+                        self.meme.isHidden = false
+                        self.updateUI()
+                        self.slider.isEnabled = true
+                        self.activityIndicator.stopAnimating()
+                        /*if(!first){
+                            print("calling background_meme_download from loadNextMeme")
+                            self.background_meme_download()
+                        }*/
+                        self.background_meme_download()
+                        return
                     }
                     else{
-                        let pic = UIImage(data: data!)
-                        self.image = pic
+                        let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
+                        let temp_url = URL(string: temp0_url)
+                        self.player = AVPlayer(url: temp_url!)
+                        self.playerViewController = AVPlayerViewController()
+                        self.playerViewController!.player = self.player
+                        self.playerViewController!.view.frame = self.meme.frame
+                        self.addChild(self.playerViewController!)
+                        self.view.addSubview(self.playerViewController!.view)
+                        self.playerViewController!.didMove(toParent: self)
+                        self.player?.play()
+                        self.meme.isHidden = true
+                        self.updateUI()
+                        self.slider.isEnabled = true
+                        self.activityIndicator.stopAnimating()
+                        /*if(!first){
+                            print("calling background_meme_download from loadNextMeme")
+                            self.background_meme_download()
+                        }*/
+                        self.background_meme_download()
+                        return
                     }
-                    self.meme.isHidden = false
-                    self.updateUI()
-                    self.slider.isEnabled = true
-                    return
+                })
+            }
+        }
+        else{
+            print("our downloaded index " + String(self.downloaded_index) + " IS greater than our normal index " + String(self.index))
+            self.index_for_cache = self.index_for_cache + 1
+            let imageExtensions = ["png", "jpg", "gif", "ifv"]
+            let last3 = self.keys[self.index].suffix(3)
+            print("the meme name at this index is " + self.keys[self.index])
+            print("double check this with the file in S3 to make sure we're labeling the right meme")
+            if imageExtensions.contains(String(last3)){
+                //we've got a gif
+                if last3.contains("gif") || last3.contains("ifv"){
+                    let gif = UIImage.gifImageWithData(self.meme_cache[index_for_cache])
+                    self.image = gif
                 }
                 else{
-                    let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
-                    let temp_url = URL(string: temp0_url)
-                    self.player = AVPlayer(url: temp_url!)
-                    self.playerViewController = AVPlayerViewController()
-                    self.playerViewController!.player = self.player
-                    self.playerViewController!.view.frame = self.meme.frame
-                    self.addChild(self.playerViewController!)
-                    self.view.addSubview(self.playerViewController!.view)
-                    self.playerViewController!.didMove(toParent: self)
-                    self.player?.play()
-                    self.meme.isHidden = true
-                    self.updateUI()
-                    self.slider.isEnabled = true
-                    return
+                    let pic = UIImage(data: self.meme_cache[index_for_cache])
+                    self.image = pic
                 }
-            })
+                self.meme.isHidden = false
+                self.updateUI()
+                self.slider.isEnabled = true
+                self.activityIndicator.stopAnimating()
+                return
+            }
+            else{
+                let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
+                let temp_url = URL(string: temp0_url)
+                self.player = AVPlayer(url: temp_url!)
+                self.playerViewController = AVPlayerViewController()
+                self.playerViewController!.player = self.player
+                self.playerViewController!.view.frame = self.meme.frame
+                self.addChild(self.playerViewController!)
+                self.view.addSubview(self.playerViewController!.view)
+                self.playerViewController!.didMove(toParent: self)
+                self.player?.play()
+                self.meme.isHidden = true
+                self.updateUI()
+                self.slider.isEnabled = true
+                self.activityIndicator.stopAnimating()
+                return
+            }
         }
+    }
+    
+    func background_meme_download() {
+        self.downloaded_index = index
+        self.index_for_cache = 0
+        self.meme_cache.removeAll()
+        self.dispatchQueue.async{
+            let max_10 = self.downloaded_index + 10
+            print("here inside background_meme_download")
+            print(self.keys.count)
+            while (self.downloaded_index < self.keys.count && self.downloaded_index <= max_10){
+                //self.waitBackgroundMemes.enter()
+                print("in this loop")
+                let transferUtility = AWSS3TransferUtility.default()
+                let expression = AWSS3TransferUtilityDownloadExpression()
+                //print("downloaded index is " + )
+                transferUtility.downloadData(fromBucket: self.s3bucket, key: self.keys[self.downloaded_index], expression: expression) { (task, url, data, error) in
+                    if error != nil{
+                        print(error!)
+                        print("error")
+                        return
+                    }
+                    //DispatchQueue.main.sync(execute: {
+                        self.meme_cache_semaphore.signal()
+                        //self.waitBackgroundMemes.leave()
+                        print("leaving the group ")
+                        //print("incrementing downloaded index to " + String(self.downloaded_index))
+                        self.meme_cache.append(data!)
+                        return
+                    //})
+                }
+                self.meme_cache_semaphore.wait()
+                self.downloaded_index = self.downloaded_index + 1
+                print("incrementing downloaded index to " + String(self.downloaded_index))
+            }
+        }
+        print("end of background_meme_download")
     }
     
     func loadAllS3MemeNames(){
@@ -375,6 +500,7 @@ class ViewController: UIViewController {
                 self.keys.append(String(object.key!))
                 print(String(object.key!))
             }
+            //self.meme_cache.count = self.keys.count
             self.waitMemeNamesS3.leave()
             print("We've got our Meme names")
             return nil

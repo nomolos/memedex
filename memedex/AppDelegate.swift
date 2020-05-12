@@ -73,8 +73,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let configuration = AWSServiceConfiguration(region:.USWest1, credentialsProvider:credentialsProvider)
         AWSServiceManager.default().defaultServiceConfiguration = configuration
         AWSS3.register(with: configuration!, forKey: "defaultKey")
-        AWSDDLog.sharedInstance.logLevel = .verbose
-        AWSDDLog.add(AWSDDTTYLogger.sharedInstance)
+        //AWSDDLog.sharedInstance.logLevel = .verbose
+        //AWSDDLog.add(AWSDDTTYLogger.sharedInstance)
         self.cognitoConfig = CognitoConfig()
         self.setupCognitoUserPool()
         print("End of application AppDelegate")
