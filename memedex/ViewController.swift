@@ -62,6 +62,8 @@ class ViewController: UIViewController {
     
     @IBAction func share(_ sender: UIButton) {
         print("inside share")
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
         sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
         UIView.animate(withDuration: 2.0,
                                    delay: 0,
@@ -73,22 +75,54 @@ class ViewController: UIViewController {
             },
                                    completion: { Void in()  }
         )
-        var share_me = self.meme.image as! UIImage
+        let imageExtensions = ["png", "jpg", "gif", "ifv"]
+        let last3 = self.keys[self.index].suffix(3)
+        //sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+        //var share_me:Any?
+        if imageExtensions.contains(String(last3)){
+            //we've got a gif
+            if last3.contains("gif") || last3.contains("ifv"){
+                //let gif = UIImage.gifImageWithData(data!)
+                var share_me = self.image
+                let share_me_container = [share_me] as [Any]
+                let activityViewController = UIActivityViewController(activityItems: share_me_container, applicationActivities: nil)
+                activityViewController.popoverPresentationController?.sourceView = self.view
+                self.present(activityViewController, animated: true, completion: nil)
+            }
+            else{
+                var share_me = self.meme.image
+                share_me = UIImage(data: share_me!.jpegData(compressionQuality: 0.1)!)!
+                let share_me_container = [share_me] as [Any]
+                let activityViewController = UIActivityViewController(activityItems: share_me_container, applicationActivities: nil)
+                activityViewController.popoverPresentationController?.sourceView = self.view
+                self.present(activityViewController, animated: true, completion: nil)
+            }
+        }
+        else{
+            let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
+            let temp_url = URL(string: temp0_url)
+            let share_me_container = [temp_url] as! [URL]
+            let activityViewController = UIActivityViewController(activityItems: share_me_container, applicationActivities: nil)
+            activityViewController.popoverPresentationController?.sourceView = self.view
+            self.present(activityViewController, animated: true, completion: nil)
+        }
         // Reduce image quality substantially through compression
         // Otherwise sharing takes for fucking ever
         // Can change in the future
         // Scale of quality is from 0.0 to 1.0
-        share_me = UIImage(data: share_me.jpegData(compressionQuality: 0.1)!)!
+        /*share_me = UIImage(data: share_me.jpegData(compressionQuality: 0.1)!)!
         //let url = URL(fileURLWithPath: "http://www.google.com")
         let share_me_container = [share_me] as [Any]
         let activityViewController = UIActivityViewController(activityItems: share_me_container, applicationActivities: nil)
         activityViewController.popoverPresentationController?.sourceView = self.view
-        self.present(activityViewController, animated: true, completion: nil)
+        self.present(activityViewController, animated: true, completion: nil)*/
     }
     
     
     @IBAction func back(_ sender: UIButton) {
         if(self.index > 0){
+            let generator = UINotificationFeedbackGenerator()
+            generator.notificationOccurred(.success)
             sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
             UIView.animate(withDuration: 2.0,
                                        delay: 0,
@@ -114,6 +148,8 @@ class ViewController: UIViewController {
     
     @IBAction func gotogolden(_ sender: UIButton) {
         print("Going to golden set")
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
         sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
         UIView.animate(withDuration: 2.0,
                                    delay: 0,

@@ -15,7 +15,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8CA-cs-GxP">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="8CA-cs-GxP">
                                 <rect key="frame" x="26" y="751" width="37" height="34"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="37" id="NEo-S7-Ksd"/>
@@ -23,7 +23,7 @@
                                 </constraints>
                                 <state key="normal" title="Button" image="back"/>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rva-RG-UbF">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rva-RG-UbF">
                                 <rect key="frame" x="189.5" y="750" width="35" height="35"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="35" id="F8q-1T-UVr"/>
@@ -31,7 +31,7 @@
                                 </constraints>
                                 <state key="normal" image="share"/>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" ambiguous="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dcO-cv-qLA">
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dcO-cv-qLA">
                                 <rect key="frame" x="360" y="749" width="28" height="36"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="36" id="6fk-Ud-xiA"/>
@@ -55,11 +55,14 @@
                             <constraint firstItem="rva-RG-UbF" firstAttribute="centerX" secondItem="Bcu-3y-fUS" secondAttribute="centerX" id="C2W-AZ-v3G"/>
                             <constraint firstItem="8CA-cs-GxP" firstAttribute="leading" secondItem="Bcu-3y-fUS" secondAttribute="leading" constant="26" id="Ntb-L1-Ttr"/>
                             <constraint firstItem="bRU-sG-sNh" firstAttribute="centerX" secondItem="Bcu-3y-fUS" secondAttribute="centerX" id="Xqp-r0-Ktb"/>
+                            <constraint firstItem="Bcu-3y-fUS" firstAttribute="bottom" secondItem="rva-RG-UbF" secondAttribute="bottom" constant="77" id="ZNh-6u-iLX"/>
                             <constraint firstItem="Bcu-3y-fUS" firstAttribute="trailing" secondItem="dcO-cv-qLA" secondAttribute="trailing" constant="26" id="bGd-eu-JpM"/>
                             <constraint firstItem="bRU-sG-sNh" firstAttribute="top" secondItem="Ze5-6b-2t3" secondAttribute="top" id="dXl-br-Va4"/>
                             <constraint firstItem="bRU-sG-sNh" firstAttribute="width" secondItem="Ze5-6b-2t3" secondAttribute="width" id="deA-eb-efv"/>
                             <constraint firstItem="EMu-dd-M07" firstAttribute="leading" secondItem="Bcu-3y-fUS" secondAttribute="leading" constant="24" id="di8-am-4fu"/>
                             <constraint firstItem="EMu-dd-M07" firstAttribute="top" secondItem="Bcu-3y-fUS" secondAttribute="top" constant="2" id="fU2-bH-bcs"/>
+                            <constraint firstItem="Bcu-3y-fUS" firstAttribute="bottom" secondItem="8CA-cs-GxP" secondAttribute="bottom" constant="77" id="hFW-rd-rDH"/>
+                            <constraint firstItem="Bcu-3y-fUS" firstAttribute="bottom" secondItem="dcO-cv-qLA" secondAttribute="bottom" constant="77" id="rLd-Hv-h8x"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="Bcu-3y-fUS"/>
                     </view>

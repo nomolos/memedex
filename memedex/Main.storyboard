@@ -144,7 +144,7 @@
         <scene sceneID="c0V-Qu-guB">
             <objects>
                 <viewController storyboardIdentifier="LoginViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="vEL-r4-6PM" customClass="LoginViewController" customModule="memedex" customModuleProvider="target" sceneMemberID="viewController">
-                    <view key="view" contentMode="scaleToFill" id="B4j-ei-U6F" customClass="TextField" customModule="memedex" customModuleProvider="target">
+                    <view key="view" contentMode="scaleToFill" id="B4j-ei-U6F">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
