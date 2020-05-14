@@ -124,7 +124,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         
         if(self.email.text == nil || self.password.text == nil || self.email.text == "" || self.password.text == ""){
             print("inside here in signup")
-            let alert = UIAlertController(title: "Fill out the fields!", message: "Enter your email and a password before clicking 'Sign Up'", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Signing Up", message: "Enter your email and a password before clicking 'Sign Up'. Don't worry, we won't send you any emails or ask for additional data :)", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
             self.present(alert, animated: true)
             return

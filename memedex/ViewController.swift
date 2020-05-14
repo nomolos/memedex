@@ -384,7 +384,65 @@ class ViewController: UIViewController {
         //}
         let transferUtility = AWSS3TransferUtility.default()
         let expression = AWSS3TransferUtilityDownloadExpression()
-        if(!(self.downloaded_index > self.index || self.index_for_cache < 0)){
+        if (first){
+            print("this is the first Meme!")
+            transferUtility.downloadData(fromBucket: s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
+                if error != nil{
+                    print(error!)
+                    print("error")
+                    return
+                }
+                DispatchQueue.main.sync(execute: {
+                    let imageExtensions = ["png", "jpg", "gif", "ifv"]
+                    let last3 = self.keys[self.index].suffix(3)
+                    if imageExtensions.contains(String(last3)){
+                        //we've got a gif
+                        if last3.contains("gif") || last3.contains("ifv"){
+                            let gif = UIImage.gifImageWithData(data!)
+                            self.image = gif
+                        }
+                        else{
+                            let pic = UIImage(data: data!)
+                            self.image = pic
+                        }
+                        self.meme.isHidden = false
+                        self.updateUI()
+                        self.slider.isEnabled = true
+                        self.activityIndicator.stopAnimating()
+                        /*if(!first){
+                            print("calling background_meme_download from loadNextMeme")
+                            self.background_meme_download()
+                        }*/
+                        self.background_meme_download()
+                        return
+                    }
+                    else{
+                        let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
+                        let temp_url = URL(string: temp0_url)
+                        self.player = AVPlayer(url: temp_url!)
+                        self.playerViewController = AVPlayerViewController()
+                        self.playerViewController!.player = self.player
+                        self.playerViewController!.view.frame = self.meme.frame
+                        self.addChild(self.playerViewController!)
+                        self.view.addSubview(self.playerViewController!.view)
+                        self.playerViewController!.didMove(toParent: self)
+                        self.player?.play()
+                        self.meme.isHidden = true
+                        self.updateUI()
+                        self.slider.isEnabled = true
+                        self.activityIndicator.stopAnimating()
+                        /*if(!first){
+                            print("calling background_meme_download from loadNextMeme")
+                            self.background_meme_download()
+                        }*/
+                        self.background_meme_download()
+                        return
+                    }
+                })
+            }
+        }
+        else if(!(self.downloaded_index > self.index || self.index_for_cache < 0)){
+            //print("Our downloaded index i")
             //print(self.downloaded_index)
             //print(self.index)
             print("our downloaded index " + String(self.downloaded_index) + " is not greater than our normal index " + String(self.index))
@@ -630,7 +688,8 @@ class ViewController: UIViewController {
             }
         }
         else { // We didn't have any matches to begin with (need to fill out golden set)
-            let alert = UIAlertController(title: "Fill Out the Golden Set!", message: "Click on the treasure chest icon and rate 13 memes in order to get the most out of our recommendation system :)", preferredStyle: .alert)
+            self.waitFinalPartner.leave()
+            let alert = UIAlertController(title: "Click on the Bottle", message: "Click on the potion-looking icon at the bottom right of the screen to help our AI recommend memes to you.", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
             self.present(alert, animated: true)
         }
