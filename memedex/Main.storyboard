@@ -186,13 +186,21 @@
                                     <action selector="signup:" destination="vEL-r4-6PM" eventType="touchUpInside" id="vAC-T2-cqb"/>
                                 </connections>
                             </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="*password must be 8 characters minimum" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="J54-ih-II0">
+                                <rect key="frame" x="34" y="397" width="346" height="21"/>
+                                <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="17"/>
+                                <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
+                            <constraint firstItem="J54-ih-II0" firstAttribute="centerX" secondItem="ZJa-wi-wtr" secondAttribute="centerX" id="8H5-96-8sT"/>
                             <constraint firstItem="xqy-5f-7J6" firstAttribute="leading" secondItem="ZJa-wi-wtr" secondAttribute="leading" constant="35.5" id="AsD-JV-6Xg"/>
                             <constraint firstItem="rWd-4i-b0l" firstAttribute="leading" secondItem="ZJa-wi-wtr" secondAttribute="leading" constant="35.5" id="E2N-D8-iyn"/>
                             <constraint firstItem="ZJa-wi-wtr" firstAttribute="trailing" secondItem="hxA-6k-x6W" secondAttribute="trailing" constant="35" id="LgC-gP-iR5"/>
                             <constraint firstItem="hxA-6k-x6W" firstAttribute="centerX" secondItem="ZJa-wi-wtr" secondAttribute="centerX" id="NQF-Hv-fHT"/>
+                            <constraint firstItem="J54-ih-II0" firstAttribute="top" secondItem="rWd-4i-b0l" secondAttribute="bottom" constant="25" id="RFE-bN-k6Y"/>
                             <constraint firstItem="QuQ-ph-NDW" firstAttribute="centerX" secondItem="ZJa-wi-wtr" secondAttribute="centerX" id="RZk-NF-W3f"/>
                             <constraint firstItem="rWd-4i-b0l" firstAttribute="top" secondItem="xqy-5f-7J6" secondAttribute="bottom" constant="28" id="TXW-AU-SqS"/>
                             <constraint firstItem="QuQ-ph-NDW" firstAttribute="leading" secondItem="ZJa-wi-wtr" secondAttribute="leading" constant="35.5" id="Uer-ah-iSx"/>
@@ -214,6 +222,7 @@
                         <outlet property="loginButton" destination="QuQ-ph-NDW" id="akl-Tx-zzG"/>
                         <outlet property="password" destination="rWd-4i-b0l" id="C8b-p3-na1"/>
                         <outlet property="signup_button" destination="hxA-6k-x6W" id="9lB-Hs-xrQ"/>
+                        <outlet property="signup_requirements" destination="J54-ih-II0" id="vsq-PM-GoW"/>
                         <segue destination="o4i-G5-4bc" kind="show" identifier="VerifySegue" id="gyI-wS-v5B"/>
                     </connections>
                 </viewController>

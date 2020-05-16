@@ -29,6 +29,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var navigationController: UINavigationController?
     var viewController: UIViewController?
     var loginViewController: LoginViewController?
+    var verificationViewController: VerificationViewController?
     static var pool: AWSCognitoIdentityUserPool?
     static var loggedIn: Bool?
     

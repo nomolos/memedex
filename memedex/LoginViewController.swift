@@ -12,6 +12,8 @@ import AWSCognitoIdentityProvider
 
 class LoginViewController: UIViewController, UITextFieldDelegate {
     
+    @IBOutlet weak var signup_requirements: UILabel!
+    
     @IBOutlet weak var email: UITextField!
     
     @IBOutlet weak var password: UITextField!
@@ -30,10 +32,13 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         print("In loginViewController")
+        self.signup_requirements.isHidden = true
         super.viewWillAppear(animated)
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.loginViewController = self
-        self.user = AppDelegate.defaultUserPool().currentUser()
+        if(self.user == nil){
+            self.user = AppDelegate.defaultUserPool().currentUser()
+        }
         print(self.user)
         print(self.user?.username)
         print(self.user?.isSignedIn)
@@ -110,6 +115,9 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     @IBOutlet weak var signup_button: UIButton!
     @IBAction func signup(_ sender: Any) {
         print("inside signup")
+        print("The user inside LoginViewController's signup is below")
+        print(self.user)
+        print(self.userAttributes)
         //let staticCredentialProvider = AWSStaticCredentialsProvider.init(accessKey: self.cognitoConfig!.getClientId(), secretKey: self.cognitoConfig!.getClientSecret())
         
         //let credentialsProvider = AWSCognitoCredentialsProvider(regionType:.USEast2,
@@ -134,8 +142,21 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         //name!.value = self.email.text
         //name!.name = "username"
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+        if(appDelegate.viewController == nil){
+            print("our view controller is nil")
+            appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+        }
+        if(appDelegate.verificationViewController != nil){
+            print("we already tried to verify an email")
+            if(appDelegate.verificationViewController?.email == email!.value){
+                print("They are trying to sign up an account that they already inputted but haven't verified. Eventually we should find a way to update the password here")
+                self.password.text = appDelegate.verificationViewController?.password
+                self.performSegue(withIdentifier: "VerifySegue", sender: self)
+                return
+            }
+        }
         //print(AppDelegate.pool)
+        print("About to call AppDelegate.pool.signup")
         AppDelegate.pool?.signUp(self.email.text!, password: self.password.text!, userAttributes: [email!], validationData: nil).continueWith{ (response) -> Any? in
             if response.error != nil {
                 let alert = UIAlertController(title: "Error", message: (response.error! as NSError).userInfo["message"] as? String, preferredStyle: .alert)
@@ -160,6 +181,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 //print(response)
                 //print(response.result)
                 //self.user = response.result?.user
+                print("About to perform segue to verification view controller")
                 DispatchQueue.main.async {
                     //self.codeDeliveryDetails = response.result?.codeDeliveryDetails
                     self.performSegue(withIdentifier: "VerifySegue", sender: self)
@@ -182,9 +204,11 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         if (self.email?.text != nil && self.password?.text?.count ?? 0 > 7) {
             self.loginButton?.isEnabled = true
             self.signup_button?.isEnabled = true
+            self.signup_requirements.isHidden = true
         } else {
             self.loginButton?.isEnabled = false
             self.signup_button?.isEnabled = false
+            self.signup_requirements.isHidden = false
         }
     }
     
