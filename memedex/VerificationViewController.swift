@@ -19,13 +19,21 @@ class VerificationViewController: UIViewController, UITextFieldDelegate {
     var email:String?
     var password:String?
     var passwordAuthenticationCompletion: AWSTaskCompletionSource<AWSCognitoIdentityPasswordAuthenticationDetails>?
+    var activityIndicator = UIActivityIndicatorView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         let alert = UIAlertController(title: "Check your email!", message: "You should have received an email with a code. Type it in here to confirm your account.", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
         self.present(alert, animated: true)
-        
+        self.activityIndicator = UIActivityIndicatorView()
+        //self.activityIndicator.
+        self.activityIndicator.color = UIColor.gray
+        self.activityIndicator.style = UIActivityIndicatorView.Style.large
+        self.activityIndicator.frame = CGRect(x: self.view.bounds.midX - 50, y: self.view.bounds.midY - 100, width: 100, height: 100)
+        self.activityIndicator.hidesWhenStopped = true
+        self.activityIndicator.layer.zPosition = 1
+        view.addSubview(self.activityIndicator)
         //let appDelegate = UIApplication.shared.delegate as! AppDelegate
         //print("These two users should be the same (hope to god)")
         //print(AppDelegate.defaultUserPool().getUser().username)
@@ -50,13 +58,15 @@ class VerificationViewController: UIViewController, UITextFieldDelegate {
     
     @IBAction func verify(_ sender: Any) {
         print("attempting to verify")
+        self.activityIndicator.startAnimating()
         self.user?.confirmSignUp(code.text!)
         .continueWith(block: { (response) -> Any? in
             if response.error != nil {
                 DispatchQueue.main.async {
                     print("verifying didn't work")
                     self.code.text = ""
-                    let alert = UIAlertController(title: "Error", message: "Code don't work bruh", preferredStyle: .alert)
+                    self.activityIndicator.stopAnimating()
+                    let alert = UIAlertController(title: "Error", message: "This code doesn't work. Try going back and signing up again.", preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "Retry", style: .default, handler: nil))
                     self.present(alert, animated: true, completion:nil)
                 }
@@ -79,6 +89,7 @@ class VerificationViewController: UIViewController, UITextFieldDelegate {
                     /*if(AppDelegate.defaultUserPool().currentUser()?.username == nil){
                         self.user.getDetails()
                     }*/
+                    self.activityIndicator.stopAnimating()
                     let appDelegate = UIApplication.shared.delegate as! AppDelegate
                     //self.user?.getDetails()
                     let authDetails = AWSCognitoIdentityPasswordAuthenticationDetails(username: self.email!, password: self.password!)

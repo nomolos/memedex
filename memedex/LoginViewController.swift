@@ -28,10 +28,21 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     var passwordAuthenticationCompletion: AWSTaskCompletionSource<AWSCognitoIdentityPasswordAuthenticationDetails>?
     
+    var activityIndicator = UIActivityIndicatorView()
+    
     //let waitUserInfo = DispatchGroup()
     
     override func viewWillAppear(_ animated: Bool) {
         print("In loginViewController")
+        self.activityIndicator = UIActivityIndicatorView()
+        //self.activityIndicator.
+        self.activityIndicator.color = UIColor.gray
+        self.activityIndicator.style = UIActivityIndicatorView.Style.large
+        self.activityIndicator.frame = CGRect(x: self.view.bounds.midX - 50, y: self.view.bounds.midY - 100, width: 100, height: 100)
+        self.activityIndicator.hidesWhenStopped = true
+        self.activityIndicator.layer.zPosition = 1
+        view.addSubview(self.activityIndicator)
+        
         self.signup_requirements.isHidden = true
         super.viewWillAppear(animated)
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
@@ -114,6 +125,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     @IBOutlet weak var signup_button: UIButton!
     @IBAction func signup(_ sender: Any) {
+        self.activityIndicator.startAnimating()
         print("inside signup")
         print("The user inside LoginViewController's signup is below")
         print(self.user)
@@ -132,6 +144,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         
         if(self.email.text == nil || self.password.text == nil || self.email.text == "" || self.password.text == ""){
             print("inside here in signup")
+            self.activityIndicator.stopAnimating()
             let alert = UIAlertController(title: "Signing Up", message: "Enter your email and a password before clicking 'Sign Up'. Don't worry, we won't send you any emails or ask for additional data :)", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
             self.present(alert, animated: true)
@@ -150,6 +163,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             print("we already tried to verify an email")
             if(appDelegate.verificationViewController?.email == email!.value){
                 print("They are trying to sign up an account that they already inputted but haven't verified. Eventually we should find a way to update the password here")
+                self.activityIndicator.stopAnimating()
                 self.password.text = appDelegate.verificationViewController?.password
                 self.performSegue(withIdentifier: "VerifySegue", sender: self)
                 return
@@ -184,6 +198,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 print("About to perform segue to verification view controller")
                 DispatchQueue.main.async {
                     //self.codeDeliveryDetails = response.result?.codeDeliveryDetails
+                    self.activityIndicator.stopAnimating()
                     self.performSegue(withIdentifier: "VerifySegue", sender: self)
                 }
                 //self.performSegue(withIdentifier: "VerifySegue", sender: self)
@@ -299,10 +314,19 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                     let temp_old_name = AppDelegate.defaultUserPool().currentUser()?.username
                     // wait until user is updated
                     // i am a piece of human garbage
-                    if(temp_old_name == AppDelegate.defaultUserPool().currentUser()?.username){
-                        //print("in here abcd")
-                        sleep(3)
-                        //continue;
+                    var observer:NSKeyValueObservation?
+                    //observer = AppDelegate.defaultUserPool().currentUser()?.username.ob
+                    var hundredth_second_count = 0
+                    while(temp_old_name == AppDelegate.defaultUserPool().currentUser()?.username){
+                        //print("In this username loop")
+                        // waited a whole ass second
+                        // They logged in as the same person who was logged in last time
+                        if(hundredth_second_count == 100){
+                            break
+                        }
+                        // one hundredth of a second
+                        usleep(10000)
+                        hundredth_second_count = hundredth_second_count + 1
                     }
                     appDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
                     //AppDelegate.loggedIn = true
