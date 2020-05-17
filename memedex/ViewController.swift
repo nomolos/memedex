@@ -590,6 +590,16 @@ class ViewController: UIViewController {
         listRequest.prefix = "actualmemes/"
         s3.listObjects(listRequest).continueWith { (task) -> AnyObject? in
             let listObjectsOutput = task.result;
+            if(task.error != nil || listObjectsOutput == nil || listObjectsOutput?.contents == nil){
+                print("We know the meme names are empty")
+                DispatchQueue.main.sync{
+                    let alert = UIAlertController(title: "No Memes Right Now", message: "memedex is currently searching the internet for the latest memes. Usually this happens around 12AM Central Time (US) and lasts 20 minutes", preferredStyle: .alert)
+                    //alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
+                    self.present(alert, animated: true)
+                }
+                return nil
+            }
+            print("We don't know the meme names are empty")
             for object in (listObjectsOutput?.contents)! {
                 self.keys.append(String(object.key!))
                 print(String(object.key!))
