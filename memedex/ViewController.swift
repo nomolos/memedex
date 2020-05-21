@@ -46,6 +46,8 @@ class ViewController: UIViewController {
     var meme_cache = [Data]()
     let meme_cache_semaphore = DispatchSemaphore(value: 0)
     
+    var meme_link:UIButton?
+    
     @IBOutlet weak var shareButton: UIButton!
     @IBOutlet weak var meme: UIImageView!
     
@@ -56,6 +58,30 @@ class ViewController: UIViewController {
         print("signed out the user")
         AppDelegate.defaultUserPool().currentUser()?.signOut()
         self.fetchUserAttributes()
+    }
+
+    @objc func goToURL(_ sender:UIButton) {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+        UIView.animate(withDuration: 2.0,
+                                   delay: 0,
+                                   usingSpringWithDamping: CGFloat(0.20),
+                                   initialSpringVelocity: CGFloat(6.0),
+                                   options: UIView.AnimationOptions.allowUserInteraction,
+                                   animations: {
+                                    sender.transform = CGAffineTransform.identity
+            },
+                                   completion: { Void in()  }
+        )
+        let alert = UIAlertController(title: "Leaving memedex", message: "Do you want to go to the site where this meme was posted?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: { (action: UIAlertAction!) in
+            return
+        }))
+        alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: { (action: UIAlertAction!) in
+            UIApplication.shared.open(URL(string: "http://www.google.com")!)
+        }))
+        self.present(alert, animated: true)
     }
     
     
@@ -252,7 +278,15 @@ class ViewController: UIViewController {
             //print(AppDelegate.defaultUserPool().currentUser()?.username)
             //var midX = self.view.bounds.midX
             //var midY = self.view.bounds.midY
+            self.meme_link = UIButton()
+        let temp_image = UIImage(named: "link") as UIImage?
+        self.meme_link?.setImage(temp_image, for: .normal)
+        self.meme_link?.frame = CGRect(x: 100,y: 100,width: 100,height: 100)
+        self.meme_link?.isHidden = true
+        self.view.addSubview(self.meme_link!)
             self.activityIndicator = UIActivityIndicatorView()
+        
+        
         //self.activityIndicator.
             self.activityIndicator.color = UIColor.white
             self.activityIndicator.style = UIActivityIndicatorView.Style.large
@@ -296,7 +330,7 @@ class ViewController: UIViewController {
                         self.loadMemesRecommendedByPartner()
                     }
                     else{
-                        let alert = UIAlertController(title: "No Matched User", message: "We could not find a user to match you with :( Your ratings will be immensely helpeful in recommending memes to other users today", preferredStyle: .alert)
+                        let alert = UIAlertController(title: "No A.I.", message: "We could not find memes to recommend to you", preferredStyle: .alert)
                         alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
                         self.present(alert, animated: true)
                         self.waitMemesUpdated.leave()
@@ -380,6 +414,10 @@ class ViewController: UIViewController {
         if(!first){
             self.index = self.index + 1
         }
+        print("the meme name at this index is " + self.keys[self.index])
+        print("the meme name at this index is " + self.keys[self.index])
+        print("the meme name at this index is " + self.keys[self.index])
+        print("the meme name at this index is " + self.keys[self.index])
         print("INDEX INSIDE OF LOADNEXTMEME IS " + String(self.index) + " name is " + String(self.keys[self.index]))
         //}
         let transferUtility = AWSS3TransferUtility.default()
@@ -699,7 +737,7 @@ class ViewController: UIViewController {
         }
         else { // We didn't have any matches to begin with (need to fill out golden set)
             self.waitFinalPartner.leave()
-            let alert = UIAlertController(title: "Click on the Bottle", message: "Click on the potion-looking icon at the bottom right of the screen to help our AI recommend memes to you.", preferredStyle: .alert)
+            let alert = UIAlertController(title: "Click the Bottle", message: "Click the bottle at the bottom right to get started", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
             self.present(alert, animated: true)
         }
@@ -797,6 +835,19 @@ class ViewController: UIViewController {
     
     func updateUI() {
         meme.image = image
+        let real_image_rect = AVMakeRect(aspectRatio: meme.image!.size, insideRect: meme.bounds)
+        print("printing real image rect bounds")
+        print(real_image_rect)
+        print(real_image_rect.origin.x)
+        print(real_image_rect.origin.y)
+        self.meme_link?.widthAnchor.constraint(equalToConstant: 54.0).isActive = true
+        self.meme_link?.heightAnchor.constraint(equalToConstant: 33.0).isActive = true
+        self.meme_link?.frame.origin.x = self.view.frame.width - 85
+        self.meme_link?.frame.origin.y = real_image_rect.origin.y + 80
+        print(meme_link?.frame)
+        self.meme_link?.isHidden = false
+        self.meme_link?.addTarget(self, action: #selector(goToURL(_:)), for: .touchUpInside)
+        self.view.bringSubviewToFront(meme_link!)
     }
     
     func startSpewing(color: Bool) {

@@ -60,7 +60,7 @@
                                 </connections>
                             </button>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="lgf-WC-pYg">
-                                <rect key="frame" x="0.0" y="49" width="414" height="666"/>
+                                <rect key="frame" x="0.0" y="105" width="414" height="610"/>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
@@ -68,10 +68,10 @@
                             <constraint firstItem="lgf-WC-pYg" firstAttribute="centerX" secondItem="cMa-ep-yj5" secondAttribute="centerX" id="3Bh-sC-yBR"/>
                             <constraint firstItem="Ktu-rx-elc" firstAttribute="centerX" secondItem="cMa-ep-yj5" secondAttribute="centerX" id="Axb-4c-d9R"/>
                             <constraint firstItem="cJ0-0F-YPD" firstAttribute="top" secondItem="Qpl-nK-YsW" secondAttribute="bottom" constant="25" id="Jwq-5o-v1v"/>
-                            <constraint firstItem="lgf-WC-pYg" firstAttribute="top" secondItem="cMa-ep-yj5" secondAttribute="top" constant="5" id="K29-kA-20f"/>
                             <constraint firstItem="cMa-ep-yj5" firstAttribute="bottom" secondItem="lgf-WC-pYg" secondAttribute="bottom" constant="147" id="LYI-Pj-PzL"/>
                             <constraint firstItem="U9x-wI-Qrz" firstAttribute="leading" secondItem="cMa-ep-yj5" secondAttribute="leading" constant="26" id="NkX-dT-htu"/>
                             <constraint firstItem="cMa-ep-yj5" firstAttribute="trailing" secondItem="cJ0-0F-YPD" secondAttribute="trailing" constant="20" id="YkE-aH-6Xf"/>
+                            <constraint firstItem="lgf-WC-pYg" firstAttribute="top" secondItem="cMa-ep-yj5" secondAttribute="top" constant="61" id="j3k-U0-tm3"/>
                             <constraint firstItem="cMa-ep-yj5" firstAttribute="bottom" secondItem="cJ0-0F-YPD" secondAttribute="bottom" constant="22" id="j75-F5-OIh"/>
                             <constraint firstItem="cJ0-0F-YPD" firstAttribute="centerX" secondItem="cMa-ep-yj5" secondAttribute="centerX" id="kRp-Kr-fxX"/>
                             <constraint firstItem="lgf-WC-pYg" firstAttribute="width" secondItem="KZY-56-BW2" secondAttribute="width" id="nTN-3y-8UZ"/>
@@ -186,7 +186,7 @@
                                     <action selector="signup:" destination="vEL-r4-6PM" eventType="touchUpInside" id="vAC-T2-cqb"/>
                                 </connections>
                             </button>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="*password must be 8 characters minimum" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="J54-ih-II0">
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="*password must be 8 characters minimum" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="J54-ih-II0">
                                 <rect key="frame" x="34" y="397" width="346" height="21"/>
                                 <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="17"/>
                                 <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -196,6 +196,7 @@
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="J54-ih-II0" firstAttribute="centerX" secondItem="ZJa-wi-wtr" secondAttribute="centerX" id="8H5-96-8sT"/>
+                            <constraint firstItem="J54-ih-II0" firstAttribute="width" secondItem="B4j-ei-U6F" secondAttribute="height" multiplier="173:448" id="8ep-fM-Vb0"/>
                             <constraint firstItem="xqy-5f-7J6" firstAttribute="leading" secondItem="ZJa-wi-wtr" secondAttribute="leading" constant="35.5" id="AsD-JV-6Xg"/>
                             <constraint firstItem="rWd-4i-b0l" firstAttribute="leading" secondItem="ZJa-wi-wtr" secondAttribute="leading" constant="35.5" id="E2N-D8-iyn"/>
                             <constraint firstItem="ZJa-wi-wtr" firstAttribute="trailing" secondItem="hxA-6k-x6W" secondAttribute="trailing" constant="35" id="LgC-gP-iR5"/>

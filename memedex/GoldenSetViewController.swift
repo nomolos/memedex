@@ -290,7 +290,7 @@ class GoldenSetViewController: UIViewController {
         slider.minimumValue = 0
         slider.maximumValue = 5
         slider.addTarget(self, action:#selector(sliderValueDidChange(sender:)), for: .allEvents)
-        let alert = UIAlertController(title: "Recommendation Engine", message: "Give ratings to these 13 memes to help us better recommend memes to you in the future. You can always come back and re-do this at a later time.", preferredStyle: .alert)
+        let alert = UIAlertController(title: "Use the Slider", message: "Give ratings to these 13 memes to help us better recommend memes to you in the future", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
         self.present(alert, animated: true)
         self.activityIndicator = UIActivityIndicatorView()

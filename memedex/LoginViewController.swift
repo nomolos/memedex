@@ -33,6 +33,15 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     //let waitUserInfo = DispatchGroup()
     
     override func viewWillAppear(_ animated: Bool) {
+        if (self.password?.text?.count ?? 0 > 7) {
+            self.loginButton?.isEnabled = true
+            self.signup_button?.isEnabled = true
+            self.signup_requirements.isHidden = true
+        } else {
+            self.loginButton?.isEnabled = false
+            self.signup_button?.isEnabled = false
+            self.signup_requirements.isHidden = false
+        }
         print("In loginViewController")
         self.activityIndicator = UIActivityIndicatorView()
         //self.activityIndicator.
@@ -215,7 +224,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     }
     
     @objc func inputDidChange(_ sender:AnyObject) {
-        //print("here9")
         if (self.email?.text != nil && self.password?.text?.count ?? 0 > 7) {
             self.loginButton?.isEnabled = true
             self.signup_button?.isEnabled = true
