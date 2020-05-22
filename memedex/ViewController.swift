@@ -34,6 +34,7 @@ class ViewController: UIViewController {
     let waitPotentialActivePartner = DispatchGroup()
     let waitFinalPartner = DispatchGroup()
     let waitMemeNamesS3 = DispatchGroup()
+    let waitURL = DispatchGroup()
     //let waitBackgroundMemes = DispatchGroup()
     let dispatchQueue = DispatchQueue(label: "com.queue.Serial")
     var emitter = CAEmitterLayer()
@@ -79,8 +80,39 @@ class ViewController: UIViewController {
             return
         }))
         alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: { (action: UIAlertAction!) in
-            UIApplication.shared.open(URL(string: "http://www.google.com")!)
+            let queryExpression = AWSDynamoDBQueryExpression()
+            queryExpression.keyConditionExpression = "memename = :memename"
+            queryExpression.expressionAttributeValues = [":memename": ("/" + self.keys[self.index])]
+            let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+            let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+            updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+            self.waitURL.enter()
+            self.activityIndicator.startAnimating()
+            var somefin = dynamoDBObjectMapper.query(URL4Meme.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+            if (task.error != nil){
+                print("error in querying for URL fuckshitdamn")
+                print(task.error)
+            }
+            if (task.result != nil){
+                //print("here2")
+                //self.waitPotentialPartners.leave()
+                //print("Found potential partner"
+                print("no error in querying for URL hooray!")
+            }
+            //print("here3")
+            //print(task.)
+            self.waitURL.leave()
+            return task.result
+            }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+            //sleep(3)
+            self.waitURL.notify(queue: .main){
+                let urley = somefin.result!.items[0] as! URL4Meme
+                //print(somefin.result!.items[0])
+                self.activityIndicator.stopAnimating()
+                UIApplication.shared.open(URL(string: String(urley.URL!))!)
+            }
         }))
+        
         self.present(alert, animated: true)
     }
     
@@ -278,12 +310,14 @@ class ViewController: UIViewController {
             //print(AppDelegate.defaultUserPool().currentUser()?.username)
             //var midX = self.view.bounds.midX
             //var midY = self.view.bounds.midY
+        if(self.meme_link == nil){
             self.meme_link = UIButton()
-        let temp_image = UIImage(named: "link") as UIImage?
-        self.meme_link?.setImage(temp_image, for: .normal)
-        self.meme_link?.frame = CGRect(x: 100,y: 100,width: 100,height: 100)
-        self.meme_link?.isHidden = true
-        self.view.addSubview(self.meme_link!)
+            let temp_image = UIImage(named: "link") as UIImage?
+            self.meme_link?.setImage(temp_image, for: .normal)
+            self.meme_link?.frame = CGRect(x: 100,y: 100,width: 100,height: 100)
+            self.meme_link?.isHidden = true
+            self.view.addSubview(self.meme_link!)
+        }
             self.activityIndicator = UIActivityIndicatorView()
         
         
@@ -843,7 +877,17 @@ class ViewController: UIViewController {
         self.meme_link?.widthAnchor.constraint(equalToConstant: 54.0).isActive = true
         self.meme_link?.heightAnchor.constraint(equalToConstant: 33.0).isActive = true
         self.meme_link?.frame.origin.x = self.view.frame.width - 85
-        self.meme_link?.frame.origin.y = real_image_rect.origin.y + 80
+        print("printing origin y")
+        print(real_image_rect.origin.y)
+        // An image/gif
+        if(!self.meme.isHidden){
+            self.meme_link?.frame.origin.y = real_image_rect.origin.y + 80
+        }
+        // a video
+        else{
+            self.meme_link?.frame.origin.y = self.meme.frame.origin.y - 70
+        }
+        //self.meme_link?.frame.origin.y = real_image_rect.origin.y + 80
         print(meme_link?.frame)
         self.meme_link?.isHidden = false
         self.meme_link?.addTarget(self, action: #selector(goToURL(_:)), for: .touchUpInside)
