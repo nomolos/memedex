@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		13FCC3E4357F39E49D8189C0 /* Pods_memedex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 58E6254CF7366FE89AC4939C /* Pods_memedex.framework */; };
 		BD13220F24785DC1007EB9AF /* URL4Meme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD13220E24785DC1007EB9AF /* URL4Meme.swift */; };
+		BD132211247DDEE2007EB9AF /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD132210247DDEE2007EB9AF /* SignUpViewController.swift */; };
 		BD220CE123F4B25800D93CBE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD220CE023F4B25800D93CBE /* AppDelegate.swift */; };
 		BD220CE623F4B25800D93CBE /* memedex.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = BD220CE423F4B25800D93CBE /* memedex.xcdatamodeld */; };
 		BD220CEA23F4B25A00D93CBE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BD220CE923F4B25A00D93CBE /* Assets.xcassets */; };
@@ -96,6 +97,7 @@
 		58E6254CF7366FE89AC4939C /* Pods_memedex.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_memedex.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		B40209945FCA4EEE493EDF00 /* Pods-memedex.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-memedex.debug.xcconfig"; path = "Target Support Files/Pods-memedex/Pods-memedex.debug.xcconfig"; sourceTree = "<group>"; };
 		BD13220E24785DC1007EB9AF /* URL4Meme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URL4Meme.swift; sourceTree = "<group>"; };
+		BD132210247DDEE2007EB9AF /* SignUpViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
 		BD220CDD23F4B25800D93CBE /* memedex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = memedex.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD220CE023F4B25800D93CBE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BD220CE523F4B25800D93CBE /* memedex.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = memedex.xcdatamodel; sourceTree = "<group>"; };
@@ -268,6 +270,7 @@
 				BD29747D245505E000DBBF9E /* PartnerMatches.swift */,
 				BD4921FB2468C541004F8408 /* Launch Screen.storyboard */,
 				BD13220E24785DC1007EB9AF /* URL4Meme.swift */,
+				BD132210247DDEE2007EB9AF /* SignUpViewController.swift */,
 			);
 			path = memedex;
 			sourceTree = "<group>";
@@ -514,6 +517,7 @@
 				BDE7EA30244B5CDD008A603B /* gif.swift in Sources */,
 				BD220CF823F4B3A200D93CBE /* ViewController.swift in Sources */,
 				BD4B85412442410D00C67E09 /* TextField.swift in Sources */,
+				BD132211247DDEE2007EB9AF /* SignUpViewController.swift in Sources */,
 				BD29747C24534BF000DBBF9E /* ActiveUser.swift in Sources */,
 				BDE7EA2C2448DCA3008A603B /* GetAWSObjectURL.swift in Sources */,
 				BDCD5C47243BD62E00B95DAD /* Meme.swift in Sources */,
@@ -652,6 +656,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1.0;
 				DEVELOPMENT_ASSET_PATHS = "\"memedex/Preview Content\"";
 				DEVELOPMENT_TEAM = 4DPF6Z8WW9;
 				ENABLE_PREVIEWS = YES;
@@ -660,6 +665,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = solomon.memedex;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -674,6 +680,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1.0;
 				DEVELOPMENT_ASSET_PATHS = "\"memedex/Preview Content\"";
 				DEVELOPMENT_TEAM = 4DPF6Z8WW9;
 				ENABLE_PREVIEWS = YES;
@@ -682,6 +689,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = solomon.memedex;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

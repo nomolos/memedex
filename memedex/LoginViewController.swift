@@ -39,7 +39,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             self.signup_requirements.isHidden = true
         } else {
             self.loginButton?.isEnabled = false
-            self.signup_button?.isEnabled = false
+            //self.signup_button?.isEnabled = false
             self.signup_requirements.isHidden = false
         }
         print("In loginViewController")
@@ -152,11 +152,11 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         email!.name = "email"
         
         if(self.email.text == nil || self.password.text == nil || self.email.text == "" || self.password.text == ""){
-            print("inside here in signup")
+            //print("inside here in signup")
             self.activityIndicator.stopAnimating()
-            let alert = UIAlertController(title: "Signing Up", message: "Enter your email and a password before clicking 'Sign Up'. Don't worry, we won't send you any emails or ask for additional data :)", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
-            self.present(alert, animated: true)
+            //let alert = UIAlertController(title: "Signing Up", message: "Enter your email and a password before clicking 'Sign Up'. Don't worry, we won't send you any emails or ask for additional data :)", preferredStyle: .alert)
+            //alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
+            self.performSegue(withIdentifier: "SignUpSegue", sender: self)
             return
         }
         //password!.value = self.password.text
@@ -187,8 +187,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 self.present(alert, animated: true, completion: nil)
             }
             else{
-                //guard let print_me = response.result; print(print_me); else print("wasn't printed")
-                //print("here")
                 print("INSIDE OF LOGINVIEW LOOKING AT SIGNUP STUFF")
                 print(response.result)
                 print(response.result?.user)
@@ -197,30 +195,30 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 print(AppDelegate.pool?.currentUser())
                 print(AppDelegate.pool?.getUser())
                 self.user = response.result?.user
-                //AppDelegate.defaultUserPool().
-                //self.userAttributes = response.result?.user.a
-                // need to instantiate a viewcontroller in the event that they verify later
-                //print("herey")
-                //print(response)
-                //print(response.result)
-                //self.user = response.result?.user
                 print("About to perform segue to verification view controller")
                 DispatchQueue.main.async {
-                    //self.codeDeliveryDetails = response.result?.codeDeliveryDetails
                     self.activityIndicator.stopAnimating()
                     self.performSegue(withIdentifier: "VerifySegue", sender: self)
                 }
-                //self.performSegue(withIdentifier: "VerifySegue", sender: self)
             }
             return 1
         }
     }
     
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        let verificationController = segue.destination as! VerificationViewController
-        verificationController.isModalInPresentation = true
-        //verificationController.codeDeliveryDetails = self.codeDeliveryDetails
-        verificationController.user = self.user!
+        if(segue.identifier == "SignUpSegue"){
+            print("clicked on signupsegue")
+            let signupController = segue.destination as! SignUpViewController
+            signupController.isModalInPresentation = true
+            signupController.user = self.user
+            signupController.userAttributes = self.userAttributes
+        }
+        else{
+            let verificationController = segue.destination as! VerificationViewController
+            verificationController.isModalInPresentation = true
+            //verificationController.codeDeliveryDetails = self.codeDeliveryDetails
+            verificationController.user = self.user!
+        }
     }
     
     @objc func inputDidChange(_ sender:AnyObject) {
@@ -230,7 +228,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             self.signup_requirements.isHidden = true
         } else {
             self.loginButton?.isEnabled = false
-            self.signup_button?.isEnabled = false
+            //self.signup_button?.isEnabled = false
             self.signup_requirements.isHidden = false
         }
     }

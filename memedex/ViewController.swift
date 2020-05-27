@@ -107,9 +107,13 @@ class ViewController: UIViewController {
             //sleep(3)
             self.waitURL.notify(queue: .main){
                 let urley = somefin.result!.items[0] as! URL4Meme
+                var urley_string = String(urley.URL!)
+                if(urley_string.contains("instagram")){
+                    urley_string = "https://" + urley_string
+                }
                 //print(somefin.result!.items[0])
                 self.activityIndicator.stopAnimating()
-                UIApplication.shared.open(URL(string: String(urley.URL!))!)
+                UIApplication.shared.open(URL(string: urley_string)!)
             }
         }))
         
@@ -472,10 +476,15 @@ class ViewController: UIViewController {
                         if last3.contains("gif") || last3.contains("ifv"){
                             let gif = UIImage.gifImageWithData(data!)
                             self.image = gif
+                            print("SETTING IMAGE TO GIF")
+                            print(self.image)
+                           // print(
                         }
                         else{
                             let pic = UIImage(data: data!)
                             self.image = pic
+                            print("SETTING IMAGE TO PIC")
+                            print(self.image)
                         }
                         self.meme.isHidden = false
                         self.updateUI()
@@ -489,6 +498,7 @@ class ViewController: UIViewController {
                         return
                     }
                     else{
+                        print("SETTING IMAGE TO VIDEO")
                         let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
                         let temp_url = URL(string: temp0_url)
                         self.player = AVPlayer(url: temp_url!)
@@ -534,10 +544,14 @@ class ViewController: UIViewController {
                         if last3.contains("gif") || last3.contains("ifv"){
                             let gif = UIImage.gifImageWithData(data!)
                             self.image = gif
+                            print("SETTING IMAGE TO GIF")
+                            print(self.image)
                         }
                         else{
+                            print("SETTING IMAGE TO PIC")
                             let pic = UIImage(data: data!)
                             self.image = pic
+                            print(self.image)
                         }
                         self.meme.isHidden = false
                         self.updateUI()
@@ -551,6 +565,7 @@ class ViewController: UIViewController {
                         return
                     }
                     else{
+                        print("SETTING IMAGE TO VIDEO")
                         let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
                         let temp_url = URL(string: temp0_url)
                         self.player = AVPlayer(url: temp_url!)
@@ -586,11 +601,15 @@ class ViewController: UIViewController {
                 //we've got a gif
                 if last3.contains("gif") || last3.contains("ifv"){
                     let gif = UIImage.gifImageWithData(self.meme_cache[index_for_cache])
+                    print("SETTING IMAGE TO GIF")
                     self.image = gif
+                    print(self.image)
                 }
                 else{
+                    print("SETTING IMAGE TO PIC")
                     let pic = UIImage(data: self.meme_cache[index_for_cache])
                     self.image = pic
+                    print(self.image)
                 }
                 self.meme.isHidden = false
                 self.updateUI()
@@ -599,6 +618,7 @@ class ViewController: UIViewController {
                 return
             }
             else{
+                print("SETTING IMAGE TO VIDEO")
                 let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
                 let temp_url = URL(string: temp0_url)
                 self.player = AVPlayer(url: temp_url!)
@@ -868,30 +888,38 @@ class ViewController: UIViewController {
     }
     
     func updateUI() {
-        meme.image = image
-        let real_image_rect = AVMakeRect(aspectRatio: meme.image!.size, insideRect: meme.bounds)
-        print("printing real image rect bounds")
-        print(real_image_rect)
-        print(real_image_rect.origin.x)
-        print(real_image_rect.origin.y)
-        self.meme_link?.widthAnchor.constraint(equalToConstant: 54.0).isActive = true
-        self.meme_link?.heightAnchor.constraint(equalToConstant: 33.0).isActive = true
-        self.meme_link?.frame.origin.x = self.view.frame.width - 85
-        print("printing origin y")
-        print(real_image_rect.origin.y)
-        // An image/gif
-        if(!self.meme.isHidden){
-            self.meme_link?.frame.origin.y = real_image_rect.origin.y + 80
+        print("Inside of updateUI")
+        print("printing number of keys " + String(self.keys.count))
+        print("printing which index we're at " + String(self.index))
+        //print(self.meme)
+        //print(self.image)
+        //print(self.keys[self.index])
+        self.meme.image = self.image
+        if((self.image) != nil){
+            let real_image_rect = AVMakeRect(aspectRatio: self.meme.image!.size, insideRect: self.meme.bounds)
+            print("printing real image rect bounds")
+            print(real_image_rect)
+            print(real_image_rect.origin.x)
+            print(real_image_rect.origin.y)
+            self.meme_link?.widthAnchor.constraint(equalToConstant: 54.0).isActive = true
+            self.meme_link?.heightAnchor.constraint(equalToConstant: 33.0).isActive = true
+            self.meme_link?.frame.origin.x = self.view.frame.width - 85
+            print("printing origin y")
+            print(real_image_rect.origin.y)
+            // An image/gif
+            if(!self.meme.isHidden){
+                self.meme_link?.frame.origin.y = real_image_rect.origin.y + 80
+            }
+            // a video
+            else{
+                self.meme_link?.frame.origin.y = self.meme.frame.origin.y - 70
+            }
+            //self.meme_link?.frame.origin.y = real_image_rect.origin.y + 80
+            print(meme_link?.frame)
+            self.meme_link?.isHidden = false
+            self.meme_link?.addTarget(self, action: #selector(goToURL(_:)), for: .touchUpInside)
+            self.view.bringSubviewToFront(meme_link!)
         }
-        // a video
-        else{
-            self.meme_link?.frame.origin.y = self.meme.frame.origin.y - 70
-        }
-        //self.meme_link?.frame.origin.y = real_image_rect.origin.y + 80
-        print(meme_link?.frame)
-        self.meme_link?.isHidden = false
-        self.meme_link?.addTarget(self, action: #selector(goToURL(_:)), for: .touchUpInside)
-        self.view.bringSubviewToFront(meme_link!)
     }
     
     func startSpewing(color: Bool) {

@@ -225,11 +225,98 @@
                         <outlet property="signup_button" destination="hxA-6k-x6W" id="9lB-Hs-xrQ"/>
                         <outlet property="signup_requirements" destination="J54-ih-II0" id="vsq-PM-GoW"/>
                         <segue destination="o4i-G5-4bc" kind="show" identifier="VerifySegue" id="gyI-wS-v5B"/>
+                        <segue destination="adW-a7-412" kind="show" identifier="SignUpSegue" id="eS6-ri-roA"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="P5I-oZ-DdD" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1207" y="-1177"/>
+            <point key="canvasLocation" x="1204" y="-1205"/>
+        </scene>
+        <!--Sign Up View Controller-->
+        <scene sceneID="9cw-NJ-H2l">
+            <objects>
+                <viewController id="adW-a7-412" customClass="SignUpViewController" customModule="memedex" customModuleProvider="target" sceneMemberID="viewController">
+                    <view key="view" contentMode="scaleToFill" id="JlI-Q0-sOr">
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
+                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <subviews>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Email" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="EpZ-7G-gqS" customClass="TextField" customModule="memedex" customModuleProvider="target">
+                                <rect key="frame" x="35.5" y="294" width="343" height="48"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" constant="343" id="OGK-n5-GVk"/>
+                                    <constraint firstAttribute="height" constant="48" id="VCL-J9-IuE"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="20"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Password" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="SL8-rr-PIQ" customClass="TextField" customModule="memedex" customModuleProvider="target">
+                                <rect key="frame" x="35.5" y="370" width="343" height="48"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="Gc4-fd-I09"/>
+                                    <constraint firstAttribute="width" constant="343" id="tsX-nl-svl"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="20"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Confirm Password" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="9pq-RF-gXl" customClass="TextField" customModule="memedex" customModuleProvider="target">
+                                <rect key="frame" x="35.5" y="451" width="343" height="48"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="48" id="0NI-0O-Cgp"/>
+                                    <constraint firstAttribute="width" constant="343" id="C27-il-vIq"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="20"/>
+                                <textInputTraits key="textInputTraits"/>
+                            </textField>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SNY-bb-xRn">
+                                <rect key="frame" x="36" y="573" width="343" height="48"/>
+                                <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="20"/>
+                                <state key="normal" title="Sign Up" backgroundImage="LoginSignup">
+                                    <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                </state>
+                                <connections>
+                                    <action selector="signup:" destination="adW-a7-412" eventType="touchUpInside" id="7F4-od-IMM"/>
+                                    <segue destination="o4i-G5-4bc" kind="show" identifier="VerifySegue2" id="673-Bf-ssx"/>
+                                </connections>
+                            </button>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="*password must be 8 characters minimum" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r4T-Cc-ahH">
+                                <rect key="frame" x="34" y="519" width="346" height="21"/>
+                                <constraints>
+                                    <constraint firstAttribute="width" secondItem="r4T-Cc-ahH" secondAttribute="height" multiplier="346:21" id="1e7-y9-Nbd"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="17"/>
+                                <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                        </subviews>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
+                        <constraints>
+                            <constraint firstItem="r4T-Cc-ahH" firstAttribute="centerX" secondItem="k9m-9B-od1" secondAttribute="centerX" id="71E-x2-AA9"/>
+                            <constraint firstItem="9pq-RF-gXl" firstAttribute="centerX" secondItem="k9m-9B-od1" secondAttribute="centerX" id="8Lw-lN-6O0"/>
+                            <constraint firstItem="SNY-bb-xRn" firstAttribute="top" secondItem="9pq-RF-gXl" secondAttribute="bottom" constant="74" id="D83-Mq-f72"/>
+                            <constraint firstItem="9pq-RF-gXl" firstAttribute="centerY" secondItem="k9m-9B-od1" secondAttribute="centerY" id="GFh-1e-H0V"/>
+                            <constraint firstItem="EpZ-7G-gqS" firstAttribute="centerX" secondItem="k9m-9B-od1" secondAttribute="centerX" id="ZRU-kF-ehA"/>
+                            <constraint firstItem="9pq-RF-gXl" firstAttribute="top" secondItem="SL8-rr-PIQ" secondAttribute="bottom" constant="33" id="cdr-SH-a85"/>
+                            <constraint firstItem="SL8-rr-PIQ" firstAttribute="centerX" secondItem="k9m-9B-od1" secondAttribute="centerX" id="fDz-x4-vL1"/>
+                            <constraint firstItem="SNY-bb-xRn" firstAttribute="centerX" secondItem="k9m-9B-od1" secondAttribute="centerX" id="j5z-Wo-ney"/>
+                            <constraint firstItem="r4T-Cc-ahH" firstAttribute="top" secondItem="9pq-RF-gXl" secondAttribute="bottom" constant="20" id="mOQ-lV-IhW"/>
+                            <constraint firstItem="SL8-rr-PIQ" firstAttribute="top" secondItem="EpZ-7G-gqS" secondAttribute="bottom" constant="28" id="tV2-uR-COf"/>
+                            <constraint firstItem="SNY-bb-xRn" firstAttribute="leading" secondItem="k9m-9B-od1" secondAttribute="leading" constant="36" id="yse-bx-GVp"/>
+                            <constraint firstItem="k9m-9B-od1" firstAttribute="trailing" secondItem="SNY-bb-xRn" secondAttribute="trailing" constant="35" id="zl9-7j-4gV"/>
+                        </constraints>
+                        <viewLayoutGuide key="safeArea" id="k9m-9B-od1"/>
+                    </view>
+                    <navigationItem key="navigationItem" id="w6S-yU-5ma"/>
+                    <connections>
+                        <outlet property="confirm_password" destination="9pq-RF-gXl" id="Nj9-6f-JJD"/>
+                        <outlet property="email" destination="EpZ-7G-gqS" id="iW5-Nc-6Pu"/>
+                        <outlet property="password" destination="SL8-rr-PIQ" id="mHe-dR-fgs"/>
+                        <outlet property="signup_button" destination="SNY-bb-xRn" id="4gy-bp-QVe"/>
+                        <outlet property="signup_requirements" destination="r4T-Cc-ahH" id="tf8-QI-vPU"/>
+                    </connections>
+                </viewController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="3jQ-7h-fjZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="2196" y="-1595"/>
         </scene>
         <!--Verification View Controller-->
         <scene sceneID="RVb-WT-egk">
@@ -285,7 +372,7 @@
                 <placeholder placeholderIdentifier="IBFirstResponder" id="347-Zj-4ho" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
                 <exit id="pNY-0c-Ysa" userLabel="Exit" sceneMemberID="exit"/>
             </objects>
-            <point key="canvasLocation" x="2460.8695652173915" y="-1173.2142857142856"/>
+            <point key="canvasLocation" x="3106" y="-1222"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="Thc-bx-Nf1">
@@ -312,4 +399,7 @@
         <image name="share" width="37" height="37"/>
         <image name="textfield" width="343" height="48"/>
     </resources>
+    <inferredMetricsTieBreakers>
+        <segue reference="673-Bf-ssx"/>
+    </inferredMetricsTieBreakers>
 </document>

@@ -50,9 +50,9 @@ class VerificationViewController: UIViewController, UITextFieldDelegate {
         self.code.delegate = self
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.verificationViewController = self
-        self.user = appDelegate.loginViewController?.user
-        self.email = appDelegate.loginViewController?.email.text
-        self.password = appDelegate.loginViewController?.password.text
+        //self.user = appDelegate.loginViewController?.user
+        //self.email = appDelegate.loginViewController?.email.text
+        //self.password = appDelegate.loginViewController?.password.text
         // Do any additional setup after loading the view.
     }
     
