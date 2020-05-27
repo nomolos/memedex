@@ -232,10 +232,10 @@
             </objects>
             <point key="canvasLocation" x="1204" y="-1205"/>
         </scene>
-        <!--Sign Up View Controller-->
+        <!--VerifySegue2-->
         <scene sceneID="9cw-NJ-H2l">
             <objects>
-                <viewController id="adW-a7-412" customClass="SignUpViewController" customModule="memedex" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController title="VerifySegue2" id="adW-a7-412" customClass="SignUpViewController" customModule="memedex" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="JlI-Q0-sOr">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -256,7 +256,7 @@
                                     <constraint firstAttribute="width" constant="343" id="tsX-nl-svl"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="20"/>
-                                <textInputTraits key="textInputTraits"/>
+                                <textInputTraits key="textInputTraits" textContentType="password"/>
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Confirm Password" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="9pq-RF-gXl" customClass="TextField" customModule="memedex" customModuleProvider="target">
                                 <rect key="frame" x="35.5" y="451" width="343" height="48"/>
@@ -265,7 +265,7 @@
                                     <constraint firstAttribute="width" constant="343" id="C27-il-vIq"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="20"/>
-                                <textInputTraits key="textInputTraits"/>
+                                <textInputTraits key="textInputTraits" textContentType="password"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SNY-bb-xRn">
                                 <rect key="frame" x="36" y="573" width="343" height="48"/>
@@ -275,7 +275,6 @@
                                 </state>
                                 <connections>
                                     <action selector="signup:" destination="adW-a7-412" eventType="touchUpInside" id="7F4-od-IMM"/>
-                                    <segue destination="o4i-G5-4bc" kind="show" identifier="VerifySegue2" id="673-Bf-ssx"/>
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="*password must be 8 characters minimum" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r4T-Cc-ahH">
@@ -312,11 +311,12 @@
                         <outlet property="password" destination="SL8-rr-PIQ" id="mHe-dR-fgs"/>
                         <outlet property="signup_button" destination="SNY-bb-xRn" id="4gy-bp-QVe"/>
                         <outlet property="signup_requirements" destination="r4T-Cc-ahH" id="tf8-QI-vPU"/>
+                        <segue destination="o4i-G5-4bc" kind="show" identifier="VerifySegue2" id="YpF-fo-M1p"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="3jQ-7h-fjZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2196" y="-1595"/>
+            <point key="canvasLocation" x="2067" y="-1614"/>
         </scene>
         <!--Verification View Controller-->
         <scene sceneID="RVb-WT-egk">
@@ -400,6 +400,6 @@
         <image name="textfield" width="343" height="48"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="673-Bf-ssx"/>
+        <segue reference="YpF-fo-M1p"/>
     </inferredMetricsTieBreakers>
 </document>

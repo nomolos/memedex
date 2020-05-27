@@ -62,29 +62,49 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
         let name = AWSCognitoIdentityUserAttributeType()
         email!.value = self.email.text
         email!.name = "email"
-        AppDelegate.pool?.signUp(self.email.text!, password: self.password.text!, userAttributes: [email!], validationData: nil).continueWith{ (response) -> Any? in
-            if response.error != nil {
-                print(response.error)
-                let alert = UIAlertController(title: "Error", message: (response.error! as NSError).userInfo["message"] as? String, preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .default, handler:nil))
-                self.present(alert, animated: true, completion: nil)
-            }
-            else{
-                print("INSIDE OF SIGNUPVIEW LOOKING AT SIGNUP STUFF")
-                print(response.result)
-                print(response.result?.user)
-                print(response.result?.userSub)
-                print(self.user)
-                print(AppDelegate.pool?.currentUser())
-                print(AppDelegate.pool?.getUser())
-                self.user = response.result?.user
-                print("About to perform segue to verification view controller")
-                DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                    self.performSegue(withIdentifier: "VerifySegue2", sender: self)
+        if((self.email.text?.isValidEmail())! && self.password.text?.count ?? 0 > 7 && self.password.text == self.confirm_password.text){
+            AppDelegate.pool?.signUp(self.email.text!, password: self.password.text!, userAttributes: [email!], validationData: nil).continueWith{ (response) -> Any? in
+                if response.error != nil {
+                    let casted = response.error as! NSError
+                    if((casted.userInfo["__type"] as! String) == "UsernameExistsException"){
+                        DispatchQueue.main.async {
+                            self.activityIndicator.stopAnimating()
+                            self.performSegue(withIdentifier: "VerifySegue2", sender: self)
+                        }
+                    }
+                    else{
+                        print("This exception is not a signup duplicate exception")
+                        print(response.error)
+                    }
                 }
+                else{
+                    self.user = response.result?.user
+                    DispatchQueue.main.async {
+                        self.activityIndicator.stopAnimating()
+                        self.performSegue(withIdentifier: "VerifySegue2", sender: self)
+                    }
+                }
+                return 1
             }
-            return 1
+            self.performSegue(withIdentifier: "VerifySegue2", sender: self)
+        }
+        if(!(self.email.text?.isValidEmail())!){
+            self.activityIndicator.stopAnimating()
+            let alert = UIAlertController(title: "Invalid Email", message: "The email address entered is invalid", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Retry", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+        }
+        else if(self.password.text?.count ?? 0 < 8){
+            self.activityIndicator.stopAnimating()
+            let alert = UIAlertController(title: "Password too short", message: "Password needs to be at least 8 characters", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Retry", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+        }
+        else if(!(self.password.text == self.confirm_password.text)){
+            self.activityIndicator.stopAnimating()
+            let alert = UIAlertController(title: "Passwords don't match", message: "Try typing your password in again", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Retry", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
         }
     }
     
@@ -116,6 +136,7 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
         verificationController.email = self.email.text
         verificationController.password = self.password.text
     }
+    
     /*
     // MARK: - Navigation
 
@@ -126,4 +147,14 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
     }
     */
 
+}
+
+extension String {
+    func isValidEmail() -> Bool {
+        guard !self.lowercased().hasPrefix("mailto:") else { return false }
+        guard let emailDetector = try? NSDataDetector(types: NSTextCheckingResult.CheckingType.link.rawValue) else { return false }
+        let matches = emailDetector.matches(in: self, options: NSRegularExpression.MatchingOptions.anchored, range: NSRange(location: 0, length: self.count))
+        guard matches.count == 1 else { return false }
+        return matches[0].url?.scheme == "mailto"
+    }
 }

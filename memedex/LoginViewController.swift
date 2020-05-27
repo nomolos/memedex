@@ -179,29 +179,45 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             }
         }
         //print(AppDelegate.pool)
-        print("About to call AppDelegate.pool.signup")
-        AppDelegate.pool?.signUp(self.email.text!, password: self.password.text!, userAttributes: [email!], validationData: nil).continueWith{ (response) -> Any? in
-            if response.error != nil {
-                let alert = UIAlertController(title: "Error", message: (response.error! as NSError).userInfo["message"] as? String, preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "OK", style: .default, handler:nil))
-                self.present(alert, animated: true, completion: nil)
-            }
-            else{
-                print("INSIDE OF LOGINVIEW LOOKING AT SIGNUP STUFF")
-                print(response.result)
-                print(response.result?.user)
-                print(response.result?.userSub)
-                print(self.user)
-                print(AppDelegate.pool?.currentUser())
-                print(AppDelegate.pool?.getUser())
-                self.user = response.result?.user
-                print("About to perform segue to verification view controller")
-                DispatchQueue.main.async {
-                    self.activityIndicator.stopAnimating()
-                    self.performSegue(withIdentifier: "VerifySegue", sender: self)
+        if((self.email.text?.isValidEmail())! && self.password.text?.count ?? 0 > 7){
+            print("calling signup")
+            AppDelegate.pool?.signUp(self.email.text!, password: self.password.text!, userAttributes: [email!], validationData: nil).continueWith{ (response) -> Any? in
+                if response.error != nil {
+                    let casted = response.error as! NSError
+                    if((casted.userInfo["__type"] as! String) == "UsernameExistsException"){
+                        DispatchQueue.main.async {
+                            self.activityIndicator.stopAnimating()
+                            self.performSegue(withIdentifier: "VerifySegue", sender: self)
+                        }
+                    }
+                    else{
+                        print("This exception is not a signup duplicate exception")
+                        print(response.error)
+                    }
                 }
+                else{
+                    self.user = response.result?.user
+                    DispatchQueue.main.async {
+                        self.activityIndicator.stopAnimating()
+                        self.performSegue(withIdentifier: "VerifySegue", sender: self)
+                    }
+                }
+                return 1
             }
-            return 1
+        }
+        else if(!(self.email.text?.isValidEmail())!){
+            print("presenting valid email error")
+            self.activityIndicator.stopAnimating()
+            let alert = UIAlertController(title: "Invalid Email", message: "The email address entered is invalid", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Retry", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
+        }
+        else if(self.password.text?.count ?? 0 < 8){
+            print("presenting valid password error")
+            self.activityIndicator.stopAnimating()
+            let alert = UIAlertController(title: "Password too short", message: "Password needs to be at least 8 characters", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Retry", style: .default, handler: nil))
+            self.present(alert, animated: true, completion: nil)
         }
     }
     
@@ -241,47 +257,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     @objc func dismissKeyboard() {
         view.endEditing(true)
     }
-    
-
-    /*func fetchUserAttributes() {
-        //print("fetching user attributes")
-        print("beginning of fetch attributes")
-        user = AppDelegate.defaultUserPool().currentUser()
-        print(user?.username)
-        user?.getDetails().continueOnSuccessWith(block: { (task) -> Any? in
-            guard task.result != nil else {
-                print("end of fetch attributes [FAIL]")
-                //self.waitUserInfo.leave()
-                return nil
-            }
-            //print("22222in this part of fetchuserattributes")
-            self.userAttributes = task.result?.userAttributes
-            self.userAttributes?.forEach({ (attribute) in
-                print("Name: " + attribute.name!)
-                print("Value: " + attribute.value!)
-            })
-            print("end of fetch attributes [SUCCESS]")
-            //self.waitUserInfo.leave()
-            DispatchQueue.main.async {
-                print("fetch attributes is actually done")
-                print("end of fetch attributes [SUCCESS]")
-                //print("444444in this part of fetchuserattributes")
-                //print("fetched attribute values")
-            }
-            //print("fetch attributes is actually done")
-            return nil
-        })
-    }*/
-    
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }
 
@@ -344,3 +319,5 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
         }
     }
 }
+
+
