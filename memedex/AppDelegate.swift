@@ -30,6 +30,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     var viewController: UIViewController?
     var loginViewController: LoginViewController?
     var verificationViewController: VerificationViewController?
+    var goldenSetViewController: GoldenSetViewController?
     static var pool: AWSCognitoIdentityUserPool?
     static var loggedIn: Bool?
     

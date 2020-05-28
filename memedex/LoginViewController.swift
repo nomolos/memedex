@@ -30,6 +30,8 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     var activityIndicator = UIActivityIndicatorView()
     
+    var go_to_golden = false
+    
     //let waitUserInfo = DispatchGroup()
     
     override func viewWillAppear(_ animated: Bool) {
@@ -134,6 +136,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     @IBOutlet weak var signup_button: UIButton!
     @IBAction func signup(_ sender: Any) {
+        //self.go_to_golden = true
         self.activityIndicator.startAnimating()
         print("inside signup")
         print("The user inside LoginViewController's signup is below")
@@ -168,7 +171,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             print("our view controller is nil")
             appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
         }
-        if(appDelegate.verificationViewController != nil){
+        /*if(appDelegate.verificationViewController != nil){
             print("we already tried to verify an email")
             if(appDelegate.verificationViewController?.email == email!.value){
                 print("They are trying to sign up an account that they already inputted but haven't verified. Eventually we should find a way to update the password here")
@@ -177,14 +180,28 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 self.performSegue(withIdentifier: "VerifySegue", sender: self)
                 return
             }
-        }
+        }*/
         //print(AppDelegate.pool)
         if((self.email.text?.isValidEmail())! && self.password.text?.count ?? 0 > 7){
             print("calling signup")
             AppDelegate.pool?.signUp(self.email.text!, password: self.password.text!, userAttributes: [email!], validationData: nil).continueWith{ (response) -> Any? in
                 if response.error != nil {
                     let casted = response.error as! NSError
-                    if((casted.userInfo["__type"] as! String) == "UsernameExistsException"){
+                    print(casted)
+                    print(response.error)
+                    print(response.result)
+                    print(response)
+                    var verification_view = false
+                    print("trying to log this user in")
+                    print("trying to log this user in")
+                    print("trying to log this user in")
+                    DispatchQueue.main.async{
+                        let authDetails = AWSCognitoIdentityPasswordAuthenticationDetails(username: self.email!.text!, password: self.password!.text! )
+                        print(authDetails)
+                        self.passwordAuthenticationCompletion?.set(result: authDetails)
+                    }
+                        
+                    /*if((casted.userInfo["__type"] as! String) == "UsernameExistsException" && verification_view){
                         DispatchQueue.main.async {
                             self.activityIndicator.stopAnimating()
                             self.performSegue(withIdentifier: "VerifySegue", sender: self)
@@ -193,9 +210,10 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                     else{
                         print("This exception is not a signup duplicate exception")
                         print(response.error)
-                    }
+                    }*/
                 }
                 else{
+                    self.go_to_golden = true
                     self.user = response.result?.user
                     DispatchQueue.main.async {
                         self.activityIndicator.stopAnimating()
@@ -234,6 +252,8 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             verificationController.isModalInPresentation = true
             //verificationController.codeDeliveryDetails = self.codeDeliveryDetails
             verificationController.user = self.user!
+            verificationController.email = self.email.text!
+            verificationController.password = self.password.text!
         }
     }
     
@@ -275,13 +295,19 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
     public func didCompleteStepWithError(_ error: Error?) {
         DispatchQueue.main.async {
             if let error = error as NSError? {
-                let alertController = UIAlertController(title: error.userInfo["__type"] as? String,
+                print("printing error in didComplete")
+                print(error)
+                print("Going to verification view (they should have an email to verify with")
+                // when they do authenticate they should go to the golden set as a new user
+                self.go_to_golden = true
+                self.performSegue(withIdentifier: "VerifySegue", sender: self)
+                /*let alertController = UIAlertController(title: error.userInfo["__type"] as? String,
                                                         message: error.userInfo["message"] as? String,
                                                         preferredStyle: .alert)
                 let retryAction = UIAlertAction(title: "Retry", style: .default, handler: nil)
                 alertController.addAction(retryAction)
                 
-                self.present(alertController, animated: true, completion:  nil)
+                self.present(alertController, animated: true, completion:  nil)*/
             } else {
                 let appDelegate = UIApplication.shared.delegate as! AppDelegate
                 if (!AppDelegate.loggedIn!){
@@ -289,7 +315,8 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                     self.email.text = nil
                     self.password.text = nil
                     //appDelegate.viewController = nil
-                    appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                    //appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                    //appDelegate.goldenSetViewController = self.storyboard?.instantiateInitialViewController(withIdentifier: "GoldenSetViewController") as? GoldenSetViewController
                     //(appDelegate.viewController as! ViewController).user = self.user
                     //(appDelegate.viewController as! ViewController).userAttributes = self.userAttributes
                     let temp_old_name = AppDelegate.defaultUserPool().currentUser()?.username
@@ -309,7 +336,17 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                         usleep(10000)
                         hundredth_second_count = hundredth_second_count + 1
                     }
-                    appDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
+                    if(!self.go_to_golden){
+                        print("Not going to golden set")
+                        appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                        appDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
+                    }
+                    else{
+                        print("going to golden set")
+                        appDelegate.goldenSetViewController = self.storyboard?.instantiateViewController(withIdentifier: "GoldenSetViewController") as? GoldenSetViewController
+                        self.go_to_golden = false
+                        appDelegate.navigationController?.setViewControllers([(appDelegate.goldenSetViewController!)], animated: true)
+                    }
                     //AppDelegate.loggedIn = true
                 }
                 else{

@@ -103,7 +103,7 @@
         <!--Golden Set View Controller-->
         <scene sceneID="h5b-cW-XF3">
             <objects>
-                <viewController id="tpt-Ut-3aV" customClass="GoldenSetViewController" customModule="memedex" customModuleProvider="target" sceneMemberID="viewController">
+                <viewController storyboardIdentifier="GoldenSetViewController" id="tpt-Ut-3aV" customClass="GoldenSetViewController" customModule="memedex" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="C0W-rB-XcC">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="842"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
