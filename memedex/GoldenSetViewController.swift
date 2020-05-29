@@ -35,7 +35,10 @@ class GoldenSetViewController: UIViewController {
     
     let waitMemeNames = DispatchGroup()
     
+    @IBOutlet weak var progress_label: UILabel!
     
+    @IBOutlet weak var progress_view: UIProgressView!
+    var progress = Progress(totalUnitCount: 13)
     @IBOutlet weak var slider: CustomSlider!
     
     @IBOutlet weak var meme: UIImageView!
@@ -74,7 +77,19 @@ class GoldenSetViewController: UIViewController {
         
         // load the next meme
         self.index = self.index + 1
-        
+        if(self.index < 14){
+            self.progress_label.text = String(self.index) + "/13"
+        }
+        self.progress.completedUnitCount += 1
+        self.progress_view.setProgress(Float(self.progress.fractionCompleted), animated: true)
+        print("Printing progress")
+        print("Printing progress")
+        print("Printing progress")
+        print(self.progress.completedUnitCount)
+        print(self.progress_view.progress)
+        print("Printing progress")
+        print("Printing progress")
+        print("Printing progress")
         // WE HAVE FINISHED LABELING THE GOLDEN SET
         // TIME TO FIND OUR MATCHES AND UPLOAD THEM TO DYNAMO
         if(self.keys.count == index){
@@ -284,6 +299,8 @@ class GoldenSetViewController: UIViewController {
     }
     
     override func viewDidLoad() {
+        self.progress.completedUnitCount = 0
+        self.progress_view.progress = 0.0
         print("golden set view controller view did load")
         super.viewDidLoad()
         slider.isContinuous = false

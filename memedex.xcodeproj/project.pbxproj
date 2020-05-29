@@ -10,6 +10,7 @@
 		13FCC3E4357F39E49D8189C0 /* Pods_memedex.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 58E6254CF7366FE89AC4939C /* Pods_memedex.framework */; };
 		BD13220F24785DC1007EB9AF /* URL4Meme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD13220E24785DC1007EB9AF /* URL4Meme.swift */; };
 		BD132211247DDEE2007EB9AF /* SignUpViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD132210247DDEE2007EB9AF /* SignUpViewController.swift */; };
+		BD13221324818FEA007EB9AF /* ImageZoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD13221224818FEA007EB9AF /* ImageZoomView.swift */; };
 		BD220CE123F4B25800D93CBE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD220CE023F4B25800D93CBE /* AppDelegate.swift */; };
 		BD220CE623F4B25800D93CBE /* memedex.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = BD220CE423F4B25800D93CBE /* memedex.xcdatamodeld */; };
 		BD220CEA23F4B25A00D93CBE /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BD220CE923F4B25A00D93CBE /* Assets.xcassets */; };
@@ -98,6 +99,7 @@
 		B40209945FCA4EEE493EDF00 /* Pods-memedex.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-memedex.debug.xcconfig"; path = "Target Support Files/Pods-memedex/Pods-memedex.debug.xcconfig"; sourceTree = "<group>"; };
 		BD13220E24785DC1007EB9AF /* URL4Meme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URL4Meme.swift; sourceTree = "<group>"; };
 		BD132210247DDEE2007EB9AF /* SignUpViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpViewController.swift; sourceTree = "<group>"; };
+		BD13221224818FEA007EB9AF /* ImageZoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageZoomView.swift; sourceTree = "<group>"; };
 		BD220CDD23F4B25800D93CBE /* memedex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = memedex.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD220CE023F4B25800D93CBE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BD220CE523F4B25800D93CBE /* memedex.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = memedex.xcdatamodel; sourceTree = "<group>"; };
@@ -271,6 +273,7 @@
 				BD4921FB2468C541004F8408 /* Launch Screen.storyboard */,
 				BD13220E24785DC1007EB9AF /* URL4Meme.swift */,
 				BD132210247DDEE2007EB9AF /* SignUpViewController.swift */,
+				BD13221224818FEA007EB9AF /* ImageZoomView.swift */,
 			);
 			path = memedex;
 			sourceTree = "<group>";
@@ -519,6 +522,7 @@
 				BD4B85412442410D00C67E09 /* TextField.swift in Sources */,
 				BD132211247DDEE2007EB9AF /* SignUpViewController.swift in Sources */,
 				BD29747C24534BF000DBBF9E /* ActiveUser.swift in Sources */,
+				BD13221324818FEA007EB9AF /* ImageZoomView.swift in Sources */,
 				BDE7EA2C2448DCA3008A603B /* GetAWSObjectURL.swift in Sources */,
 				BDCD5C47243BD62E00B95DAD /* Meme.swift in Sources */,
 				BD13220F24785DC1007EB9AF /* URL4Meme.swift in Sources */,
