@@ -49,6 +49,7 @@ class ViewController: UIViewController {
     var meme_cache = [Data]()
     let meme_cache_semaphore = DispatchSemaphore(value: 0)
     
+    @IBOutlet weak var back_button: UIButton!
     var meme_link:UIButton?
     
     @IBOutlet weak var shareButton: UIButton!
@@ -64,6 +65,9 @@ class ViewController: UIViewController {
     }
 
     @objc func goToURL(_ sender:UIButton) {
+        print("Trying to go to a URL")
+        print("Our index is " + String(self.index))
+        print("Our image at this index is " + String(self.keys[self.index]))
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
         sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
@@ -184,6 +188,7 @@ class ViewController: UIViewController {
     
     
     @IBAction func back(_ sender: UIButton) {
+        self.back_button.isEnabled = false
         if(self.index > 0){
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.success)
@@ -199,7 +204,10 @@ class ViewController: UIViewController {
                                        completion: { Void in()  }
             )
             self.index = self.index - 2
-            self.index_for_cache = self.index_for_cache - 2
+            // Change something here
+            self.index_for_cache = 0
+            self.downloaded_index = 0
+            //self.index_for_cache = self.index_for_cache - 2
             self.loadNextMeme(first: false)
         }
         /*else if (self.index == 1){ // change this eventually
@@ -503,6 +511,7 @@ class ViewController: UIViewController {
                         self.imageView.isHidden = false
                         self.updateUI()
                         self.slider.isEnabled = true
+                        self.back_button.isEnabled = true
                         self.activityIndicator.stopAnimating()
                         /*if(!first){
                             print("calling background_meme_download from loadNextMeme")
@@ -536,6 +545,7 @@ class ViewController: UIViewController {
                         self.imageView.isHidden = true
                         self.updateUI()
                         self.slider.isEnabled = true
+                        self.back_button.isEnabled = true
                         self.activityIndicator.stopAnimating()
                         /*if(!first){
                             print("calling background_meme_download from loadNextMeme")
@@ -589,6 +599,7 @@ class ViewController: UIViewController {
                         self.imageView.isHidden = false
                         self.updateUI()
                         self.slider.isEnabled = true
+                        self.back_button.isEnabled = true
                         self.activityIndicator.stopAnimating()
                         /*if(!first){
                             print("calling background_meme_download from loadNextMeme")
@@ -621,6 +632,7 @@ class ViewController: UIViewController {
                         self.imageView.isHidden = true
                         self.updateUI()
                         self.slider.isEnabled = true
+                        self.back_button.isEnabled = true
                         self.activityIndicator.stopAnimating()
                         /*if(!first){
                             print("calling background_meme_download from loadNextMeme")
@@ -665,6 +677,7 @@ class ViewController: UIViewController {
                 self.imageView.isHidden = false
                 self.updateUI()
                 self.slider.isEnabled = true
+                self.back_button.isEnabled = true
                 self.activityIndicator.stopAnimating()
                 return
             }
@@ -692,6 +705,7 @@ class ViewController: UIViewController {
                 self.imageView.isHidden = true
                 self.updateUI()
                 self.slider.isEnabled = true
+                self.back_button.isEnabled = true
                 self.activityIndicator.stopAnimating()
                 return
             }

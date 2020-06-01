@@ -97,6 +97,7 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
+                        <outlet property="back_button" destination="U9x-wI-Qrz" id="SIR-eb-GRu"/>
                         <outlet property="imageView" destination="XV1-9E-4xs" id="PqM-WG-IGb"/>
                         <outlet property="meme" destination="7wf-kl-Uue" id="wTw-1x-1P9"/>
                         <outlet property="shareButton" destination="Ktu-rx-elc" id="LWU-j8-fbl"/>
