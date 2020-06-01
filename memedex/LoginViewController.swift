@@ -159,6 +159,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             self.activityIndicator.stopAnimating()
             //let alert = UIAlertController(title: "Signing Up", message: "Enter your email and a password before clicking 'Sign Up'. Don't worry, we won't send you any emails or ask for additional data :)", preferredStyle: .alert)
             //alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
+            self.go_to_golden = true
             self.performSegue(withIdentifier: "SignUpSegue", sender: self)
             return
         }

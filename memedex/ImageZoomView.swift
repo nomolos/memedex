@@ -13,7 +13,6 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
     var gestureRecognizer: UITapGestureRecognizer!
     var zoomHere:CGPoint?
     var pinchGesture = UIPinchGestureRecognizer()
-    //var frame2:CGRect
 
     
     convenience init(frame: CGRect, something:Bool) {
@@ -85,8 +84,6 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
     @objc func pinchRecognized(pinch: UIPinchGestureRecognizer) {
         print("recognized pinch")
     }
-    
-    //func gest
     
     // Calculates the zoom rectangle for the scale
     func zoomRectForScale(_ scale: CGFloat, center: CGPoint) -> CGRect {

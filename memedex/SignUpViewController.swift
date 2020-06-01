@@ -26,6 +26,8 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
     
     var activityIndicator = UIActivityIndicatorView()
     
+    var readyToVerify = DispatchGroup()
+    
     @IBOutlet weak var signup_button: UIButton!
     
     override func viewWillAppear(_ animated: Bool) {
@@ -62,6 +64,7 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
         let name = AWSCognitoIdentityUserAttributeType()
         email!.value = self.email.text
         email!.name = "email"
+        self.readyToVerify.enter()
         if((self.email.text?.isValidEmail())! && self.password.text?.count ?? 0 > 7 && self.password.text == self.confirm_password.text){
             AppDelegate.pool?.signUp(self.email.text!, password: self.password.text!, userAttributes: [email!], validationData: nil).continueWith{ (response) -> Any? in
                 if response.error != nil {
@@ -86,7 +89,7 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
                 }
                 return 1
             }
-            self.performSegue(withIdentifier: "VerifySegue2", sender: self)
+            //self.performSegue(withIdentifier: "VerifySegue2", sender: self)
         }
         if(!(self.email.text?.isValidEmail())!){
             self.activityIndicator.stopAnimating()
