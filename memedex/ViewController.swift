@@ -25,7 +25,9 @@ class ViewController: UIViewController {
     var index_for_cache = 0
     var user:AWSCognitoIdentityUser?
     //var userAttributes:[AWSCognitoIdentityProviderAttributeType]?
+    @IBOutlet weak var imageView: UIImageView!
     var image:UIImage?
+    //var imageView:UIImageView?
     var playerViewController:AVPlayerViewController?
     var user_to_pair_with:String?
     let waitPartnerMemes = DispatchGroup()
@@ -50,7 +52,7 @@ class ViewController: UIViewController {
     var meme_link:UIButton?
     
     @IBOutlet weak var shareButton: UIButton!
-    @IBOutlet weak var meme: UIImageView!
+    @IBOutlet var meme: ImageZoomView!
     
     @IBAction func logout(_ sender: Any) {
         print("here23")
@@ -152,7 +154,7 @@ class ViewController: UIViewController {
                 self.present(activityViewController, animated: true, completion: nil)
             }
             else{
-                var share_me = self.meme.image
+                var share_me = self.meme.imageView.image
                 share_me = UIImage(data: share_me!.jpegData(compressionQuality: 0.1)!)!
                 let share_me_container = [share_me] as [Any]
                 let activityViewController = UIActivityViewController(activityItems: share_me_container, applicationActivities: nil)
@@ -314,6 +316,10 @@ class ViewController: UIViewController {
             //print(AppDelegate.defaultUserPool().currentUser()?.username)
             //var midX = self.view.bounds.midX
             //var midY = self.view.bounds.midY
+        print("printing meme frame in view will appear")
+        /*print(self.meme.frame)
+        self.meme = ImageZoomView(frame: self.meme.frame, something: true)
+        self.view.addSubview(self.meme)*/
         if(self.meme_link == nil){
             self.meme_link = UIButton()
             let temp_image = UIImage(named: "link") as UIImage?
@@ -486,7 +492,15 @@ class ViewController: UIViewController {
                             print("SETTING IMAGE TO PIC")
                             print(self.image)
                         }
+                        if(self.playerViewController != nil){
+                            self.playerViewController?.willMove(toParent: nil)
+                            self.playerViewController?.view.removeFromSuperview()
+                            self.playerViewController?.removeFromParent()
+                            self.playerViewController = nil
+                            self.player = nil
+                        }
                         self.meme.isHidden = false
+                        self.imageView.isHidden = false
                         self.updateUI()
                         self.slider.isEnabled = true
                         self.activityIndicator.stopAnimating()
@@ -499,6 +513,15 @@ class ViewController: UIViewController {
                     }
                     else{
                         print("SETTING IMAGE TO VIDEO")
+                        //self.player = nil
+                        if(self.playerViewController != nil){
+                            //self.player.willMov
+                            self.playerViewController?.willMove(toParent: nil)
+                            self.playerViewController?.view.removeFromSuperview()
+                            self.playerViewController?.removeFromParent()
+                            self.playerViewController = nil
+                            self.player = nil
+                        }
                         let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
                         let temp_url = URL(string: temp0_url)
                         self.player = AVPlayer(url: temp_url!)
@@ -510,6 +533,7 @@ class ViewController: UIViewController {
                         self.playerViewController!.didMove(toParent: self)
                         self.player?.play()
                         self.meme.isHidden = true
+                        self.imageView.isHidden = true
                         self.updateUI()
                         self.slider.isEnabled = true
                         self.activityIndicator.stopAnimating()
@@ -553,7 +577,16 @@ class ViewController: UIViewController {
                             self.image = pic
                             print(self.image)
                         }
+                        //self.player = nil
+                        if(self.playerViewController != nil){
+                            self.playerViewController?.willMove(toParent: nil)
+                            self.playerViewController?.view.removeFromSuperview()
+                            self.playerViewController?.removeFromParent()
+                            self.playerViewController = nil
+                            self.player = nil
+                        }
                         self.meme.isHidden = false
+                        self.imageView.isHidden = false
                         self.updateUI()
                         self.slider.isEnabled = true
                         self.activityIndicator.stopAnimating()
@@ -566,6 +599,14 @@ class ViewController: UIViewController {
                     }
                     else{
                         print("SETTING IMAGE TO VIDEO")
+                        //self.player = nil
+                        if(self.playerViewController != nil){
+                            self.playerViewController?.willMove(toParent: nil)
+                            self.playerViewController?.view.removeFromSuperview()
+                            self.playerViewController?.removeFromParent()
+                            self.playerViewController = nil
+                            self.player = nil
+                        }
                         let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
                         let temp_url = URL(string: temp0_url)
                         self.player = AVPlayer(url: temp_url!)
@@ -577,6 +618,7 @@ class ViewController: UIViewController {
                         self.playerViewController!.didMove(toParent: self)
                         self.player?.play()
                         self.meme.isHidden = true
+                        self.imageView.isHidden = true
                         self.updateUI()
                         self.slider.isEnabled = true
                         self.activityIndicator.stopAnimating()
@@ -611,7 +653,16 @@ class ViewController: UIViewController {
                     self.image = pic
                     print(self.image)
                 }
+                //self.player = nil
+                if(self.playerViewController != nil){
+                    self.playerViewController?.willMove(toParent: nil)
+                    self.playerViewController?.view.removeFromSuperview()
+                    self.playerViewController?.removeFromParent()
+                    self.playerViewController = nil
+                    self.player = nil
+                }
                 self.meme.isHidden = false
+                self.imageView.isHidden = false
                 self.updateUI()
                 self.slider.isEnabled = true
                 self.activityIndicator.stopAnimating()
@@ -619,6 +670,14 @@ class ViewController: UIViewController {
             }
             else{
                 print("SETTING IMAGE TO VIDEO")
+                //self.player = nil
+                if(self.playerViewController != nil){
+                    self.playerViewController?.willMove(toParent: nil)
+                    self.playerViewController?.view.removeFromSuperview()
+                    self.playerViewController?.removeFromParent()
+                    self.playerViewController = nil
+                    self.player = nil
+                }
                 let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
                 let temp_url = URL(string: temp0_url)
                 self.player = AVPlayer(url: temp_url!)
@@ -630,6 +689,7 @@ class ViewController: UIViewController {
                 self.playerViewController!.didMove(toParent: self)
                 self.player?.play()
                 self.meme.isHidden = true
+                self.imageView.isHidden = true
                 self.updateUI()
                 self.slider.isEnabled = true
                 self.activityIndicator.stopAnimating()
@@ -888,15 +948,34 @@ class ViewController: UIViewController {
     }
     
     func updateUI() {
-        print("Inside of updateUI")
-        print("printing number of keys " + String(self.keys.count))
-        print("printing which index we're at " + String(self.index))
+        //self.meme.frame
+        if(!self.meme.isHidden){
+            self.imageView?.image = self.image
+            self.meme = ImageZoomView(frame: self.meme.frame, something: true)
+            self.view.addSubview(self.meme)
+            //self.meme.delegate = self as! UIScrollViewDelegate
+            print("Inside of updateUI")
+            print("printing number of keys " + String(self.keys.count))
+            print("printing which index we're at " + String(self.index))
+            print("printing meme frame in updateUI")
+            print(self.meme.frame)
+            self.meme.updateImage(imageView: self.imageView!)
+        }
         //print(self.meme)
         //print(self.image)
         //print(self.keys[self.index])
-        self.meme.image = self.image
+        //sleep(2)
+        //self.meme = ImageZoomView(frame: self.meme.frame, image: self.image)
+        //self.view.addSubview(self.meme)
+        //sleep(4)
+        //self.meme.image = self.image
         if((self.image) != nil){
-            let real_image_rect = AVMakeRect(aspectRatio: self.meme.image!.size, insideRect: self.meme.bounds)
+            print("printing self.image")
+            //print(self.image)
+            print(self.meme)
+            print(self.meme.imageView)
+            print(self.meme.getImage())
+            let real_image_rect = AVMakeRect(aspectRatio: self.meme.getImage().size, insideRect: self.meme.bounds)
             print("printing real image rect bounds")
             print(real_image_rect)
             print(real_image_rect.origin.x)

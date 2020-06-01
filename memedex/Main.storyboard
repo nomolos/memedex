@@ -59,22 +59,29 @@
                                     <action selector="gotogolden:" destination="S7V-t3-R7L" eventType="touchUpInside" id="H5x-QM-iir"/>
                                 </connections>
                             </button>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="lgf-WC-pYg">
-                                <rect key="frame" x="0.0" y="105" width="414" height="610"/>
+                            <scrollView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="7wf-kl-Uue" customClass="ImageZoomView" customModule="memedex" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="105" width="417" height="610"/>
+                            </scrollView>
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="XV1-9E-4xs">
+                                <rect key="frame" x="0.0" y="111.5" width="414" height="597"/>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
-                            <constraint firstItem="lgf-WC-pYg" firstAttribute="centerX" secondItem="cMa-ep-yj5" secondAttribute="centerX" id="3Bh-sC-yBR"/>
+                            <constraint firstItem="XV1-9E-4xs" firstAttribute="width" secondItem="7wf-kl-Uue" secondAttribute="width" multiplier="0.992806" id="3Ap-Jy-BHS"/>
                             <constraint firstItem="Ktu-rx-elc" firstAttribute="centerX" secondItem="cMa-ep-yj5" secondAttribute="centerX" id="Axb-4c-d9R"/>
                             <constraint firstItem="cJ0-0F-YPD" firstAttribute="top" secondItem="Qpl-nK-YsW" secondAttribute="bottom" constant="25" id="Jwq-5o-v1v"/>
-                            <constraint firstItem="cMa-ep-yj5" firstAttribute="bottom" secondItem="lgf-WC-pYg" secondAttribute="bottom" constant="147" id="LYI-Pj-PzL"/>
+                            <constraint firstItem="7wf-kl-Uue" firstAttribute="centerX" secondItem="cMa-ep-yj5" secondAttribute="centerX" id="Lui-yd-gyT"/>
+                            <constraint firstItem="XV1-9E-4xs" firstAttribute="height" secondItem="7wf-kl-Uue" secondAttribute="height" multiplier="0.978689" id="Nfk-zO-Diw"/>
                             <constraint firstItem="U9x-wI-Qrz" firstAttribute="leading" secondItem="cMa-ep-yj5" secondAttribute="leading" constant="26" id="NkX-dT-htu"/>
+                            <constraint firstItem="Ktu-rx-elc" firstAttribute="top" secondItem="7wf-kl-Uue" secondAttribute="bottom" constant="35" id="P66-On-mLd"/>
                             <constraint firstItem="cMa-ep-yj5" firstAttribute="trailing" secondItem="cJ0-0F-YPD" secondAttribute="trailing" constant="20" id="YkE-aH-6Xf"/>
-                            <constraint firstItem="lgf-WC-pYg" firstAttribute="top" secondItem="cMa-ep-yj5" secondAttribute="top" constant="61" id="j3k-U0-tm3"/>
+                            <constraint firstItem="7wf-kl-Uue" firstAttribute="width" secondItem="KZY-56-BW2" secondAttribute="width" multiplier="1.00725" id="epL-nF-dj7"/>
                             <constraint firstItem="cMa-ep-yj5" firstAttribute="bottom" secondItem="cJ0-0F-YPD" secondAttribute="bottom" constant="22" id="j75-F5-OIh"/>
+                            <constraint firstItem="7wf-kl-Uue" firstAttribute="top" secondItem="cMa-ep-yj5" secondAttribute="top" constant="61" id="jbw-xg-02y"/>
                             <constraint firstItem="cJ0-0F-YPD" firstAttribute="centerX" secondItem="cMa-ep-yj5" secondAttribute="centerX" id="kRp-Kr-fxX"/>
-                            <constraint firstItem="lgf-WC-pYg" firstAttribute="width" secondItem="KZY-56-BW2" secondAttribute="width" id="nTN-3y-8UZ"/>
+                            <constraint firstItem="XV1-9E-4xs" firstAttribute="centerY" secondItem="7wf-kl-Uue" secondAttribute="centerY" id="kTO-bd-XrC"/>
+                            <constraint firstItem="XV1-9E-4xs" firstAttribute="centerX" secondItem="7wf-kl-Uue" secondAttribute="centerX" id="lI8-rg-kH2"/>
                             <constraint firstItem="cJ0-0F-YPD" firstAttribute="leading" secondItem="cMa-ep-yj5" secondAttribute="leading" constant="20" id="puT-KT-R7K"/>
                             <constraint firstItem="cMa-ep-yj5" firstAttribute="trailing" secondItem="Qpl-nK-YsW" secondAttribute="trailing" constant="26" id="uJt-2B-n6Z"/>
                             <constraint firstItem="cJ0-0F-YPD" firstAttribute="top" secondItem="U9x-wI-Qrz" secondAttribute="bottom" constant="25" id="zRH-d1-ZeI"/>
@@ -90,7 +97,8 @@
                         </barButtonItem>
                     </navigationItem>
                     <connections>
-                        <outlet property="meme" destination="lgf-WC-pYg" id="Vko-9a-jE2"/>
+                        <outlet property="imageView" destination="XV1-9E-4xs" id="PqM-WG-IGb"/>
+                        <outlet property="meme" destination="7wf-kl-Uue" id="wTw-1x-1P9"/>
                         <outlet property="shareButton" destination="Ktu-rx-elc" id="LWU-j8-fbl"/>
                         <outlet property="slider" destination="cJ0-0F-YPD" id="zoH-DZ-rGj"/>
                         <segue destination="tpt-Ut-3aV" kind="show" identifier="goldensegue" id="DEh-Nw-dcj"/>
