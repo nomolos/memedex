@@ -56,12 +56,27 @@ class ViewController: UIViewController {
     @IBOutlet var meme: ImageZoomView!
     
     @IBAction func logout(_ sender: Any) {
+        let alert = UIAlertController(title: "Sign Out", message: "Do you want to sign out?", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction!) in
+            print("here23")
+            self.dismiss(animated: true, completion: nil)
+            self.user?.signOut()
+            print("signed out the user")
+            AppDelegate.defaultUserPool().currentUser()?.signOut()
+            self.fetchUserAttributes()
+            return
+        }))
+        alert.addAction(UIAlertAction(title: "No", style: .default, handler: { (action: UIAlertAction!) in
+            return
+        }))
+        self.present(alert, animated: true)
+        /*self.present(alert, animated: true)
         print("here23")
         self.dismiss(animated: true, completion: nil)
         self.user?.signOut()
         print("signed out the user")
         AppDelegate.defaultUserPool().currentUser()?.signOut()
-        self.fetchUserAttributes()
+        self.fetchUserAttributes()*/
     }
 
     @objc func goToURL(_ sender:UIButton) {
@@ -88,7 +103,9 @@ class ViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: { (action: UIAlertAction!) in
             let queryExpression = AWSDynamoDBQueryExpression()
             queryExpression.keyConditionExpression = "memename = :memename"
-            queryExpression.expressionAttributeValues = [":memename": ("/" + self.keys[self.index])]
+            let spliced = self.keys[self.index].dropFirst(12)
+            print(spliced)
+            queryExpression.expressionAttributeValues = [":memename": spliced]
             let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
             let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
             updateMapperConfig.saveBehavior = .updateSkipNullAttributes
@@ -114,9 +131,6 @@ class ViewController: UIViewController {
             self.waitURL.notify(queue: .main){
                 let urley = somefin.result!.items[0] as! URL4Meme
                 var urley_string = String(urley.URL!)
-                if(urley_string.contains("instagram")){
-                    urley_string = "https://" + urley_string
-                }
                 //print(somefin.result!.items[0])
                 self.activityIndicator.stopAnimating()
                 UIApplication.shared.open(URL(string: urley_string)!)
