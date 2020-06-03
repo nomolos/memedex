@@ -296,19 +296,21 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
     public func didCompleteStepWithError(_ error: Error?) {
         DispatchQueue.main.async {
             if let error = error as NSError? {
-                print("printing error in didComplete")
-                print(error)
-                print("Going to verification view (they should have an email to verify with")
-                // when they do authenticate they should go to the golden set as a new user
-                self.go_to_golden = true
-                self.performSegue(withIdentifier: "VerifySegue", sender: self)
-                /*let alertController = UIAlertController(title: error.userInfo["__type"] as? String,
-                                                        message: error.userInfo["message"] as? String,
-                                                        preferredStyle: .alert)
-                let retryAction = UIAlertAction(title: "Retry", style: .default, handler: nil)
-                alertController.addAction(retryAction)
-                
-                self.present(alertController, animated: true, completion:  nil)*/
+                let casted = error as NSError
+                if((casted.userInfo["__type"] as! String) == "NotAuthorizedException"){
+                    let alertController = UIAlertController(title: "Account does not exist",
+                                                            message: "Try signing in again or signing up",
+                                                            preferredStyle: .alert)
+                    let retryAction = UIAlertAction(title: "Retry", style: .default, handler: nil)
+                    alertController.addAction(retryAction)
+                    self.present(alertController, animated: true, completion:  nil)
+                }
+                else{
+                    DispatchQueue.main.async {
+                        self.go_to_golden = true
+                        self.performSegue(withIdentifier: "VerifySegue", sender: self)
+                    }
+                }
             } else {
                 let appDelegate = UIApplication.shared.delegate as! AppDelegate
                 if (!AppDelegate.loggedIn!){
