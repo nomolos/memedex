@@ -82,28 +82,20 @@ class GoldenSetViewController: UIViewController {
         }
         self.progress.completedUnitCount += 1
         self.progress_view.setProgress(Float(self.progress.fractionCompleted), animated: true)
-        print("Printing progress")
-        print("Printing progress")
-        print("Printing progress")
-        print(self.progress.completedUnitCount)
-        print(self.progress_view.progress)
-        print("Printing progress")
-        print("Printing progress")
-        print("Printing progress")
+        
         // WE HAVE FINISHED LABELING THE GOLDEN SET
         // TIME TO FIND OUR MATCHES AND UPLOAD THEM TO DYNAMO
         if(self.keys.count == index){
-            //vibration indicating failure to go forward
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.error)
             var dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
             let scanExpression = AWSDynamoDBScanExpression()
             let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
             updateMapperConfig.saveBehavior = .updateSkipNullAttributes
-            //scanExpression.limit = 50
             dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
-            var json_response = dynamoDBObjectMapper.scan(GoldenMeme.self, expression: scanExpression, configuration: updateMapperConfig)
-            //print(json_response)
+            let json_response = dynamoDBObjectMapper.scan(GoldenMeme.self, expression: scanExpression, configuration: updateMapperConfig)
+            
+            // Eventually get rid of this sleep
             sleep(2)
             
             var user_ratings = [String:Double]()
@@ -114,15 +106,9 @@ class GoldenSetViewController: UIViewController {
             // find our ratings and initialize a dictionary with them
             for item in json_response.result!.items{
                 let goldy = item as! GoldenMeme
-                let username = goldy.username as! String
-                let memename = goldy.meme as! String
+                let username = goldy.username! as String
+                let memename = goldy.meme! as String
                 let rating = goldy.rating as! Double
-                // print(String((self.user?.username)!))
-                print("\n")
-                print(username)
-                print(memename)
-                print(rating)
-                print("\n")
                 if(username==self.user?.username!){
                     user_ratings[memename] = rating
                 }
@@ -156,7 +142,6 @@ class GoldenSetViewController: UIViewController {
                 // this user did not label all 13 memes :(
                 // Give them an artificially high score so we don't get paired
                 if user_2.1 != 13{
-                    // print("disqualifying " + user_2.0 + " because they labeled only " + String(user_2.1) + " memes in the golden set")
                     user_distances.removeValue(forKey: user_2.0)
                 }
             }
@@ -189,8 +174,7 @@ class GoldenSetViewController: UIViewController {
             self.waitPotentialPartners.notify(queue: .main){
                 print("leaving golden set")
                 let alert = UIAlertController(title: "All Set!", message: "Thank you for labeling the golden set! We now have the necessary data to recommend memes to you.", preferredStyle: .alert)
-                alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: {(alert: UIAlertAction!) in //self.navigationController?.popViewController(animated: true);
-                //self.dismiss(animated: true, completion: nil);
+                alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: {(alert: UIAlertAction!) in
                 let appDelegate = UIApplication.shared.delegate as! AppDelegate
                 appDelegate.viewController = nil
                 appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
@@ -204,8 +188,6 @@ class GoldenSetViewController: UIViewController {
         // We haven't reached the end of the golden set yet
         // Load up a new meme
         else{
-            print("we have this many memes in our cache " + String(self.meme_cache.count))
-            print("This is our current index " + String(self.index))
             if(!(self.meme_cache.count > self.index-1)){
                 self.activityIndicator.startAnimating()
                 let transferUtility = AWSS3TransferUtility.default()
@@ -257,7 +239,6 @@ class GoldenSetViewController: UIViewController {
             }
             else{
                 self.activityIndicator.startAnimating()
-                //DispatchQueue.main.sync(execute: {
                     let imageExtensions = ["png", "jpg", "gif", "ifv", "PNG", "JPG", "GIF", "IFV"]
                     let last3 = self.keys[self.index].suffix(3)
                     if imageExtensions.contains(String(last3)){
@@ -293,7 +274,6 @@ class GoldenSetViewController: UIViewController {
                         self.activityIndicator.stopAnimating()
                         return
                     }
-                //})
             }
         }
     }
@@ -301,7 +281,6 @@ class GoldenSetViewController: UIViewController {
     override func viewDidLoad() {
         self.progress.completedUnitCount = 0
         self.progress_view.progress = 0.0
-        print("golden set view controller view did load")
         super.viewDidLoad()
         slider.isContinuous = false
         slider.minimumValue = 0
@@ -311,7 +290,6 @@ class GoldenSetViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
         self.present(alert, animated: true)
         self.activityIndicator = UIActivityIndicatorView()
-        //self.activityIndicator.
         self.activityIndicator.color = UIColor.gray
         self.activityIndicator.style = UIActivityIndicatorView.Style.large
         self.activityIndicator.frame = CGRect(x: self.view.bounds.midX - 50, y: self.view.bounds.midY - 100, width: 100, height: 100)
@@ -335,6 +313,7 @@ class GoldenSetViewController: UIViewController {
         }
         self.fetchUserAttributes()
         self.activityIndicator.startAnimating()
+        
         // Go ahead and load first item
         self.waitMemeNames.notify(queue: .main){
             let transferUtility = AWSS3TransferUtility.default()
@@ -470,8 +449,6 @@ class GoldenSetViewController: UIViewController {
     func background_meme_download() {
         self.meme_cache.removeAll()
         self.dispatchQueue.async{
-            print("here inside background_meme_download")
-            print(self.keys.count)
             var temp = 1
             while (temp < 13){
                 let transferUtility = AWSS3TransferUtility.default()
@@ -491,15 +468,4 @@ class GoldenSetViewController: UIViewController {
             }
         }
     }
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
-
 }

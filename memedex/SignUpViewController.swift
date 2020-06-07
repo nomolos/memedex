@@ -42,14 +42,12 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
             self.signup_requirements.isHidden = false
         }
         self.activityIndicator = UIActivityIndicatorView()
-        //self.activityIndicator.
         self.activityIndicator.color = UIColor.gray
         self.activityIndicator.style = UIActivityIndicatorView.Style.large
         self.activityIndicator.frame = CGRect(x: self.view.bounds.midX - 50, y: self.view.bounds.midY - 100, width: 100, height: 100)
         self.activityIndicator.hidesWhenStopped = true
         self.activityIndicator.layer.zPosition = 1
         view.addSubview(self.activityIndicator)
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
         self.view.addGestureRecognizer(tap)
         self.password?.addTarget(self, action: #selector(self.inputDidChange(_:)), for: .editingChanged)
@@ -61,14 +59,14 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
     @IBAction func signup(_ sender: Any) {
         self.activityIndicator.startAnimating()
         let email = AWSCognitoIdentityUserAttributeType()
-        let name = AWSCognitoIdentityUserAttributeType()
         email!.value = self.email.text
         email!.name = "email"
         self.readyToVerify.enter()
+        // Valid email and passwords
         if((self.email.text?.isValidEmail())! && self.password.text?.count ?? 0 > 7 && self.password.text == self.confirm_password.text){
             AppDelegate.pool?.signUp(self.email.text!, password: self.password.text!, userAttributes: [email!], validationData: nil).continueWith{ (response) -> Any? in
                 if response.error != nil {
-                    let casted = response.error as! NSError
+                    let casted = response.error! as NSError
                     if((casted.userInfo["__type"] as! String) == "UsernameExistsException"){
                         DispatchQueue.main.async {
                             self.activityIndicator.stopAnimating()
@@ -77,7 +75,7 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
                     }
                     else{
                         print("This exception is not a signup duplicate exception")
-                        print(response.error)
+                        print("Not moving to verification view controller")
                     }
                 }
                 else{
@@ -89,20 +87,22 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
                 }
                 return 1
             }
-            //self.performSegue(withIdentifier: "VerifySegue2", sender: self)
         }
+        // Invalid Email
         if(!(self.email.text?.isValidEmail())!){
             self.activityIndicator.stopAnimating()
             let alert = UIAlertController(title: "Invalid Email", message: "The email address entered is invalid", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Retry", style: .default, handler: nil))
             self.present(alert, animated: true, completion: nil)
         }
+        // Invalid Password
         else if(self.password.text?.count ?? 0 < 8){
             self.activityIndicator.stopAnimating()
             let alert = UIAlertController(title: "Password too short", message: "Password needs to be at least 8 characters", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Retry", style: .default, handler: nil))
             self.present(alert, animated: true, completion: nil)
         }
+        // Passwords don't match
         else if(!(self.password.text == self.confirm_password.text)){
             self.activityIndicator.stopAnimating()
             let alert = UIAlertController(title: "Passwords don't match", message: "Try typing your password in again", preferredStyle: .alert)
@@ -121,13 +121,11 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        print("in text field should return")
         self.view.endEditing(true)
         return false
     }
     
     @objc func dismissKeyboard() {
-        print("in dismiss keyboard")
         self.view.endEditing(true)
     }
     
@@ -139,19 +137,11 @@ class SignUpViewController: UIViewController, UITextFieldDelegate {
         verificationController.email = self.email.text
         verificationController.password = self.password.text
     }
-    
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 
 }
 
+// Got this from StackOverflow
+// Unsure if there are edge cases that break it
 extension String {
     func isValidEmail() -> Bool {
         guard !self.lowercased().hasPrefix("mailto:") else { return false }

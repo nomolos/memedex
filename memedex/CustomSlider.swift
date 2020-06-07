@@ -9,15 +9,9 @@
 import UIKit
 
 class CustomSlider: UISlider {
-
-    /*
-    // Only override draw() if you perform custom drawing.
-    // An empty implementation adversely affects performance during animation.
-    override func draw(_ rect: CGRect) {
-        // Drawing code
-    }
-    */
     
+    // Change this to make slider circle larger
+    // Should eventually increase box size without larger icon
     @IBInspectable var thumbRadius: CGFloat = 50
     
     override func awakeFromNib() {
@@ -37,15 +31,8 @@ class CustomSlider: UISlider {
     }
     
     private func thumbImage(radius: CGFloat) -> UIImage {
-        // Set proper frame
-        // y: radius / 2 will correctly offset the thumb
-
         thumbView.frame = CGRect(x: 0, y: radius / 2, width: radius, height: radius)
         thumbView.layer.cornerRadius = radius / 2
-
-        // Convert thumbView to UIImage
-        // See this: https://stackoverflow.com/a/41288197/7235585
-
         let renderer = UIGraphicsImageRenderer(bounds: thumbView.bounds)
         return renderer.image { rendererContext in
             thumbView.layer.render(in: rendererContext.cgContext)
@@ -54,7 +41,7 @@ class CustomSlider: UISlider {
     
     private lazy var thumbView: UIView = {
         let thumb = UIView()
-        thumb.backgroundColor = UIColor.white//thumbTintColor
+        thumb.backgroundColor = UIColor.white
         thumb.layer.borderWidth = 0.4
         thumb.layer.borderColor = UIColor.darkGray.cgColor
         return thumb

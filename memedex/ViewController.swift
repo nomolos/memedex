@@ -24,10 +24,8 @@ class ViewController: UIViewController {
     var downloaded_index = 0
     var index_for_cache = 0
     var user:AWSCognitoIdentityUser?
-    //var userAttributes:[AWSCognitoIdentityProviderAttributeType]?
     @IBOutlet weak var imageView: UIImageView!
     var image:UIImage?
-    //var imageView:UIImageView?
     var playerViewController:AVPlayerViewController?
     var user_to_pair_with:String?
     let waitPartnerMemes = DispatchGroup()
@@ -37,7 +35,6 @@ class ViewController: UIViewController {
     let waitFinalPartner = DispatchGroup()
     let waitMemeNamesS3 = DispatchGroup()
     let waitURL = DispatchGroup()
-    //let waitBackgroundMemes = DispatchGroup()
     let dispatchQueue = DispatchQueue(label: "com.queue.Serial")
     var emitter = CAEmitterLayer()
     var player: AVPlayer?
@@ -58,10 +55,8 @@ class ViewController: UIViewController {
     @IBAction func logout(_ sender: Any) {
         let alert = UIAlertController(title: "Sign Out", message: "Do you want to sign out?", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction!) in
-            print("here23")
             self.dismiss(animated: true, completion: nil)
             self.user?.signOut()
-            print("signed out the user")
             AppDelegate.defaultUserPool().currentUser()?.signOut()
             self.fetchUserAttributes()
             return
@@ -70,19 +65,9 @@ class ViewController: UIViewController {
             return
         }))
         self.present(alert, animated: true)
-        /*self.present(alert, animated: true)
-        print("here23")
-        self.dismiss(animated: true, completion: nil)
-        self.user?.signOut()
-        print("signed out the user")
-        AppDelegate.defaultUserPool().currentUser()?.signOut()
-        self.fetchUserAttributes()*/
     }
 
     @objc func goToURL(_ sender:UIButton) {
-        print("Trying to go to a URL")
-        print("Our index is " + String(self.index))
-        print("Our image at this index is " + String(self.keys[self.index]))
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
         sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
@@ -104,7 +89,6 @@ class ViewController: UIViewController {
             let queryExpression = AWSDynamoDBQueryExpression()
             queryExpression.keyConditionExpression = "memename = :memename"
             let spliced = self.keys[self.index].dropFirst(12)
-            print(spliced)
             queryExpression.expressionAttributeValues = [":memename": spliced]
             let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
             let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
@@ -117,33 +101,24 @@ class ViewController: UIViewController {
                 print(task.error)
             }
             if (task.result != nil){
-                //print("here2")
-                //self.waitPotentialPartners.leave()
-                //print("Found potential partner"
                 print("no error in querying for URL hooray!")
             }
-            //print("here3")
-            //print(task.)
             self.waitURL.leave()
             return task.result
             }) as! AWSTask<AWSDynamoDBPaginatedOutput>
-            //sleep(3)
             self.waitURL.notify(queue: .main){
                 let urley = somefin.result!.items[0] as! URL4Meme
                 var urley_string = String(urley.URL!)
-                //print(somefin.result!.items[0])
                 self.activityIndicator.stopAnimating()
                 UIApplication.shared.open(URL(string: urley_string)!)
             }
         }))
-        
         self.present(alert, animated: true)
     }
     
     
     
     @IBAction func share(_ sender: UIButton) {
-        print("inside share")
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
         sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
@@ -159,12 +134,9 @@ class ViewController: UIViewController {
         )
         let imageExtensions = ["png", "jpg", "gif", "ifv"]
         let last3 = self.keys[self.index].suffix(3)
-        //sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
-        //var share_me:Any?
         if imageExtensions.contains(String(last3)){
             //we've got a gif
             if last3.contains("gif") || last3.contains("ifv"){
-                //let gif = UIImage.gifImageWithData(data!)
                 var share_me = self.image
                 let share_me_container = [share_me] as [Any]
                 let activityViewController = UIActivityViewController(activityItems: share_me_container, applicationActivities: nil)
@@ -188,16 +160,6 @@ class ViewController: UIViewController {
             activityViewController.popoverPresentationController?.sourceView = self.view
             self.present(activityViewController, animated: true, completion: nil)
         }
-        // Reduce image quality substantially through compression
-        // Otherwise sharing takes for fucking ever
-        // Can change in the future
-        // Scale of quality is from 0.0 to 1.0
-        /*share_me = UIImage(data: share_me.jpegData(compressionQuality: 0.1)!)!
-        //let url = URL(fileURLWithPath: "http://www.google.com")
-        let share_me_container = [share_me] as [Any]
-        let activityViewController = UIActivityViewController(activityItems: share_me_container, applicationActivities: nil)
-        activityViewController.popoverPresentationController?.sourceView = self.view
-        self.present(activityViewController, animated: true, completion: nil)*/
     }
     
     
@@ -221,19 +183,14 @@ class ViewController: UIViewController {
             // Change something here
             self.index_for_cache = 0
             self.downloaded_index = 0
-            //self.index_for_cache = self.index_for_cache - 2
             self.loadNextMeme(first: false)
         }
-        /*else if (self.index == 1){ // change this eventually
-            return
-        }*/
         else{
             return
         }
     }
     
     @IBAction func gotogolden(_ sender: UIButton) {
-        print("Going to golden set")
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
         sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
@@ -247,7 +204,6 @@ class ViewController: UIViewController {
             },
                                    completion: { Void in()  }
         )
-        //sleep(1)
         self.performSegue(withIdentifier: "goldensegue", sender: self)
     }
     
@@ -277,7 +233,6 @@ class ViewController: UIViewController {
     
     @IBAction func next(_ sender: Any) {
         self.slider.isEnabled = false
-        
         // This user is active for the first time today
         // Send a notification to Dynamo
         // Adds them to today's Active Users table
@@ -322,26 +277,14 @@ class ViewController: UIViewController {
     }
     
     override func viewDidLoad() {
-        print("in view did load")
         super.viewDidLoad()
         self.configureSlider()
-        //self.callWhenViewing()
     }
     
-    //extension CGRect {
-    //    var center: CGPoint { return CGPoint(x: midX, y: midY) }
-    //}
-    
     override func viewWillAppear(_ animated: Bool) {
-            //print(AppDelegate.defaultUserPool().currentUser()?.username)
-            //sleep(3)
-            //print(AppDelegate.defaultUserPool().currentUser()?.username)
-            //var midX = self.view.bounds.midX
-            //var midY = self.view.bounds.midY
-        print("printing meme frame in view will appear")
-        /*print(self.meme.frame)
-        self.meme = ImageZoomView(frame: self.meme.frame, something: true)
-        self.view.addSubview(self.meme)*/
+        let appDelegate = UIApplication.shared.delegate as? AppDelegate
+        /*UIApplication.shared.windows.first?.rootViewController = appDelegate?.window?.rootViewController
+        UIApplication.shared.windows.first?.makeKeyAndVisible()*/
         if(self.meme_link == nil){
             self.meme_link = UIButton()
             let temp_image = UIImage(named: "link") as UIImage?
@@ -350,93 +293,30 @@ class ViewController: UIViewController {
             self.meme_link?.isHidden = true
             self.view.addSubview(self.meme_link!)
         }
-            self.activityIndicator = UIActivityIndicatorView()
-        
-        
-        //self.activityIndicator.
-            self.activityIndicator.color = UIColor.white
-            self.activityIndicator.style = UIActivityIndicatorView.Style.large
-            self.activityIndicator.frame = CGRect(x: self.view.bounds.midX - 50, y: self.view.bounds.midY - 100, width: 100, height: 100)
-            self.activityIndicator.hidesWhenStopped = true
-            self.activityIndicator.layer.zPosition = 1
-            view.addSubview(self.activityIndicator)
-        
-            print("View is appearing viewcontroller")
-            super.viewWillAppear(animated)
-            //sleep(3)
-            print("This is the user in the ViewController " + String((AppDelegate.defaultUserPool().currentUser()?.username!)!))
-            print("Their attributes below")
-            print(AppDelegate.defaultUserPool().currentUser()?.username)
-            self.fetchUserAttributes()
-            AppDelegate.loggedIn = true
-            //print("Again but the local variable " + String(self.user!.username!))
-            //print("Their attributes below")
-            //self.fetchUserAttributes()
-            //sleep(3)
-            
-            print("waiting for our meme names")
-            print("waiting for our final meme order")
-            self.waitMemeNamesS3.enter()
-            self.waitMemesUpdated.enter()
-            self.loadAllS3MemeNames()
-        
-            print("Waiting for potential partner")
-            print("Waiting for final partner")
-            self.waitPotentialPartners.enter()
-            self.waitFinalPartner.enter()
-            
-            self.findPartnerMatchesPart1()
-        
-            self.waitPotentialPartners.notify(queue: .main){
-                print("got into here")
-                self.findPartnerMatchesPart2()
-                self.waitFinalPartner.notify(queue: .main){
-                    print("444444444")
-                    if self.found_match{
-                        self.loadMemesRecommendedByPartner()
-                    }
-                    else{
-                        let alert = UIAlertController(title: "No A.I.", message: "We could not find memes to recommend to you", preferredStyle: .alert)
-                        alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
-                        self.present(alert, animated: true)
-                        self.waitMemesUpdated.leave()
-                    }
-                }
-                // THIS GROUP IS DEPENDENT ON QUERY FOUR AND THE BLOCK ABOVE AS WELL
-                // 66666666666
-                self.waitMemeNamesS3.notify(queue: .main){
-                    self.waitMemesUpdated.notify(queue: .main){
-                        print("66666666")
-                        print("This meme is at the front " + self.keys[0])
-                        self.loadNextMeme(first: true)
-                    }
-                }
-            }
-    }
-    
-    /*func callWhenViewing() {
-        self.configureSlider()
+        self.activityIndicator = UIActivityIndicatorView()
+        self.activityIndicator.color = UIColor.white
+        self.activityIndicator.style = UIActivityIndicatorView.Style.large
+        self.activityIndicator.frame = CGRect(x: self.view.bounds.midX - 50, y: self.view.bounds.midY - 100, width: 100, height: 100)
+        self.activityIndicator.hidesWhenStopped = true
+        self.activityIndicator.layer.zPosition = 1
+        view.addSubview(self.activityIndicator)
+        super.viewWillAppear(animated)
         self.fetchUserAttributes()
-        
+        AppDelegate.loggedIn = true
         self.waitMemeNamesS3.enter()
         self.waitMemesUpdated.enter()
         self.loadAllS3MemeNames()
-    
         self.waitPotentialPartners.enter()
         self.waitFinalPartner.enter()
-        
         self.findPartnerMatchesPart1()
-    
         self.waitPotentialPartners.notify(queue: .main){
-            print("got into here")
             self.findPartnerMatchesPart2()
             self.waitFinalPartner.notify(queue: .main){
-                print("444444444")
                 if self.found_match{
                     self.loadMemesRecommendedByPartner()
                 }
                 else{
-                    let alert = UIAlertController(title: "No Matched User", message: "We could not find a user to match you with :( Your ratings will be immensely helpeful in recommending memes to other users today", preferredStyle: .alert)
+                    let alert = UIAlertController(title: "No A.I.", message: "We could not find memes to recommend to you", preferredStyle: .alert)
                     alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
                     self.present(alert, animated: true)
                     self.waitMemesUpdated.leave()
@@ -446,19 +326,15 @@ class ViewController: UIViewController {
             // 66666666666
             self.waitMemeNamesS3.notify(queue: .main){
                 self.waitMemesUpdated.notify(queue: .main){
-                    print("66666666")
-                    print("This meme is at the front " + self.keys[0])
                     self.loadNextMeme(first: true)
                 }
             }
         }
-    }*/
+    }
     
     func rateCurrentMeme() {
         let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
         let meme = Meme()
-        print("INDEX INSIDE OF RATECURRENTMEME " + String(self.index))
-        print("WE ARE LABELING THE MEME " + self.keys[self.index])
         meme?.username = user?.username as! NSString
         meme?.meme = self.keys[self.index] as NSString
         meme?.rating = slider.value as NSNumber
@@ -475,21 +351,14 @@ class ViewController: UIViewController {
     }
     
     func loadNextMeme(first: Bool) {
-        //self.meme.isHidden = true
         self.activityIndicator.startAnimating()
         if(!first){
             self.index = self.index + 1
         }
-        print("the meme name at this index is " + self.keys[self.index])
-        print("the meme name at this index is " + self.keys[self.index])
-        print("the meme name at this index is " + self.keys[self.index])
-        print("the meme name at this index is " + self.keys[self.index])
-        print("INDEX INSIDE OF LOADNEXTMEME IS " + String(self.index) + " name is " + String(self.keys[self.index]))
-        //}
         let transferUtility = AWSS3TransferUtility.default()
         let expression = AWSS3TransferUtilityDownloadExpression()
+        // Very first meme of the session
         if (first){
-            print("this is the first Meme!")
             transferUtility.downloadData(fromBucket: s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
                 if error != nil{
                     print(error!)
@@ -504,15 +373,10 @@ class ViewController: UIViewController {
                         if last3.contains("gif") || last3.contains("ifv"){
                             let gif = UIImage.gifImageWithData(data!)
                             self.image = gif
-                            print("SETTING IMAGE TO GIF")
-                            print(self.image)
-                           // print(
                         }
                         else{
                             let pic = UIImage(data: data!)
                             self.image = pic
-                            print("SETTING IMAGE TO PIC")
-                            print(self.image)
                         }
                         if(self.playerViewController != nil){
                             self.playerViewController?.willMove(toParent: nil)
@@ -527,18 +391,11 @@ class ViewController: UIViewController {
                         self.slider.isEnabled = true
                         self.back_button.isEnabled = true
                         self.activityIndicator.stopAnimating()
-                        /*if(!first){
-                            print("calling background_meme_download from loadNextMeme")
-                            self.background_meme_download()
-                        }*/
                         self.background_meme_download()
                         return
                     }
                     else{
-                        print("SETTING IMAGE TO VIDEO")
-                        //self.player = nil
                         if(self.playerViewController != nil){
-                            //self.player.willMov
                             self.playerViewController?.willMove(toParent: nil)
                             self.playerViewController?.view.removeFromSuperview()
                             self.playerViewController?.removeFromParent()
@@ -571,13 +428,8 @@ class ViewController: UIViewController {
                 })
             }
         }
+        // We haven't downloaded the next meme that we want
         else if(!(self.downloaded_index > self.index || self.index_for_cache < 0)){
-            //print("Our downloaded index i")
-            //print(self.downloaded_index)
-            //print(self.index)
-            print("our downloaded index " + String(self.downloaded_index) + " is not greater than our normal index " + String(self.index))
-            print("or we want back too far and our cache doesn't hold the image anymore")
-            print(" our cache index is : " + String(self.index_for_cache))
             transferUtility.downloadData(fromBucket: s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
                 if error != nil{
                     print(error!)
@@ -592,16 +444,11 @@ class ViewController: UIViewController {
                         if last3.contains("gif") || last3.contains("ifv"){
                             let gif = UIImage.gifImageWithData(data!)
                             self.image = gif
-                            print("SETTING IMAGE TO GIF")
-                            print(self.image)
                         }
                         else{
-                            print("SETTING IMAGE TO PIC")
                             let pic = UIImage(data: data!)
                             self.image = pic
-                            print(self.image)
                         }
-                        //self.player = nil
                         if(self.playerViewController != nil){
                             self.playerViewController?.willMove(toParent: nil)
                             self.playerViewController?.view.removeFromSuperview()
@@ -615,16 +462,10 @@ class ViewController: UIViewController {
                         self.slider.isEnabled = true
                         self.back_button.isEnabled = true
                         self.activityIndicator.stopAnimating()
-                        /*if(!first){
-                            print("calling background_meme_download from loadNextMeme")
-                            self.background_meme_download()
-                        }*/
                         self.background_meme_download()
                         return
                     }
                     else{
-                        print("SETTING IMAGE TO VIDEO")
-                        //self.player = nil
                         if(self.playerViewController != nil){
                             self.playerViewController?.willMove(toParent: nil)
                             self.playerViewController?.view.removeFromSuperview()
@@ -648,38 +489,27 @@ class ViewController: UIViewController {
                         self.slider.isEnabled = true
                         self.back_button.isEnabled = true
                         self.activityIndicator.stopAnimating()
-                        /*if(!first){
-                            print("calling background_meme_download from loadNextMeme")
-                            self.background_meme_download()
-                        }*/
                         self.background_meme_download()
                         return
                     }
                 })
             }
         }
+        // We already have the meme we want in a cache
         else{
-            print("our downloaded index " + String(self.downloaded_index) + " IS greater than our normal index " + String(self.index))
             self.index_for_cache = self.index_for_cache + 1
             let imageExtensions = ["png", "jpg", "gif", "ifv"]
             let last3 = self.keys[self.index].suffix(3)
-            print("the meme name at this index is " + self.keys[self.index])
-            print("double check this with the file in S3 to make sure we're labeling the right meme")
             if imageExtensions.contains(String(last3)){
                 //we've got a gif
                 if last3.contains("gif") || last3.contains("ifv"){
                     let gif = UIImage.gifImageWithData(self.meme_cache[index_for_cache])
-                    print("SETTING IMAGE TO GIF")
                     self.image = gif
-                    print(self.image)
                 }
                 else{
-                    print("SETTING IMAGE TO PIC")
                     let pic = UIImage(data: self.meme_cache[index_for_cache])
                     self.image = pic
-                    print(self.image)
                 }
-                //self.player = nil
                 if(self.playerViewController != nil){
                     self.playerViewController?.willMove(toParent: nil)
                     self.playerViewController?.view.removeFromSuperview()
@@ -696,8 +526,6 @@ class ViewController: UIViewController {
                 return
             }
             else{
-                print("SETTING IMAGE TO VIDEO")
-                //self.player = nil
                 if(self.playerViewController != nil){
                     self.playerViewController?.willMove(toParent: nil)
                     self.playerViewController?.view.removeFromSuperview()
@@ -732,35 +560,23 @@ class ViewController: UIViewController {
         self.meme_cache.removeAll()
         self.dispatchQueue.async{
             let max_10 = self.downloaded_index + 10
-            print("here inside background_meme_download")
-            print(self.keys.count)
             while (self.downloaded_index < self.keys.count && self.downloaded_index <= max_10){
-                //self.waitBackgroundMemes.enter()
-                print("in this loop")
                 let transferUtility = AWSS3TransferUtility.default()
                 let expression = AWSS3TransferUtilityDownloadExpression()
-                //print("downloaded index is " + )
                 transferUtility.downloadData(fromBucket: self.s3bucket, key: self.keys[self.downloaded_index], expression: expression) { (task, url, data, error) in
                     if error != nil{
                         print(error!)
                         print("error")
                         return
                     }
-                    //DispatchQueue.main.sync(execute: {
-                        self.meme_cache_semaphore.signal()
-                        //self.waitBackgroundMemes.leave()
-                        print("leaving the group ")
-                        //print("incrementing downloaded index to " + String(self.downloaded_index))
-                        self.meme_cache.append(data!)
-                        return
-                    //})
+                    self.meme_cache_semaphore.signal()
+                    self.meme_cache.append(data!)
+                    return
                 }
                 self.meme_cache_semaphore.wait()
                 self.downloaded_index = self.downloaded_index + 1
-                print("incrementing downloaded index to " + String(self.downloaded_index))
             }
         }
-        print("end of background_meme_download")
     }
     
     func loadAllS3MemeNames(){
@@ -771,22 +587,17 @@ class ViewController: UIViewController {
         s3.listObjects(listRequest).continueWith { (task) -> AnyObject? in
             let listObjectsOutput = task.result;
             if(task.error != nil || listObjectsOutput == nil || listObjectsOutput?.contents == nil){
-                print("We know the meme names are empty")
                 DispatchQueue.main.sync{
                     let alert = UIAlertController(title: "No Memes Right Now", message: "memedex is currently searching the internet for the latest memes. Usually this happens around 12AM Central Time (US) and lasts 20 minutes", preferredStyle: .alert)
-                    //alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
                     self.present(alert, animated: true)
                 }
                 return nil
             }
-            print("We don't know the meme names are empty")
             for object in (listObjectsOutput?.contents)! {
                 self.keys.append(String(object.key!))
                 print(String(object.key!))
             }
-            //self.meme_cache.count = self.keys.count
             self.waitMemeNamesS3.leave()
-            print("We've got our Meme names")
             return nil
         }
     }
@@ -805,11 +616,8 @@ class ViewController: UIViewController {
             print("error")
         }
         if (task.result != nil){
-            print("here2")
             self.waitPotentialPartners.leave()
-            print("Found potential partner")
         }
-        print("here3")
         return task.result
         }) as! AWSTask<AWSDynamoDBPaginatedOutput>
     }
@@ -819,8 +627,6 @@ class ViewController: UIViewController {
     // Who is also in the users_active_today DynamoDB table
     func findPartnerMatchesPart2() {
         let matches2 = self.matches?.result?.items
-        print("printing out our matches!!!!!!")
-        print(matches2)
         let queryExpression = AWSDynamoDBQueryExpression()
         queryExpression.keyConditionExpression = "username = :username"
         queryExpression.expressionAttributeValues = [":username": self.user?.username]
@@ -830,8 +636,6 @@ class ViewController: UIViewController {
             let user_list_strings = user_list.getUsers()
             var num_checked_users = 0
             for paired_user in user_list_strings{
-                print("in this for loop")
-                print("this is the user we are looking for " + paired_user)
                 queryExpression.expressionAttributeValues = [":username": paired_user]
                 // SECOND QUERY FOR PARTNER WHO WAS ACTIVE
                 // 222222222
@@ -840,36 +644,25 @@ class ViewController: UIViewController {
                 if (task.error != nil){
                     print("ERROR IN findPartnerMatchesPart2")
                 }
-                print("calling potentially active partner")
                 self.waitPotentialActivePartner.leave()
                 return task.result
                 }) as! AWSTask<AWSDynamoDBPaginatedOutput>
-                print("outside this wait")
                 self.waitPotentialActivePartner.notify(queue: .main){
                     // this check hopefully blocks the behavior where
                     // this function is called again despite the first one
                     // returning/leaving the function
                     if(!self.found_match){
-                        print("potentially active partner")
                         num_checked_users = num_checked_users + 1
                         let returned_matches = active_matches.result?.items
-                        print("printing out returned matches!")
-                        print(active_matches)
-                        print(returned_matches)
                         if returned_matches?.count ?? 0 == 1 {
                             self.found_match = true
                             self.user_to_pair_with = paired_user
-                            print("Found final partner")
-                            print("Am I in here twice?")
-                            print("exiting waitFinalPartner")
                             self.waitFinalPartner.leave()
-                            print("That was the problem")
                             return;
                         }
-                            // we need to free the queue even though
-                            // we didn't find a match
+                        // we need to free the queue even though
+                        // we didn't find a match
                         else if num_checked_users == user_list_strings.count{
-                            print("exiting waitFinalPartner")
                             self.waitFinalPartner.leave()
                             return;
                         }
@@ -877,7 +670,8 @@ class ViewController: UIViewController {
                 }
             }
         }
-        else { // We didn't have any matches to begin with (need to fill out golden set)
+        // We didn't have any matches to begin with (need to fill out golden set)
+        else {
             self.waitFinalPartner.leave()
             let alert = UIAlertController(title: "Click the Bottle", message: "Click the bottle at the bottom right to get started", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
@@ -888,7 +682,7 @@ class ViewController: UIViewController {
     func loadMemesRecommendedByPartner() {
         let queryExpression = AWSDynamoDBQueryExpression()
         queryExpression.keyConditionExpression = "username = :username"
-        queryExpression.expressionAttributeValues = [":username": self.user_to_pair_with]
+        queryExpression.expressionAttributeValues = [":username": self.user_to_pair_with!]
         let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
         let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
         updateMapperConfig.saveBehavior = .updateSkipNullAttributes
@@ -896,33 +690,30 @@ class ViewController: UIViewController {
         self.waitPartnerMemes.enter()
         self.dispatchQueue.async{
             // FOURTH QUERY FOR MEME NAMES OF RECOMMENDED MEMES
-            matches5 = dynamoDBObjectMapper.query(Meme.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
-            if (task.error != nil){
-                print("error")
-            }
-            if (task.result != nil){
-                print("here2")
-                self.waitPartnerMemes.leave()
-            }
-            return task.result
-            }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+            matches5 = (dynamoDBObjectMapper.query(Meme.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+                if (task.error != nil){
+                    print("error")
+                }
+                if (task.result != nil){
+                    print("here2")
+                    self.waitPartnerMemes.leave()
+                }
+                return task.result
+            }) as! AWSTask<AWSDynamoDBPaginatedOutput>)
         }
         // THIS GROUP IS DEPENDENT ON QUERY FOUR
         // THIS GROUP IS ALSO DEPENDENT ON QUERY 3
         // 555555555
-        print("showing current state of self.keys")
-        print(self.keys.count)
         // Needs to have the S3 meme names before
         // we alter the ordering
         self.waitMemeNamesS3.notify(queue: .main){
             self.waitPartnerMemes.notify(queue: self.dispatchQueue){
-                var all_ratings_of_partner = matches5?.result?.items
-                print("our partner has labeled a total of " + String(all_ratings_of_partner!.count) + " memes")
+                let all_ratings_of_partner = matches5?.result?.items
                 var temp_keys = [String]()
                 for meme_rating_pair in all_ratings_of_partner!{
-                    var meme_rating_pair2 = meme_rating_pair as! Meme
+                    let meme_rating_pair2 = meme_rating_pair as! Meme
                     // We want this rating
-                    if(self.keys.contains(meme_rating_pair2.meme as! String)){
+                    if(self.keys.contains(meme_rating_pair2.meme! as String)){
                         if(Double(meme_rating_pair2.rating ?? 3) > 4){
                             temp_keys.append(meme_rating_pair2.meme as! String)
                             let index_of_boi = self.keys.firstIndex(of: meme_rating_pair2.meme as! String)
@@ -934,33 +725,24 @@ class ViewController: UIViewController {
                         }
                     }
                 }
-                print("We should have " + String(temp_keys.count) + " memes shifted to the front")
                 self.last_recommended_index = temp_keys.count
                 for keyster in self.keys{
                     temp_keys.append(keyster)
                 }
                 self.keys = temp_keys
-                print("This meme should be at the front " + self.keys[0])
-                print("We've got our final meme order")
                 self.waitMemesUpdated.leave()
             }
         }
     }
     
     func fetchUserAttributes() {
-        print("inside viewdidLoad fetchuserattributes")
         user = AppDelegate.defaultUserPool().currentUser()
         user?.getDetails().continueOnSuccessWith(block: { (task) -> Any? in
             guard task.result != nil else {
                 print("fetchuserattributes failed in viewdidload")
                 return nil
             }
-            print("fetchuserattributes worked in viewdidload")
             self.userAttributes = task.result?.userAttributes
-            self.userAttributes?.forEach({ (attribute) in
-                print("Name: " + attribute.name!)
-                print("Value: " + attribute.value!)
-            })
             DispatchQueue.main.async {
                 print("fetchuserattributes worked in viewdidload")
             }
@@ -976,43 +758,17 @@ class ViewController: UIViewController {
     }
     
     func updateUI() {
-        //self.meme.frame
         if(!self.meme.isHidden){
             self.imageView?.image = self.image
             self.meme = ImageZoomView(frame: self.meme.frame, something: true)
             self.view.addSubview(self.meme)
-            //self.meme.delegate = self as! UIScrollViewDelegate
-            print("Inside of updateUI")
-            print("printing number of keys " + String(self.keys.count))
-            print("printing which index we're at " + String(self.index))
-            print("printing meme frame in updateUI")
-            print(self.meme.frame)
             self.meme.updateImage(imageView: self.imageView!)
         }
-        //print(self.meme)
-        //print(self.image)
-        //print(self.keys[self.index])
-        //sleep(2)
-        //self.meme = ImageZoomView(frame: self.meme.frame, image: self.image)
-        //self.view.addSubview(self.meme)
-        //sleep(4)
-        //self.meme.image = self.image
         if((self.image) != nil){
-            print("printing self.image")
-            //print(self.image)
-            print(self.meme)
-            print(self.meme.imageView)
-            print(self.meme.getImage())
             let real_image_rect = AVMakeRect(aspectRatio: self.meme.getImage().size, insideRect: self.meme.bounds)
-            print("printing real image rect bounds")
-            print(real_image_rect)
-            print(real_image_rect.origin.x)
-            print(real_image_rect.origin.y)
             self.meme_link?.widthAnchor.constraint(equalToConstant: 54.0).isActive = true
             self.meme_link?.heightAnchor.constraint(equalToConstant: 33.0).isActive = true
             self.meme_link?.frame.origin.x = self.view.frame.width - 85
-            print("printing origin y")
-            print(real_image_rect.origin.y)
             // An image/gif
             if(!self.meme.isHidden){
                 self.meme_link?.frame.origin.y = real_image_rect.origin.y + 80
@@ -1021,8 +777,6 @@ class ViewController: UIViewController {
             else{
                 self.meme_link?.frame.origin.y = self.meme.frame.origin.y - 70
             }
-            //self.meme_link?.frame.origin.y = real_image_rect.origin.y + 80
-            print(meme_link?.frame)
             self.meme_link?.isHidden = false
             self.meme_link?.addTarget(self, action: #selector(goToURL(_:)), for: .touchUpInside)
             self.view.bringSubviewToFront(meme_link!)
@@ -1040,7 +794,7 @@ class ViewController: UIViewController {
     }
     
     func generateEmitterCells(color: Bool) -> [CAEmitterCell] {
-    var cells:[CAEmitterCell] = [CAEmitterCell]()
+        var cells:[CAEmitterCell] = [CAEmitterCell]()
         var x = 0
         while x < 20{
             let cell = CAEmitterCell()
@@ -1071,5 +825,36 @@ class ViewController: UIViewController {
     func getRandomNumber() -> CGFloat {
         return CGFloat(arc4random_uniform(100))
     }
+    
 }
+
+/*
+ Trying some state restoration stuff
+ Hasn't worked so far
+ 
+ extension ViewController : UIViewControllerRestoration {
+    static func viewController(withRestorationIdentifierPath identifierComponents: [String], coder: NSCoder) -> UIViewController? {
+        print("in this static restoration function")
+        let vc = ViewController()
+        return vc
+    }
+
+    override func encodeRestorableState(with coder: NSCoder) {
+        print("indside encodeRestorableState")
+        coder.encode(self.index, forKey: "index")
+        coder.encode(self.navigationController, forKey: "navigationController")
+        //coder.encode(<#T##data: Data##Data#>)
+        super.encodeRestorableState(with: coder)
+    }
+    
+    override func decodeRestorableState(with coder: NSCoder) {
+        print("indside decodeRestorableState")
+        coder.decodeObject(forKey:"navigationController")
+        self.index = coder.decodeInteger(forKey: "index")
+        self.loadNextMeme(first: false)
+        self.updateUI()
+        super.decodeRestorableState(with: coder)
+        //self.viewWillAppear(false)
+    }
+}*/
 

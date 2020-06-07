@@ -35,12 +35,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     static var loggedIn: Bool?
     
     var storyboard: UIStoryboard? {
-        //print("here2")
         return UIStoryboard(name: "Main", bundle: nil)
     }
     
     class func defaultUserPool() -> AWSCognitoIdentityUserPool {
-        //print("here1")
         return AWSCognitoIdentityUserPool(forKey: userPoolID)
     }
     
@@ -48,30 +46,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var cognitoConfig:CognitoConfig?
     
-    /*class func checkLogin () -> UIViewController {
-        /*if (self.navigationController == nil){
-            
-        }
-        if (self.viewController == nil){
-            
-        }*/
-        return loginView()
-    }*/
-    
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        print("In App Delegate1")
         AppDelegate.loggedIn = false
         
         // Initialize Pinpoint
         pinpoint = AWSPinpoint(configuration:
                 AWSPinpointConfiguration.defaultPinpointConfiguration(launchOptions: launchOptions))
-        //sleep(1)
-    //navigationController?.view.backgroundColor = UIColor.clear
-        //self.window?.tintColor = UIColor.white
         let credentialsProvider = AWSCognitoCredentialsProvider(regionType:.USEast2,
         identityPoolId:"us-east-2:7ddd079c-2a06-460d-975c-7fbf8c32c4d8")
         
-        // Change back to USWest1
+        // Can add logger (commented out)
+        // For more info
         let configuration = AWSServiceConfiguration(region:.USWest1, credentialsProvider:credentialsProvider)
         AWSServiceManager.default().defaultServiceConfiguration = configuration
         AWSS3.register(with: configuration!, forKey: "defaultKey")
@@ -79,8 +64,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //AWSDDLog.add(AWSDDTTYLogger.sharedInstance)
         self.cognitoConfig = CognitoConfig()
         self.setupCognitoUserPool()
-        print("End of application AppDelegate")
-        
         do {
             try Amplify.add(plugin: AWSPinpointAnalyticsPlugin())
             try Amplify.configure()
@@ -88,40 +71,42 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         } catch {
             print("Failed to initialize Amplify with \(error)")
         }
-        //print("this is the user in app delegate " + String((AppDelegate.defaultUserPool().currentUser()?.username!)!))
-        /*if(self.navigationController == nil) {
-            print("In App Delegate1")
-            print("navigation controller is nil inside application")
-            self.navigationController = self.window?.rootViewController as? UINavigationController
-            self.loginViewController = self.navigationController?.children[0] as! LoginViewController?
-        }
-        sleep(1)*/
-        
-        
         // Override point for customization after application launch.
-
-        //let syncClient = AWSCognito.default()
-        // Create AWSMobileClient to connect with AWS
         return AWSMobileClient.sharedInstance().interceptApplication(
             application,
             didFinishLaunchingWithOptions: launchOptions)
     }
     
+    /*
+    State restoration stuff
+    Haven't gotten it to work yet
+    
+    func application(_ application: UIApplication, shouldSaveSecureApplicationState coder: NSCoder) -> Bool {
+        print("shouldsavesecureappstate")
+        self.viewController?.encodeRestorableState(with: NSCoder())
+        return true
+    }
+    
+    func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
+        return true
+    }
+    
+    func application(_ application: UIApplication, shouldRestoreSecureApplicationState coder: NSCoder) -> Bool {
+        print("shouldrestoresecureappstate")
+        return true
+    }*/
+    
     func setupCognitoUserPool() {
-        print("setting up Cognito user pool in App Delegate")
         let clientId:String = self.cognitoConfig!.getClientId()
         let poolId:String = self.cognitoConfig!.getPoolId()
         let clientSecret:String = self.cognitoConfig!.getClientSecret()
         let region:AWSRegionType = self.cognitoConfig!.getRegion()
-        
         let serviceConfiguration:AWSServiceConfiguration = AWSServiceConfiguration(region: region, credentialsProvider: nil)
         let cognitoConfiguration:AWSCognitoIdentityUserPoolConfiguration = AWSCognitoIdentityUserPoolConfiguration(clientId: clientId, clientSecret: clientSecret, poolId: poolId)
         AWSCognitoIdentityUserPool.register(with: serviceConfiguration, userPoolConfiguration: cognitoConfiguration, forKey: userPoolID)
         AppDelegate.pool = AppDelegate.defaultUserPool()
         AppDelegate.pool!.delegate = self
     }
-
-    // MARK: - Core Data stack
 
     lazy var persistentContainer: NSPersistentContainer = {
         /*
@@ -173,22 +158,11 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 // 2. Log in
 // 3. Log out
 extension AppDelegate: AWSCognitoIdentityInteractiveAuthenticationDelegate {
-    
     func startPasswordAuthentication() -> AWSCognitoIdentityPasswordAuthentication {
-        print("Just entered App Delegate Authentication Extension")
-        /*if(self.navigationController == nil) {
-            print("initializing navigation controller > this should never be called")
-            self.navigationController = self.window?.rootViewController as? UINavigationController
-        }
-        else if (!AppDelegate.loggedIn!){
-            print("You should be seeing ")
-        }*/
         if(AppDelegate.loggedIn!){
-            print("logging out app delegate")
             self.navigationController?.setViewControllers([self.loginViewController!], animated: true)
         }
         else if (self.navigationController == nil) {
-            print("initializing navigation controller > this should never be called ?")
             self.navigationController = self.window?.rootViewController as? UINavigationController
         }
         else{
@@ -196,6 +170,5 @@ extension AppDelegate: AWSCognitoIdentityInteractiveAuthenticationDelegate {
         }
         return self.loginViewController!
     }
-    
 }
 

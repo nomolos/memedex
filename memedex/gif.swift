@@ -11,6 +11,9 @@ import UIKit
 import ImageIO
 
 
+// Copied this whole class from online
+// Did it for the gifImageWithData function, which allows for loading a gif
+
 fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
   switch (lhs, rhs) {
   case let (l?, r?):

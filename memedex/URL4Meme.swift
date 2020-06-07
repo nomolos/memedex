@@ -16,7 +16,7 @@ class URL4Meme: AWSDynamoDBObjectModel, AWSDynamoDBModeling {
     class func dynamoDBTableName() -> String {
         return "URLs"
     }
-    
+
     class func hashKeyAttribute() -> String {
         return "memename"
     }

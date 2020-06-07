@@ -10,6 +10,9 @@ import UIKit
 import Foundation
 import AWSCore
 
+
+// Somehow this shit works
+// I don't mess with it
 class CognitoConfig: NSObject {
 
     var keys:Dictionary<String,Any>?

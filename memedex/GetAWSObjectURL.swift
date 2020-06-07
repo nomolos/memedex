@@ -10,6 +10,10 @@ import UIKit
 import Foundation
 import AWSS3
 
+// This whole class lets us make a URL
+// To host videos at
+// So we can play the video from this URL
+
 let S3BucketName = "memedexbucket"
 class GetAWSObjectURL: NSObject {
     

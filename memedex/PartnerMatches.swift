@@ -9,6 +9,9 @@
 import UIKit
 import AWSDynamoDB
 
+// Used for finding potential partners
+// A partner is someone whose meme ratings help identify memes
+// For the current user
 class PartnerMatches: AWSDynamoDBObjectModel, AWSDynamoDBModeling {
     @objc var username:NSString?
     @objc var user1:NSString?

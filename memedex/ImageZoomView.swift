@@ -8,6 +8,9 @@
 
 import UIKit
 
+// This whole class exists for zooming into images
+// Double tap to zoom is currently a little buggy -> doesn't take you
+// exactly where you double tap
 class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelegate {
     var imageView: UIImageView!
     var gestureRecognizer: UITapGestureRecognizer!
@@ -18,8 +21,6 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
     convenience init(frame: CGRect, something:Bool) {
         self.init(frame: frame)
         self.frame = frame
-        self.pinchGesture = UIPinchGestureRecognizer(target: self, action: #selector(pinchRecognized(pinch:)))
-        self.addGestureRecognizer(self.pinchGesture)
         setupGestureRecognizer()
     }
     
@@ -36,10 +37,6 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
         self.imageView.centerYAnchor.constraint(equalTo: self.contentLayoutGuide.centerYAnchor).isActive = true
         self.imageView.translatesAutoresizingMaskIntoConstraints = false
         self.setupScrollView(image: self.imageView.image!)
-        print("printing frame inside updateImage")
-        print(self.frame)
-        print("printing the images frame inside updateImage")
-        print(self.imageView.frame)
         self.removeConstraints(self.constraints)
         self.setNeedsLayout()
     }
@@ -51,11 +48,6 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
         delegate = self
         minimumZoomScale = 1.0
         maximumZoomScale = 2.0
-        print("printing frame in setupScrollview")
-        print(self.frame)
-        print(self.contentSize)
-        print(self.visibleSize)
-        print(self.imageView.frame)
     }
     
     // Sets up the gesture recognizer that receives double taps to auto-zoom
@@ -75,28 +67,18 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        //print("inside touchesBegan")
         let touch = touches.first!
         self.zoomHere = touch.location(in: self)
-        //zoom(to: zoomRectForScale(maximumZoomScale, center: self.zoomHere!), animated: true)
-    }
-    
-    @objc func pinchRecognized(pinch: UIPinchGestureRecognizer) {
-        print("recognized pinch")
     }
     
     // Calculates the zoom rectangle for the scale
     func zoomRectForScale(_ scale: CGFloat, center: CGPoint) -> CGRect {
-        print("inside zoomRect")
         var zoomRect = CGRect.zero
         zoomRect.size.height = imageView.frame.size.height / scale
         zoomRect.size.width = imageView.frame.size.width / scale
         let newCenter = self.zoomHere
-        let what = convert(center, from: imageView)
-        zoomRect.origin.x = newCenter!.x /*- (zoomRect.size.width / 2.0)*/
-        zoomRect.origin.y = newCenter!.y /*- (zoomRect.size.height / 2.0)*/
-        print("Rect we want to zoom to")
-        print(zoomRect)
+        zoomRect.origin.x = newCenter!.x
+        zoomRect.origin.y = newCenter!.y
         return zoomRect
     }
     
