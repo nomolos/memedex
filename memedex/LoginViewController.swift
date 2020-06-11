@@ -31,6 +31,10 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     var activityIndicator = UIActivityIndicatorView()
     
     var go_to_golden = false
+
+    var viewController:ViewController?
+    
+    var goldenSetViewController:GoldenSetViewController?
     
     override func viewWillAppear(_ animated: Bool) {
         if (self.password?.text?.count ?? 0 > 7) {
@@ -53,20 +57,38 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         
         self.signup_requirements.isHidden = true
         super.viewWillAppear(animated)
+        
         let appDelegate = UIApplication.shared.delegate as! AppDelegate
         appDelegate.loginViewController = self
+        
         if(self.user == nil){
             self.user = AppDelegate.defaultUserPool().currentUser()
         }
-        if (appDelegate.navigationController == nil){
-            appDelegate.navigationController = appDelegate.window?.rootViewController as? UINavigationController
-        }
+        
+        //if (appDelegate.navigationController == nil){
+         //   appDelegate.navigationController = appDelegate.window?.rootViewController as? UINavigationController
+        //}
+        
+        print("finding out if the user is signed in loginView")
+        print(self.user?.isSignedIn)
+        
         // User is already signed in
         if(self.user?.isSignedIn ?? false){
-            appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-            (appDelegate.viewController as! ViewController).user = self.user
-            appDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
+            print("printing our window loginView")
+            print(self.view.window)
+            print("should be transitioning to viewController")
+            print(appDelegate)
+            self.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+            print(self.viewController)
+            self.viewController!.user = self.user
+            print(self.navigationController)
+            // should be the same as accessing from scene delegate
+            self.navigationController?.setViewControllers([self.viewController!], animated: true)
+            //let sceneDelegate = UIApplication.shared.delegate as! SceneDelegate
+            //sceneDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
+            print("should have transitioned to view controller")
         }
+        
         self.password?.addTarget(self, action: #selector(self.inputDidChange(_:)), for: .editingChanged)
         self.email?.addTarget(self, action: #selector(self.inputDidChange(_:)), for: .editingChanged)
         self.cognitoConfig = CognitoConfig()
@@ -101,11 +123,13 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             self.performSegue(withIdentifier: "SignUpSegue", sender: self)
             return
         }
-        let appDelegate = UIApplication.shared.delegate as! AppDelegate
-        if(appDelegate.viewController == nil){
-            print("our view controller is nil")
-            appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-        }
+        
+        //let appDelegate = UIApplication.shared.delegate as! AppDelegate
+        //if(appDelegate.viewController == nil){
+        //    print("our view controller is nil")
+         //   appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+        //}
+        
         // Enough info to sign up
         if((self.email.text?.isValidEmail())! && self.password.text?.count ?? 0 > 7){
             AppDelegate.pool?.signUp(self.email.text!, password: self.password.text!, userAttributes: [email!], validationData: nil).continueWith{ (response) -> Any? in
@@ -186,15 +210,17 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
 
 extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
     public func getDetails(_ authenticationInput: AWSCognitoIdentityPasswordAuthenticationInput, passwordAuthenticationCompletionSource: AWSTaskCompletionSource<AWSCognitoIdentityPasswordAuthenticationDetails>) {
+        print("inside getDetails loginView")
         self.passwordAuthenticationCompletion = passwordAuthenticationCompletionSource
-        DispatchQueue.main.async {
+        /*DispatchQueue.main.async {
             if (self.email.text == nil) {
                 print("in login get details and an email is nil... not sure what's up")
             }
-        }
+        }*/
     }
     
     public func didCompleteStepWithError(_ error: Error?) {
+        print("inside didCompleteStepWithError LoginView")
         DispatchQueue.main.async {
             if let error = error as NSError? {
                 let casted = error as NSError
@@ -228,13 +254,15 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                         hundredth_second_count = hundredth_second_count + 1
                     }
                     if(!self.go_to_golden){
-                        appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-                        appDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
+                        let hacky_scene_access = UIApplication.shared.connectedScenes.first
+                        let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
+                        scene_delegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                        scene_delegate.navigationController?.setViewControllers([scene_delegate.viewController!], animated: true)
                     }
                     else{
-                        appDelegate.goldenSetViewController = self.storyboard?.instantiateViewController(withIdentifier: "GoldenSetViewController") as? GoldenSetViewController
+                        self.goldenSetViewController = self.storyboard?.instantiateViewController(withIdentifier: "GoldenSetViewController") as? GoldenSetViewController
                         self.go_to_golden = false
-                        appDelegate.navigationController?.setViewControllers([(appDelegate.goldenSetViewController!)], animated: true)
+                        self.navigationController?.setViewControllers([(self.goldenSetViewController!)], animated: true)
                     }
                 }
                 else{

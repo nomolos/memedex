@@ -45,6 +45,8 @@ class ViewController: UIViewController {
     var activityIndicator = UIActivityIndicatorView()
     var meme_cache = [Data]()
     let meme_cache_semaphore = DispatchSemaphore(value: 0)
+    static let key_1 = "key_1"
+    static let key_2 = "key_2"
     
     @IBOutlet weak var back_button: UIButton!
     var meme_link:UIButton?
@@ -89,6 +91,9 @@ class ViewController: UIViewController {
             let queryExpression = AWSDynamoDBQueryExpression()
             queryExpression.keyConditionExpression = "memename = :memename"
             let spliced = self.keys[self.index].dropFirst(12)
+            print(spliced)
+            print(spliced)
+            print(spliced)
             queryExpression.expressionAttributeValues = [":memename": spliced]
             let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
             let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
@@ -102,13 +107,17 @@ class ViewController: UIViewController {
             }
             if (task.result != nil){
                 print("no error in querying for URL hooray!")
+                print(task.result!.items)
             }
             self.waitURL.leave()
             return task.result
             }) as! AWSTask<AWSDynamoDBPaginatedOutput>
             self.waitURL.notify(queue: .main){
+                print("about to calculate urley")
                 let urley = somefin.result!.items[0] as! URL4Meme
+                print(urley)
                 var urley_string = String(urley.URL!)
+                print(urley_string)
                 self.activityIndicator.stopAnimating()
                 UIApplication.shared.open(URL(string: urley_string)!)
             }
@@ -282,9 +291,12 @@ class ViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        let appDelegate = UIApplication.shared.delegate as? AppDelegate
+        //let appDelegate = UIApplication.shared.delegate as? AppDelegate
         /*UIApplication.shared.windows.first?.rootViewController = appDelegate?.window?.rootViewController
         UIApplication.shared.windows.first?.makeKeyAndVisible()*/
+        let hacky_scene_access = UIApplication.shared.connectedScenes.first
+        let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
+        scene_delegate.viewController = self
         if(self.meme_link == nil){
             self.meme_link = UIButton()
             let temp_image = UIImage(named: "link") as UIImage?
@@ -358,78 +370,8 @@ class ViewController: UIViewController {
         let transferUtility = AWSS3TransferUtility.default()
         let expression = AWSS3TransferUtilityDownloadExpression()
         // Very first meme of the session
-        if (first){
-            transferUtility.downloadData(fromBucket: s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
-                if error != nil{
-                    print(error!)
-                    print("error")
-                    return
-                }
-                DispatchQueue.main.sync(execute: {
-                    let imageExtensions = ["png", "jpg", "gif", "ifv"]
-                    let last3 = self.keys[self.index].suffix(3)
-                    if imageExtensions.contains(String(last3)){
-                        //we've got a gif
-                        if last3.contains("gif") || last3.contains("ifv"){
-                            let gif = UIImage.gifImageWithData(data!)
-                            self.image = gif
-                        }
-                        else{
-                            let pic = UIImage(data: data!)
-                            self.image = pic
-                        }
-                        if(self.playerViewController != nil){
-                            self.playerViewController?.willMove(toParent: nil)
-                            self.playerViewController?.view.removeFromSuperview()
-                            self.playerViewController?.removeFromParent()
-                            self.playerViewController = nil
-                            self.player = nil
-                        }
-                        self.meme.isHidden = false
-                        self.imageView.isHidden = false
-                        self.updateUI()
-                        self.slider.isEnabled = true
-                        self.back_button.isEnabled = true
-                        self.activityIndicator.stopAnimating()
-                        self.background_meme_download()
-                        return
-                    }
-                    else{
-                        if(self.playerViewController != nil){
-                            self.playerViewController?.willMove(toParent: nil)
-                            self.playerViewController?.view.removeFromSuperview()
-                            self.playerViewController?.removeFromParent()
-                            self.playerViewController = nil
-                            self.player = nil
-                        }
-                        let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
-                        let temp_url = URL(string: temp0_url)
-                        self.player = AVPlayer(url: temp_url!)
-                        self.playerViewController = AVPlayerViewController()
-                        self.playerViewController!.player = self.player
-                        self.playerViewController!.view.frame = self.meme.frame
-                        self.addChild(self.playerViewController!)
-                        self.view.addSubview(self.playerViewController!.view)
-                        self.playerViewController!.didMove(toParent: self)
-                        self.player?.play()
-                        self.meme.isHidden = true
-                        self.imageView.isHidden = true
-                        self.updateUI()
-                        self.slider.isEnabled = true
-                        self.back_button.isEnabled = true
-                        self.activityIndicator.stopAnimating()
-                        /*if(!first){
-                            print("calling background_meme_download from loadNextMeme")
-                            self.background_meme_download()
-                        }*/
-                        self.background_meme_download()
-                        return
-                    }
-                })
-            }
-        }
-        // We haven't downloaded the next meme that we want
-        else if(!(self.downloaded_index > self.index || self.index_for_cache < 0)){
+        // OR We haven't downloaded the next meme that we want
+        if(first || (!(self.downloaded_index > self.index || self.index_for_cache < 0))){
             transferUtility.downloadData(fromBucket: s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
                 if error != nil{
                     print(error!)
@@ -826,35 +768,90 @@ class ViewController: UIViewController {
         return CGFloat(arc4random_uniform(100))
     }
     
-}
+    // STATE RESTORATION SHIT FROM HERE ON OUT
+    // STATE RESTORATION SHIT FROM HERE ON OUT
+    // STATE RESTORATION SHIT FROM HERE ON OUT
+    // STATE RESTORATION SHIT FROM HERE ON OUT
+    // STATE RESTORATION SHIT FROM HERE ON OUT
+    
+    /*
+     Might be for non-scene-based
+     func applyUserActivityEntries(_ activity: NSUserActivity) {
+        print("applyUserActivityEntries DetailViewController")
 
-/*
- Trying some state restoration stuff
- Hasn't worked so far
- 
- extension ViewController : UIViewControllerRestoration {
-    static func viewController(withRestorationIdentifierPath identifierComponents: [String], coder: NSCoder) -> UIViewController? {
-        print("in this static restoration function")
-        let vc = ViewController()
-        return vc
-    }
-
-    override func encodeRestorableState(with coder: NSCoder) {
-        print("indside encodeRestorableState")
-        coder.encode(self.index, forKey: "index")
-        coder.encode(self.navigationController, forKey: "navigationController")
-        //coder.encode(<#T##data: Data##Data#>)
-        super.encodeRestorableState(with: coder)
+        // We remember the item's identifier for unsaved changes.
+        let index: [Int: Int] = [ViewController.activityIdentifierKey: detailItem!.identifier]
+        activity.addUserInfoEntries(from: itemIdentifier)
+        
+        // Remember the edit mode state to restore next time (we compare the orignal note with the unsaved note).
+        let originalItem = DataSource.shared().itemFromIdentifier(detailItem!.identifier)
+        let nowEditing = originalItem.title != detailName.text || originalItem.notes != detailNotes.text
+        let nowEditingSaveState: [String: Bool] = [DetailViewController.activityEditStateKey: nowEditing]
+        activity.addUserInfoEntries(from: nowEditingSaveState)
+    }*/
+    
+    func restoreItemInterface(_ activityUserInfo: [AnyHashable: Any]) {
+        print("restoreItemInterface called ViewController")
+        print((activityUserInfo[ViewController.key_1] as? Int))
+        self.index = (activityUserInfo[ViewController.key_1] as? Int)!
     }
     
-    override func decodeRestorableState(with coder: NSCoder) {
-        print("indside decodeRestorableState")
-        coder.decodeObject(forKey:"navigationController")
-        self.index = coder.decodeInteger(forKey: "index")
-        self.loadNextMeme(first: false)
-        self.updateUI()
-        super.decodeRestorableState(with: coder)
-        //self.viewWillAppear(false)
+    
+    class var activityType: String {
+        print("setting activityType DetailViewController")
+        let activityType = ""
+        
+        // Load our activity type from our Info.plist.
+        if let activityTypes = Bundle.main.infoDictionary?["NSUserActivityTypes"] {
+            if let activityArray = activityTypes as? [String] {
+                return activityArray[0]
+            }
+        }
+        
+        return activityType
     }
-}*/
+    
+    // Used by our scene delegate to return an instance of this class from our storyboard.
+    static func loadFromStoryboard() -> ViewController? {
+        print("loadFromStoryboard ViewController")
+        let storyboard = UIStoryboard(name: "Main", bundle: .main)
+        return storyboard.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+    }
+    
+    // Used to construct an NSUserActivity instance for state restoration.
+    var detailUserActivity: NSUserActivity {
+        print("detailUserActivity ViewController")
+        let userActivity = NSUserActivity(activityType: ViewController.activityType)
+        userActivity.title = "Restore Item"
+        let index_temp : [String:Int] = [ViewController.key_1: self.index]
+        userActivity.addUserInfoEntries(from: index_temp)
+        //applyUserActivityEntries(userActivity)
+        return userActivity
+    }
+}
+ 
+ extension ViewController {
+    
+    override func updateUserActivityState(_ activity: NSUserActivity) {
+        print("updateUserActivityState ViewController")
+        let userActivity = NSUserActivity(activityType: ViewController.activityType)
+        userActivity.title = "Restore Item"
+        let index_temp : [String:Int] = [ViewController.key_1: self.index]
+        userActivity.addUserInfoEntries(from: index_temp)
+        super.updateUserActivityState(activity)
+    }
+
+    override func restoreUserActivityState(_ activity: NSUserActivity) {
+        print("restoreUserActivityState ViewController")
+         super.restoreUserActivityState(activity)
+        // Check if the activity is of our type.
+        if activity.activityType == ViewController.activityType {
+            // Get the user activity data.
+            print("activity type does equal our type")
+            if let activityUserInfo = activity.userInfo {
+                restoreItemInterface(activityUserInfo)
+            }
+        }
+    }
+}
 

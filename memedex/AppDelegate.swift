@@ -26,13 +26,15 @@ var pinpoint: AWSPinpoint?
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
     
-    var navigationController: UINavigationController?
+    //var navigationController: UINavigationController?
     var viewController: UIViewController?
     var loginViewController: LoginViewController?
     var verificationViewController: VerificationViewController?
     var goldenSetViewController: GoldenSetViewController?
     static var pool: AWSCognitoIdentityUserPool?
     static var loggedIn: Bool?
+    //var window: UIWindow?
+   //var navigationController:UINavigationController?
     
     var storyboard: UIStoryboard? {
         return UIStoryboard(name: "Main", bundle: nil)
@@ -42,12 +44,20 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         return AWSCognitoIdentityUserPool(forKey: userPoolID)
     }
     
-    var window: UIWindow?
+    //var window: UIWindow?
     
     var cognitoConfig:CognitoConfig?
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
+        //print("printing window app delegate")
+        //print(self.window)
         AppDelegate.loggedIn = false
+        print("printing Scenes app delegate")
+        print(UIApplication.shared.connectedScenes)
+        /*self.window = UIWindow(frame: UIScreen.main.bounds)
+        self.navigationController = UINavigationController(rootViewController: LoginViewController())
+        self.window?.rootViewController = self.navigationController
+        self.window?.makeKeyAndVisible()*/
         
         // Initialize Pinpoint
         pinpoint = AWSPinpoint(configuration:
@@ -71,15 +81,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         } catch {
             print("Failed to initialize Amplify with \(error)")
         }
+        //self.window?.makeKeyAndVisible()
         // Override point for customization after application launch.
         return AWSMobileClient.sharedInstance().interceptApplication(
             application,
             didFinishLaunchingWithOptions: launchOptions)
     }
     
-    /*
-    State restoration stuff
-    Haven't gotten it to work yet
+    //State restoration stuff
+    //Haven't gotten it to work yet
     
     func application(_ application: UIApplication, shouldSaveSecureApplicationState coder: NSCoder) -> Bool {
         print("shouldsavesecureappstate")
@@ -94,7 +104,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ application: UIApplication, shouldRestoreSecureApplicationState coder: NSCoder) -> Bool {
         print("shouldrestoresecureappstate")
         return true
-    }*/
+    }
     
     func setupCognitoUserPool() {
         let clientId:String = self.cognitoConfig!.getClientId()
@@ -159,16 +169,61 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 // 3. Log out
 extension AppDelegate: AWSCognitoIdentityInteractiveAuthenticationDelegate {
     func startPasswordAuthentication() -> AWSCognitoIdentityPasswordAuthentication {
+        print("inside startPasswordAuthentication AppDelegate")
+        //UIApplication.shared.connectedScenes
+        let hacky_scene_access = UIApplication.shared.connectedScenes.first
+        let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
         if(AppDelegate.loggedIn!){
-            self.navigationController?.setViewControllers([self.loginViewController!], animated: true)
+            print("printing connected scenes from app delegate in auth")
+            //print(self.window.rootViewController)
+            print(UIApplication.shared.connectedScenes)
+            print("printing scene delegate's navigationView and login view")
+            print(scene_delegate.navigationController)
+            print(scene_delegate.loginViewController)
+            scene_delegate.navigationController?.setViewControllers([scene_delegate.loginViewController!], animated: true)
+            //self.navigationController!.setViewControllers([self.loginViewController!], animated: true)
         }
-        else if (self.navigationController == nil) {
-            self.navigationController = self.window?.rootViewController as? UINavigationController
-        }
-        else{
-            print("No conditions satisified AppDelegate")
-        }
-        return self.loginViewController!
+        print("printing scene delegate's navigationView and login view")
+        print(scene_delegate.navigationController)
+        print(scene_delegate.loginViewController)
+        print(UIApplication.shared.connectedScenes)
+        return scene_delegate.loginViewController!
     }
 }
 
+// MARK: - AppDelegate Scene Lifecycle Support
+
+extension AppDelegate {
+    
+    /** Called when the UIKit is about to create & vend a new UIScene instance to the application.
+        Use this method to select a configuration to create the new scene with.
+        The application delegate may modify the provided UISceneConfiguration within this method.
+        If the UISceneConfiguration instance returned from this method does not have a systemType
+        which matches the connectingSession's, UIKit will assert.
+    */
+    @available(iOS 13.0, *)
+    func application(_ application: UIApplication,
+                     configurationForConnecting connectingSceneSession: UISceneSession,
+                     options: UIScene.ConnectionOptions) -> UISceneConfiguration {
+        print("returning UISceneConfiguration AppDelegate")
+        return UISceneConfiguration(name: "Main Scene", sessionRole: connectingSceneSession.role)
+    }
+    
+    /** The scene session was discarded by the user.
+     
+        Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+        Remove any state or data associated with this session, as it will not return.
+
+        Called when the system, due to a user interaction or a request from the application itself,
+        removes one or more representation from the -[UIApplication openSessions] set.
+     
+        If any sessions were discarded while the application was not running,
+        this will be called shortly after application:didFinishLaunchingWithOptions.
+     */
+    @available(iOS 13.0, *)
+    func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
+        //..
+        print("In third application func AppDelegate")
+    }
+
+}

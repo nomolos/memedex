@@ -175,10 +175,12 @@ class GoldenSetViewController: UIViewController {
                 print("leaving golden set")
                 let alert = UIAlertController(title: "All Set!", message: "Thank you for labeling the golden set! We now have the necessary data to recommend memes to you.", preferredStyle: .alert)
                 alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: {(alert: UIAlertAction!) in
-                let appDelegate = UIApplication.shared.delegate as! AppDelegate
-                appDelegate.viewController = nil
-                appDelegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-                appDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
+                //let appDelegate = UIApplication.shared.delegate as! AppDelegate
+                //appDelegate.viewController = nil
+                let hacky_scene_access = UIApplication.shared.connectedScenes.first
+                let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
+                scene_delegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                scene_delegate.navigationController!.setViewControllers([scene_delegate.viewController!], animated: true)
                 }))
                 self.present(alert, animated: true)
                 return
