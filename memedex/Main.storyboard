@@ -284,7 +284,7 @@
                                     <constraint firstAttribute="width" constant="343" id="tsX-nl-svl"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="20"/>
-                                <textInputTraits key="textInputTraits" textContentType="password"/>
+                                <textInputTraits key="textInputTraits" secureTextEntry="YES" textContentType="password"/>
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Confirm Password" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="9pq-RF-gXl" customClass="TextField" customModule="memedex" customModuleProvider="target">
                                 <rect key="frame" x="35.5" y="451" width="343" height="48"/>
@@ -293,7 +293,7 @@
                                     <constraint firstAttribute="width" constant="343" id="C27-il-vIq"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="20"/>
-                                <textInputTraits key="textInputTraits" textContentType="password"/>
+                                <textInputTraits key="textInputTraits" secureTextEntry="YES" textContentType="password"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SNY-bb-xRn">
                                 <rect key="frame" x="36" y="573" width="343" height="48"/>
@@ -428,6 +428,6 @@
         <image name="textfield" width="343" height="48"/>
     </resources>
     <inferredMetricsTieBreakers>
-        <segue reference="gyI-wS-v5B"/>
+        <segue reference="YpF-fo-M1p"/>
     </inferredMetricsTieBreakers>
 </document>

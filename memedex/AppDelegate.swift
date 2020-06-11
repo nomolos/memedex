@@ -52,8 +52,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         //print("printing window app delegate")
         //print(self.window)
         AppDelegate.loggedIn = false
-        print("printing Scenes app delegate")
-        print(UIApplication.shared.connectedScenes)
+        //print("printing Scenes app delegate")
+        //print(UIApplication.shared.connectedScenes)
         /*self.window = UIWindow(frame: UIScreen.main.bounds)
         self.navigationController = UINavigationController(rootViewController: LoginViewController())
         self.window?.rootViewController = self.navigationController
@@ -92,7 +92,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     //Haven't gotten it to work yet
     
     func application(_ application: UIApplication, shouldSaveSecureApplicationState coder: NSCoder) -> Bool {
-        print("shouldsavesecureappstate")
+        //print("shouldsavesecureappstate")
         self.viewController?.encodeRestorableState(with: NSCoder())
         return true
     }
@@ -102,7 +102,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ application: UIApplication, shouldRestoreSecureApplicationState coder: NSCoder) -> Bool {
-        print("shouldrestoresecureappstate")
+        //print("shouldrestoresecureappstate")
         return true
     }
     
@@ -169,24 +169,24 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 // 3. Log out
 extension AppDelegate: AWSCognitoIdentityInteractiveAuthenticationDelegate {
     func startPasswordAuthentication() -> AWSCognitoIdentityPasswordAuthentication {
-        print("inside startPasswordAuthentication AppDelegate")
+        //print("inside startPasswordAuthentication AppDelegate")
         //UIApplication.shared.connectedScenes
         let hacky_scene_access = UIApplication.shared.connectedScenes.first
         let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
         if(AppDelegate.loggedIn!){
-            print("printing connected scenes from app delegate in auth")
+            //print("printing connected scenes from app delegate in auth")
             //print(self.window.rootViewController)
-            print(UIApplication.shared.connectedScenes)
-            print("printing scene delegate's navigationView and login view")
-            print(scene_delegate.navigationController)
-            print(scene_delegate.loginViewController)
+            //print(UIApplication.shared.connectedScenes)
+            //print("printing scene delegate's navigationView and login view")
+            //print(scene_delegate.navigationController)
+            //print(scene_delegate.loginViewController)
             scene_delegate.navigationController?.setViewControllers([scene_delegate.loginViewController!], animated: true)
             //self.navigationController!.setViewControllers([self.loginViewController!], animated: true)
         }
-        print("printing scene delegate's navigationView and login view")
-        print(scene_delegate.navigationController)
-        print(scene_delegate.loginViewController)
-        print(UIApplication.shared.connectedScenes)
+        //print("printing scene delegate's navigationView and login view")
+        //print(scene_delegate.navigationController)
+        //print(scene_delegate.loginViewController)
+        //print(UIApplication.shared.connectedScenes)
         return scene_delegate.loginViewController!
     }
 }

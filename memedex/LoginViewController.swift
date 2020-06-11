@@ -69,24 +69,24 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
          //   appDelegate.navigationController = appDelegate.window?.rootViewController as? UINavigationController
         //}
         
-        print("finding out if the user is signed in loginView")
-        print(self.user?.isSignedIn)
+        //print("finding out if the user is signed in loginView")
+        //print(self.user?.isSignedIn)
         
         // User is already signed in
         if(self.user?.isSignedIn ?? false){
-            print("printing our window loginView")
-            print(self.view.window)
-            print("should be transitioning to viewController")
-            print(appDelegate)
+            //print("printing our window loginView")
+            //print(self.view.window)
+            //print("should be transitioning to viewController")
+            //print(appDelegate)
             self.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-            print(self.viewController)
+            //print(self.viewController)
             self.viewController!.user = self.user
-            print(self.navigationController)
+            //print(self.navigationController)
             // should be the same as accessing from scene delegate
             self.navigationController?.setViewControllers([self.viewController!], animated: true)
             //let sceneDelegate = UIApplication.shared.delegate as! SceneDelegate
             //sceneDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
-            print("should have transitioned to view controller")
+            //print("should have transitioned to view controller")
         }
         
         self.password?.addTarget(self, action: #selector(self.inputDidChange(_:)), for: .editingChanged)
@@ -154,7 +154,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         }
         // Email isn't valid
         else if(!(self.email.text?.isValidEmail())!){
-            print("presenting valid email error")
+            //print("presenting valid email error")
             self.activityIndicator.stopAnimating()
             let alert = UIAlertController(title: "Invalid Email", message: "The email address entered is invalid", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Retry", style: .default, handler: nil))
@@ -162,7 +162,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         }
         // Password isn't long enough
         else if(self.password.text?.count ?? 0 < 8){
-            print("presenting valid password error")
+            //print("presenting valid password error")
             self.activityIndicator.stopAnimating()
             let alert = UIAlertController(title: "Password too short", message: "Password needs to be at least 8 characters", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Retry", style: .default, handler: nil))
@@ -210,7 +210,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
 
 extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
     public func getDetails(_ authenticationInput: AWSCognitoIdentityPasswordAuthenticationInput, passwordAuthenticationCompletionSource: AWSTaskCompletionSource<AWSCognitoIdentityPasswordAuthenticationDetails>) {
-        print("inside getDetails loginView")
+        //print("inside getDetails loginView")
         self.passwordAuthenticationCompletion = passwordAuthenticationCompletionSource
         /*DispatchQueue.main.async {
             if (self.email.text == nil) {
@@ -220,7 +220,7 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
     }
     
     public func didCompleteStepWithError(_ error: Error?) {
-        print("inside didCompleteStepWithError LoginView")
+        //print("inside didCompleteStepWithError LoginView")
         DispatchQueue.main.async {
             if let error = error as NSError? {
                 let casted = error as NSError

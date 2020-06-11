@@ -34,6 +34,7 @@ class ViewController: UIViewController {
     let waitPotentialActivePartner = DispatchGroup()
     let waitFinalPartner = DispatchGroup()
     let waitMemeNamesS3 = DispatchGroup()
+    let waitPotentialActivePartner2 = DispatchGroup()
     let waitURL = DispatchGroup()
     let dispatchQueue = DispatchQueue(label: "com.queue.Serial")
     var emitter = CAEmitterLayer()
@@ -91,9 +92,6 @@ class ViewController: UIViewController {
             let queryExpression = AWSDynamoDBQueryExpression()
             queryExpression.keyConditionExpression = "memename = :memename"
             let spliced = self.keys[self.index].dropFirst(12)
-            print(spliced)
-            print(spliced)
-            print(spliced)
             queryExpression.expressionAttributeValues = [":memename": spliced]
             let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
             let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
@@ -103,21 +101,16 @@ class ViewController: UIViewController {
             var somefin = dynamoDBObjectMapper.query(URL4Meme.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
             if (task.error != nil){
                 print("error in querying for URL fuckshitdamn")
-                print(task.error)
             }
             if (task.result != nil){
                 print("no error in querying for URL hooray!")
-                print(task.result!.items)
             }
             self.waitURL.leave()
             return task.result
             }) as! AWSTask<AWSDynamoDBPaginatedOutput>
             self.waitURL.notify(queue: .main){
-                print("about to calculate urley")
                 let urley = somefin.result!.items[0] as! URL4Meme
-                print(urley)
                 var urley_string = String(urley.URL!)
-                print(urley_string)
                 self.activityIndicator.stopAnimating()
                 UIApplication.shared.open(URL(string: urley_string)!)
             }
@@ -325,6 +318,7 @@ class ViewController: UIViewController {
             self.findPartnerMatchesPart2()
             self.waitFinalPartner.notify(queue: .main){
                 if self.found_match{
+                    print("we found a match")
                     self.loadMemesRecommendedByPartner()
                 }
                 else{
@@ -342,6 +336,11 @@ class ViewController: UIViewController {
                 }
             }
         }
+        print("PRINTING USER IN VIEWCONTROLLER")
+        print("PRINTING USER IN VIEWCONTROLLER")
+        print(self.user?.username)
+        print("PRINTING USER IN VIEWCONTROLLER")
+        print("PRINTING USER IN VIEWCONTROLLER")
     }
     
     func rateCurrentMeme() {
@@ -507,8 +506,7 @@ class ViewController: UIViewController {
                 let expression = AWSS3TransferUtilityDownloadExpression()
                 transferUtility.downloadData(fromBucket: self.s3bucket, key: self.keys[self.downloaded_index], expression: expression) { (task, url, data, error) in
                     if error != nil{
-                        print(error!)
-                        print("error")
+                        print("error in background meme download")
                         return
                     }
                     self.meme_cache_semaphore.signal()
@@ -576,6 +574,8 @@ class ViewController: UIViewController {
         if matches2?.count ?? 0 == 1 {
             let user_list = matches2![0] as! PartnerMatches
             let user_list_strings = user_list.getUsers()
+            print("printing users we could match with")
+            print(user_list_strings)
             var num_checked_users = 0
             for paired_user in user_list_strings{
                 queryExpression.expressionAttributeValues = [":username": paired_user]
@@ -586,6 +586,10 @@ class ViewController: UIViewController {
                 if (task.error != nil){
                     print("ERROR IN findPartnerMatchesPart2")
                 }
+                print("printing something in ActiveToday")
+                print("printing something in ActiveToday")
+                print("printing something in ActiveToday")
+                print(task.result!.items)
                 self.waitPotentialActivePartner.leave()
                 return task.result
                 }) as! AWSTask<AWSDynamoDBPaginatedOutput>
@@ -599,13 +603,50 @@ class ViewController: UIViewController {
                         if returned_matches?.count ?? 0 == 1 {
                             self.found_match = true
                             self.user_to_pair_with = paired_user
+                            print("SHOULD BE PAIRING WITH THE USER BELOW")
+                            print("SHOULD BE PAIRING WITH THE USER BELOW")
+                            print(self.user_to_pair_with)
+                            print("SHOULD BE PAIRING WITH THE USER BELOW")
+                            print("SHOULD BE PAIRING WITH THE USER BELOW")
                             self.waitFinalPartner.leave()
                             return;
                         }
                         // we need to free the queue even though
                         // we didn't find a match
+                        // This time search through active users only
+                        // Eventually we should filter through the active users
+                        // in this part of the code
+                        // For now, don't wait to slow it down
                         else if num_checked_users == user_list_strings.count{
-                            self.waitFinalPartner.leave()
+                            print("we didn't find a match within our user matches")
+                            self.waitPotentialActivePartner2.enter()
+                            let queryExpression2 = AWSDynamoDBScanExpression()
+                            //queryExpression2.keyConditionExpression = "username = :username"
+                           //queryExpression2.expressionAttributeValues = [":username": "*"]
+                            let active_matches = dynamoDBObjectMapper.scan(ActiveUser.self, expression: queryExpression2).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+                                if (task.error != nil){
+                                    print("ERROR IN findPartnerMatchesPart2")
+                                    print(task.error)
+                                }
+                                print("printing something in ActiveToday")
+                                print("printing something in ActiveToday")
+                                print("printing something in ActiveToday")
+                                print(task.result!.items)
+                                self.waitPotentialActivePartner2.leave()
+                                return task.result
+                                }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+                            self.waitPotentialActivePartner2.notify(queue: .main){
+                                if(active_matches.result?.items.count != 0){
+                                    self.found_match = true
+                                    print("found a match that was active today but not part of our matches table")
+                                    let user2 = active_matches.result!.items[0] as! ActiveUser
+                                    //let user_list_strings2 = user_list2.getUsers()
+                                    self.user_to_pair_with = user2.username as String?
+                                    print("printing user to pair with")
+                                    print(self.user_to_pair_with)
+                                }
+                                self.waitFinalPartner.leave()
+                            }
                             return;
                         }
                     }
@@ -622,6 +663,7 @@ class ViewController: UIViewController {
     }
     
     func loadMemesRecommendedByPartner() {
+        print("in loadMemesRecommendedByPartner")
         let queryExpression = AWSDynamoDBQueryExpression()
         queryExpression.keyConditionExpression = "username = :username"
         queryExpression.expressionAttributeValues = [":username": self.user_to_pair_with!]
@@ -634,15 +676,15 @@ class ViewController: UIViewController {
             // FOURTH QUERY FOR MEME NAMES OF RECOMMENDED MEMES
             matches5 = (dynamoDBObjectMapper.query(Meme.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
                 if (task.error != nil){
-                    print("error")
+                    print("error in loadMemesRecommendedByPartner")
                 }
                 if (task.result != nil){
-                    print("here2")
                     self.waitPartnerMemes.leave()
                 }
                 return task.result
             }) as! AWSTask<AWSDynamoDBPaginatedOutput>)
         }
+        
         // THIS GROUP IS DEPENDENT ON QUERY FOUR
         // THIS GROUP IS ALSO DEPENDENT ON QUERY 3
         // 555555555
@@ -651,6 +693,8 @@ class ViewController: UIViewController {
         self.waitMemeNamesS3.notify(queue: .main){
             self.waitPartnerMemes.notify(queue: self.dispatchQueue){
                 let all_ratings_of_partner = matches5?.result?.items
+                print("printing ratings of partner")
+                print(all_ratings_of_partner)
                 var temp_keys = [String]()
                 for meme_rating_pair in all_ratings_of_partner!{
                     let meme_rating_pair2 = meme_rating_pair as! Meme
@@ -685,9 +729,9 @@ class ViewController: UIViewController {
                 return nil
             }
             self.userAttributes = task.result?.userAttributes
-            DispatchQueue.main.async {
-                print("fetchuserattributes worked in viewdidload")
-            }
+            /*DispatchQueue.main.async {
+                //print("fetchuserattributes worked in viewdidload")
+            }*/
             return nil
         })
     }
@@ -791,14 +835,14 @@ class ViewController: UIViewController {
     }*/
     
     func restoreItemInterface(_ activityUserInfo: [AnyHashable: Any]) {
-        print("restoreItemInterface called ViewController")
+        //print("restoreItemInterface called ViewController")
         print((activityUserInfo[ViewController.key_1] as? Int))
         self.index = (activityUserInfo[ViewController.key_1] as? Int)!
     }
     
     
     class var activityType: String {
-        print("setting activityType DetailViewController")
+        //print("setting activityType DetailViewController")
         let activityType = ""
         
         // Load our activity type from our Info.plist.
@@ -813,14 +857,14 @@ class ViewController: UIViewController {
     
     // Used by our scene delegate to return an instance of this class from our storyboard.
     static func loadFromStoryboard() -> ViewController? {
-        print("loadFromStoryboard ViewController")
+        //print("loadFromStoryboard ViewController")
         let storyboard = UIStoryboard(name: "Main", bundle: .main)
         return storyboard.instantiateViewController(withIdentifier: "ViewController") as? ViewController
     }
     
     // Used to construct an NSUserActivity instance for state restoration.
     var detailUserActivity: NSUserActivity {
-        print("detailUserActivity ViewController")
+        //print("detailUserActivity ViewController")
         let userActivity = NSUserActivity(activityType: ViewController.activityType)
         userActivity.title = "Restore Item"
         let index_temp : [String:Int] = [ViewController.key_1: self.index]
@@ -833,7 +877,7 @@ class ViewController: UIViewController {
  extension ViewController {
     
     override func updateUserActivityState(_ activity: NSUserActivity) {
-        print("updateUserActivityState ViewController")
+        //print("updateUserActivityState ViewController")
         let userActivity = NSUserActivity(activityType: ViewController.activityType)
         userActivity.title = "Restore Item"
         let index_temp : [String:Int] = [ViewController.key_1: self.index]
@@ -842,12 +886,12 @@ class ViewController: UIViewController {
     }
 
     override func restoreUserActivityState(_ activity: NSUserActivity) {
-        print("restoreUserActivityState ViewController")
+        //print("restoreUserActivityState ViewController")
          super.restoreUserActivityState(activity)
         // Check if the activity is of our type.
         if activity.activityType == ViewController.activityType {
             // Get the user activity data.
-            print("activity type does equal our type")
+            //print("activity type does equal our type")
             if let activityUserInfo = activity.userInfo {
                 restoreItemInterface(activityUserInfo)
             }
