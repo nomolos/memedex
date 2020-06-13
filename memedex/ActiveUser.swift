@@ -11,6 +11,7 @@ import AWSDynamoDB
 
 class ActiveUser: AWSDynamoDBObjectModel, AWSDynamoDBModeling {
     @objc var username:NSString?
+    @objc var num_ratings:NSNumber?
     
     class func dynamoDBTableName() -> String {
         return "users_active_today"

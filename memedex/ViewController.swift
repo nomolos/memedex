@@ -235,12 +235,14 @@ class ViewController: UIViewController {
     
     @IBAction func next(_ sender: Any) {
         self.slider.isEnabled = false
-        // This user is active for the first time today
+        // This user is active
         // Send a notification to Dynamo
         // Adds them to today's Active Users table
-        if(self.index == 0){
+        // Want to update this after every 10 labels
+        if(self.index == 0 || (self.index % 10 == 0)){
             var active_user = ActiveUser()
             active_user?.username = user?.username as! NSString
+            active_user?.num_ratings = (self.index + 1) as! NSNumber
             let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
             let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
             updateMapperConfig.saveBehavior = .updateSkipNullAttributes
@@ -319,6 +321,7 @@ class ViewController: UIViewController {
             self.waitFinalPartner.notify(queue: .main){
                 if self.found_match{
                     print("we found a match")
+                    print("the user we're matched with is " + self.user_to_pair_with!)
                     self.loadMemesRecommendedByPartner()
                 }
                 else{
@@ -370,6 +373,14 @@ class ViewController: UIViewController {
         let expression = AWSS3TransferUtilityDownloadExpression()
         // Very first meme of the session
         // OR We haven't downloaded the next meme that we want
+        print("printing index")
+        print(self.index)
+        print(self.downloaded_index)
+        print(self.keys.count)
+        if(self.index >= self.keys.count){
+            print("should not be here... probably due to state restoration bug")
+            self.index = 0
+        }
         if(first || (!(self.downloaded_index > self.index || self.index_for_cache < 0))){
             transferUtility.downloadData(fromBucket: s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
                 if error != nil{
@@ -542,16 +553,16 @@ class ViewController: UIViewController {
         }
     }
     
-    // Grab all potential partners
-    // These are in the user_matchings DynamoDB table
+    // Grab all active uesrs today
+    // These are in the users_active_today DynamoDB table
     func findPartnerMatchesPart1() {
-        let queryExpression = AWSDynamoDBQueryExpression()
-        queryExpression.keyConditionExpression = "username = :username"
-        queryExpression.expressionAttributeValues = [":username": self.user?.username]
+        let queryExpression = AWSDynamoDBScanExpression()
+        //queryExpression.keyConditionExpression = "username = :username"
+        //queryExpression.expressionAttributeValues = [":username": self.user?.username]
         let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
         let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
         updateMapperConfig.saveBehavior = .updateSkipNullAttributes
-        self.matches = dynamoDBObjectMapper.query(PartnerMatches.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+        self.matches = dynamoDBObjectMapper.scan(ActiveUser.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
         if (task.error != nil){
             print("error")
         }
@@ -563,102 +574,253 @@ class ViewController: UIViewController {
     }
     
     // Find the final partner
-    // This is found by finding the closest partner
-    // Who is also in the users_active_today DynamoDB table
+    // Search through users_active_today
+    // Find the person who has labeled the most memes
+    // Up until max of 80 [threshold can be changed later]
+    // If multiple users have labeled this many memes, settle the tie by referencing the golden set
     func findPartnerMatchesPart2() {
+        print("inside findPartnerMatchesPart2")
         let matches2 = self.matches?.result?.items
-        let queryExpression = AWSDynamoDBQueryExpression()
+        print(matches2)
+        /*let queryExpression = AWSDynamoDBQueryExpression()
         queryExpression.keyConditionExpression = "username = :username"
         queryExpression.expressionAttributeValues = [":username": self.user?.username]
-        let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
-        if matches2?.count ?? 0 == 1 {
-            let user_list = matches2![0] as! PartnerMatches
-            let user_list_strings = user_list.getUsers()
-            print("printing users we could match with")
-            print(user_list_strings)
-            var num_checked_users = 0
-            for paired_user in user_list_strings{
-                queryExpression.expressionAttributeValues = [":username": paired_user]
-                // SECOND QUERY FOR PARTNER WHO WAS ACTIVE
-                // 222222222
-                self.waitPotentialActivePartner.enter()
-                let active_matches = dynamoDBObjectMapper.query(ActiveUser.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
-                if (task.error != nil){
-                    print("ERROR IN findPartnerMatchesPart2")
+        let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()*/
+        if matches2?.count ?? 0 >= 1 {
+            print("we have a match")
+            var ten_or_more = [String]()
+            var twenty_or_more = [String]()
+            var thirty_or_more = [String]()
+            var forty_or_more = [String]()
+            var fifty_or_more = [String]()
+            var sixty_or_more = [String]()
+            var seventy_or_more = [String]()
+            var eighty_or_more = [String]()
+            
+            for user in matches2!{
+                print(user)
+                let casted_user = user as! ActiveUser
+                if(casted_user.num_ratings == nil){
+                    ten_or_more.append(String(casted_user.username!))
+                    continue
                 }
-                print("printing something in ActiveToday")
-                print("printing something in ActiveToday")
-                print("printing something in ActiveToday")
-                print(task.result!.items)
-                self.waitPotentialActivePartner.leave()
-                return task.result
-                }) as! AWSTask<AWSDynamoDBPaginatedOutput>
-                self.waitPotentialActivePartner.notify(queue: .main){
-                    // this check hopefully blocks the behavior where
-                    // this function is called again despite the first one
-                    // returning/leaving the function
-                    if(!self.found_match){
-                        num_checked_users = num_checked_users + 1
-                        let returned_matches = active_matches.result?.items
-                        if returned_matches?.count ?? 0 == 1 {
-                            self.found_match = true
-                            self.user_to_pair_with = paired_user
-                            print("SHOULD BE PAIRING WITH THE USER BELOW")
-                            print("SHOULD BE PAIRING WITH THE USER BELOW")
-                            print(self.user_to_pair_with)
-                            print("SHOULD BE PAIRING WITH THE USER BELOW")
-                            print("SHOULD BE PAIRING WITH THE USER BELOW")
-                            self.waitFinalPartner.leave()
-                            return;
-                        }
-                        // we need to free the queue even though
-                        // we didn't find a match
-                        // This time search through active users only
-                        // Eventually we should filter through the active users
-                        // in this part of the code
-                        // For now, don't wait to slow it down
-                        else if num_checked_users == user_list_strings.count{
-                            print("we didn't find a match within our user matches")
-                            self.waitPotentialActivePartner2.enter()
-                            let queryExpression2 = AWSDynamoDBScanExpression()
-                            //queryExpression2.keyConditionExpression = "username = :username"
-                           //queryExpression2.expressionAttributeValues = [":username": "*"]
-                            let active_matches = dynamoDBObjectMapper.scan(ActiveUser.self, expression: queryExpression2).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
-                                if (task.error != nil){
-                                    print("ERROR IN findPartnerMatchesPart2")
-                                    print(task.error)
+                if(Int(casted_user.num_ratings!) > 10){
+                    ten_or_more.append(String(casted_user.username!))
+                }
+                if(Int(casted_user.num_ratings!) > 20){
+                    twenty_or_more.append(String(casted_user.username!))
+                }
+                if(Int(casted_user.num_ratings!) > 30){
+                    thirty_or_more.append(String(casted_user.username!))
+                }
+                if(Int(casted_user.num_ratings!) > 40){
+                    forty_or_more.append(String(casted_user.username!))
+                }
+                if(Int(casted_user.num_ratings!) > 50){
+                    fifty_or_more.append(String(casted_user.username!))
+                }
+                if(Int(casted_user.num_ratings!) > 60){
+                    sixty_or_more.append(String(casted_user.username!))
+                }
+                if(Int(casted_user.num_ratings!) > 70){
+                    seventy_or_more.append(String(casted_user.username!))
+                }
+                if(Int(casted_user.num_ratings!) > 80){
+                    eighty_or_more.append(String(casted_user.username!))
+                }
+            }
+            
+            
+            // in case we have multiple users who have labeled
+            // roughly the same # of memes
+            // We have to settle ties using the golden set
+            let queryExpression = AWSDynamoDBQueryExpression()
+            queryExpression.keyConditionExpression = "username = :username"
+            queryExpression.expressionAttributeValues = [":username": self.user?.username]
+            let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+            let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+            updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+            //var golden_matches_strings = [String]()
+            self.waitPotentialActivePartner2.enter()
+            var golden_matches = dynamoDBObjectMapper.query(PartnerMatches.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+            if (task.error != nil){
+                print("error")
+            }
+            if (task.result != nil){
+                self.waitPotentialActivePartner2.leave()
+            }
+            return task.result
+            }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+            
+            
+            self.waitPotentialActivePartner2.notify(queue: .main){
+                let temp = golden_matches.result!.items[0] as! PartnerMatches
+                let golden_matches_strings = temp.getUsers()
+                
+                if(ten_or_more.count > 0){
+                    self.found_match = true
+                    if(eighty_or_more.count > 0){
+                        if(eighty_or_more.count > 1){
+                            // if we find a user who is in our list of golden set matches
+                            // immediately return them
+                            for potential_match in eighty_or_more{
+                                if(golden_matches_strings.contains(potential_match)){
+                                    self.user_to_pair_with = potential_match
+                                    self.waitFinalPartner.leave()
+                                    return
                                 }
-                                print("printing something in ActiveToday")
-                                print("printing something in ActiveToday")
-                                print("printing something in ActiveToday")
-                                print(task.result!.items)
-                                self.waitPotentialActivePartner2.leave()
-                                return task.result
-                                }) as! AWSTask<AWSDynamoDBPaginatedOutput>
-                            self.waitPotentialActivePartner2.notify(queue: .main){
-                                if(active_matches.result?.items.count != 0){
-                                    self.found_match = true
-                                    print("found a match that was active today but not part of our matches table")
-                                    let user2 = active_matches.result!.items[0] as! ActiveUser
-                                    //let user_list_strings2 = user_list2.getUsers()
-                                    self.user_to_pair_with = user2.username as String?
-                                    print("printing user to pair with")
-                                    print(self.user_to_pair_with)
-                                }
-                                self.waitFinalPartner.leave()
                             }
-                            return;
+                            // None of the active users were matches
+                            // from the golden set
+                            // Simply select the first and use them
+                            self.user_to_pair_with = eighty_or_more[0]
+                            self.waitFinalPartner.leave()
+                            return
+                        }
+                        else{
+                            self.user_to_pair_with = eighty_or_more[0]
+                            self.waitFinalPartner.leave()
                         }
                     }
+                    else if(seventy_or_more.count > 0){
+                        if(seventy_or_more.count > 1){
+                            for potential_match in seventy_or_more{
+                                if(golden_matches_strings.contains(potential_match)){
+                                    self.user_to_pair_with = potential_match
+                                    self.waitFinalPartner.leave()
+                                    return
+                                }
+                            }
+                            self.user_to_pair_with = seventy_or_more[0]
+                            self.waitFinalPartner.leave()
+                            return
+                        }
+                        else{
+                            self.user_to_pair_with = seventy_or_more[0]
+                            self.waitFinalPartner.leave()
+                        }
+                    }
+                    else if(sixty_or_more.count > 0){
+                        if(sixty_or_more.count > 1){
+                            for potential_match in sixty_or_more{
+                                if(golden_matches_strings.contains(potential_match)){
+                                    self.user_to_pair_with = potential_match
+                                    self.waitFinalPartner.leave()
+                                    return
+                                }
+                            }
+                            self.user_to_pair_with = sixty_or_more[0]
+                            self.waitFinalPartner.leave()
+                            return
+                        }
+                        else{
+                            self.user_to_pair_with = sixty_or_more[0]
+                            self.waitFinalPartner.leave()
+                        }
+                    }
+                    else if(fifty_or_more.count > 0){
+                        if(fifty_or_more.count > 1){
+                            for potential_match in fifty_or_more{
+                                if(golden_matches_strings.contains(potential_match)){
+                                    self.user_to_pair_with = potential_match
+                                    self.waitFinalPartner.leave()
+                                    return
+                                }
+                            }
+                            self.user_to_pair_with = fifty_or_more[0]
+                            self.waitFinalPartner.leave()
+                            return
+                        }
+                        else{
+                            self.user_to_pair_with = fifty_or_more[0]
+                            self.waitFinalPartner.leave()
+                        }
+                    }
+                    else if(forty_or_more.count > 0){
+                        if(forty_or_more.count > 1){
+                            for potential_match in forty_or_more{
+                                if(golden_matches_strings.contains(potential_match)){
+                                    self.user_to_pair_with = potential_match
+                                    self.waitFinalPartner.leave()
+                                    return
+                                }
+                            }
+                            self.user_to_pair_with = forty_or_more[0]
+                            self.waitFinalPartner.leave()
+                            return
+                        }
+                        else{
+                            self.user_to_pair_with = forty_or_more[0]
+                            self.waitFinalPartner.leave()
+                        }
+                    }
+                    else if(thirty_or_more.count > 0){
+                        if(thirty_or_more.count > 1){
+                            for potential_match in thirty_or_more{
+                                if(golden_matches_strings.contains(potential_match)){
+                                    self.user_to_pair_with = potential_match
+                                    self.waitFinalPartner.leave()
+                                    return
+                                }
+                            }
+                            self.user_to_pair_with = thirty_or_more[0]
+                            self.waitFinalPartner.leave()
+                            return
+                        }
+                        else{
+                            self.user_to_pair_with = thirty_or_more[0]
+                            self.waitFinalPartner.leave()
+                        }
+                    }
+                    else if(twenty_or_more.count > 0){
+                        if(twenty_or_more.count > 1){
+                            for potential_match in twenty_or_more{
+                                if(golden_matches_strings.contains(potential_match)){
+                                    self.user_to_pair_with = potential_match
+                                    self.waitFinalPartner.leave()
+                                    return
+                                }
+                            }
+                            self.user_to_pair_with = twenty_or_more[0]
+                            self.waitFinalPartner.leave()
+                            return
+                        }
+                        else{
+                            self.user_to_pair_with = twenty_or_more[0]
+                            self.waitFinalPartner.leave()
+                        }
+                    }
+                        // Only ten-ish labels
+                    else{
+                        if(ten_or_more.count > 1){
+                            for potential_match in ten_or_more{
+                                if(golden_matches_strings.contains(potential_match)){
+                                    self.user_to_pair_with = potential_match
+                                    self.waitFinalPartner.leave()
+                                    return
+                                }
+                            }
+                            self.user_to_pair_with = ten_or_more[0]
+                            self.waitFinalPartner.leave()
+                            return
+                        }
+                        else{
+                            self.user_to_pair_with = ten_or_more[0]
+                            self.waitFinalPartner.leave()
+                        }
+                    }
+                }
+                // Nobody with sufficient labels to build out
+                // recommendation
+                else{
+                    self.waitFinalPartner.leave()
                 }
             }
         }
         // We didn't have any matches to begin with (need to fill out golden set)
         else {
+            print("we don't have a match")
             self.waitFinalPartner.leave()
-            let alert = UIAlertController(title: "Click the Bottle", message: "Click the bottle at the bottom right to get started", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
-            self.present(alert, animated: true)
         }
     }
     
@@ -700,15 +862,19 @@ class ViewController: UIViewController {
                     let meme_rating_pair2 = meme_rating_pair as! Meme
                     // We want this rating
                     if(self.keys.contains(meme_rating_pair2.meme! as String)){
-                        if(Double(meme_rating_pair2.rating ?? 3) > 4){
+                        if(Double(meme_rating_pair2.rating ?? 3) > 3.5){
                             temp_keys.append(meme_rating_pair2.meme as! String)
                             let index_of_boi = self.keys.firstIndex(of: meme_rating_pair2.meme as! String)
                             self.keys.remove(at: index_of_boi!)
                         }
-                        else if(Double(meme_rating_pair2.rating ?? 3) < 2){
+                        /*
+                        Currently not down-ranking memes based on partner labels
+                        Might want to do this eventually
+                         else if(Double(meme_rating_pair2.rating ?? 3) == 0){
                             let index_of_boi = self.keys.firstIndex(of: meme_rating_pair2.meme as! String)!
                             self.keys.remove(at: index_of_boi)
                         }
+                        */
                     }
                 }
                 self.last_recommended_index = temp_keys.count
