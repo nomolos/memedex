@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 51;
+	objectVersion = 52;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -74,6 +74,8 @@
 		BD29747E245505E000DBBF9E /* PartnerMatches.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD29747D245505E000DBBF9E /* PartnerMatches.swift */; };
 		BD4921FC2468C541004F8408 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD4921FB2468C541004F8408 /* Launch Screen.storyboard */; };
 		BD4B85412442410D00C67E09 /* TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4B85402442410D00C67E09 /* TextField.swift */; };
+		BD57D62624955289005C73E3 /* FacebookCore in Frameworks */ = {isa = PBXBuildFile; productRef = BD57D62524955289005C73E3 /* FacebookCore */; };
+		BD57D62824955289005C73E3 /* FacebookLogin in Frameworks */ = {isa = PBXBuildFile; productRef = BD57D62724955289005C73E3 /* FacebookLogin */; };
 		BD767C4424328CE200A813C7 /* CognitoConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = BD767C4324328CE200A813C7 /* CognitoConfig.plist */; };
 		BD8DB8AC2466009F0066E055 /* AWSAuthCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD8DB8AB2466009F0066E055 /* AWSAuthCore.framework */; };
 		BD8DB8AE246600AA0066E055 /* AWSCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD8DB8AD246600AA0066E055 /* AWSCore.framework */; };
@@ -196,8 +198,10 @@
 				BD9D8F9124674946008AC0FE /* AWSPinpoint.framework in Frameworks */,
 				BD8DB8B0246600B50066E055 /* AWSMobileClient.framework in Frameworks */,
 				BD8DB8AE246600AA0066E055 /* AWSCore.framework in Frameworks */,
+				BD57D62824955289005C73E3 /* FacebookLogin in Frameworks */,
 				BD8DB8AC2466009F0066E055 /* AWSAuthCore.framework in Frameworks */,
 				13FCC3E4357F39E49D8189C0 /* Pods_memedex.framework in Frameworks */,
+				BD57D62624955289005C73E3 /* FacebookCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -365,6 +369,10 @@
 			dependencies = (
 			);
 			name = memedex;
+			packageProductDependencies = (
+				BD57D62524955289005C73E3 /* FacebookCore */,
+				BD57D62724955289005C73E3 /* FacebookLogin */,
+			);
 			productName = memedex;
 			productReference = BD220CDD23F4B25800D93CBE /* memedex.app */;
 			productType = "com.apple.product-type.application";
@@ -393,6 +401,9 @@
 				Base,
 			);
 			mainGroup = BD220CD423F4B25800D93CBE;
+			packageReferences = (
+				BD57D62424955289005C73E3 /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */,
+			);
 			productRefGroup = BD220CDE23F4B25800D93CBE /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -727,6 +738,30 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BD57D62424955289005C73E3 /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/facebook/facebook-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 7.0.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BD57D62524955289005C73E3 /* FacebookCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD57D62424955289005C73E3 /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */;
+			productName = FacebookCore;
+		};
+		BD57D62724955289005C73E3 /* FacebookLogin */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BD57D62424955289005C73E3 /* XCRemoteSwiftPackageReference "facebook-ios-sdk" */;
+			productName = FacebookLogin;
+		};
+/* End XCSwiftPackageProductDependency section */
 
 /* Begin XCVersionGroup section */
 		BD220CE423F4B25800D93CBE /* memedex.xcdatamodeld */ = {

@@ -103,6 +103,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     }
     
     @IBAction func login(_ sender: Any) {
+        self.activityIndicator.startAnimating()
         if (self.email?.text != nil && self.password?.text != nil) {
             let authDetails = AWSCognitoIdentityPasswordAuthenticationDetails(username: self.email!.text!, password: self.password!.text! )
             self.passwordAuthenticationCompletion?.set(result: authDetails)
@@ -225,6 +226,7 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
             if let error = error as NSError? {
                 let casted = error as NSError
                 if((casted.userInfo["__type"] as! String) == "NotAuthorizedException"){
+                    self.activityIndicator.stopAnimating()
                     let alertController = UIAlertController(title: "Account does not exist",
                                                             message: "Try signing in again or signing up",
                                                             preferredStyle: .alert)
@@ -233,6 +235,7 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                     self.present(alertController, animated: true, completion:  nil)
                 }
                 else{
+                    self.activityIndicator.stopAnimating()
                     DispatchQueue.main.async {
                         self.go_to_golden = true
                         self.performSegue(withIdentifier: "VerifySegue", sender: self)
@@ -254,12 +257,14 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                         hundredth_second_count = hundredth_second_count + 1
                     }
                     if(!self.go_to_golden){
+                        self.activityIndicator.stopAnimating()
                         let hacky_scene_access = UIApplication.shared.connectedScenes.first
                         let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
                         scene_delegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
                         scene_delegate.navigationController?.setViewControllers([scene_delegate.viewController!], animated: true)
                     }
                     else{
+                        self.activityIndicator.stopAnimating()
                         self.goldenSetViewController = self.storyboard?.instantiateViewController(withIdentifier: "GoldenSetViewController") as? GoldenSetViewController
                         self.go_to_golden = false
                         self.navigationController?.setViewControllers([(self.goldenSetViewController!)], animated: true)

@@ -188,6 +188,9 @@ class ViewController: UIViewController {
             self.loadNextMeme(first: false)
         }
         else{
+            let alert = UIAlertController(title: "Back button", message: "You can't go back since this is the first meme", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
+            self.present(alert, animated: true)
             return
         }
     }

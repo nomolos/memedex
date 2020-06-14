@@ -17,6 +17,7 @@ import AWSMobileClient
 import AWSPinpoint
 import Amplify
 import AmplifyPlugins
+import FBSDKCoreKit
 
 
 let userPoolID = "SampleUserPool"
@@ -47,10 +48,32 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     //var window: UIWindow?
     
     var cognitoConfig:CognitoConfig?
+          
+    func application(
+        _ app: UIApplication,
+        open url: URL,
+        options: [UIApplication.OpenURLOptionsKey : Any] = [:]
+    ) -> Bool {
+
+        ApplicationDelegate.shared.application(
+            app,
+            open: url,
+            sourceApplication: options[UIApplication.OpenURLOptionsKey.sourceApplication] as? String,
+            annotation: options[UIApplication.OpenURLOptionsKey.annotation]
+        )
+
+    }
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         //print("printing window app delegate")
         //print(self.window)
+        
+        ApplicationDelegate.shared.application(
+            application,
+            didFinishLaunchingWithOptions: launchOptions
+        )
+        
+        
         AppDelegate.loggedIn = false
         //print("printing Scenes app delegate")
         //print(UIApplication.shared.connectedScenes)
@@ -83,6 +106,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         //self.window?.makeKeyAndVisible()
         // Override point for customization after application launch.
+        
         return AWSMobileClient.sharedInstance().interceptApplication(
             application,
             didFinishLaunchingWithOptions: launchOptions)
