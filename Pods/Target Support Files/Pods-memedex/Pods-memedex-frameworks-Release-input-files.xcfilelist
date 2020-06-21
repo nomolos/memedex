@@ -1,5 +1,4 @@
 ${PODS_ROOT}/Target Support Files/Pods-memedex/Pods-memedex-frameworks.sh
-${BUILT_PRODUCTS_DIR}/AWSAppSync/AWSAppSync.framework
 ${BUILT_PRODUCTS_DIR}/AWSAuthCore/AWSAuthCore.framework
 ${BUILT_PRODUCTS_DIR}/AWSAutoScaling/AWSAutoScaling.framework
 ${BUILT_PRODUCTS_DIR}/AWSCloudWatch/AWSCloudWatch.framework
@@ -10,6 +9,7 @@ ${BUILT_PRODUCTS_DIR}/AWSCore/AWSCore.framework
 ${BUILT_PRODUCTS_DIR}/AWSDynamoDB/AWSDynamoDB.framework
 ${BUILT_PRODUCTS_DIR}/AWSEC2/AWSEC2.framework
 ${BUILT_PRODUCTS_DIR}/AWSElasticLoadBalancing/AWSElasticLoadBalancing.framework
+${BUILT_PRODUCTS_DIR}/AWSFacebookSignIn/AWSFacebookSignIn.framework
 ${BUILT_PRODUCTS_DIR}/AWSIoT/AWSIoT.framework
 ${BUILT_PRODUCTS_DIR}/AWSKinesis/AWSKinesis.framework
 ${BUILT_PRODUCTS_DIR}/AWSLambda/AWSLambda.framework
@@ -23,9 +23,10 @@ ${BUILT_PRODUCTS_DIR}/AWSSES/AWSSES.framework
 ${BUILT_PRODUCTS_DIR}/AWSSNS/AWSSNS.framework
 ${BUILT_PRODUCTS_DIR}/AWSSQS/AWSSQS.framework
 ${BUILT_PRODUCTS_DIR}/AWSSimpleDB/AWSSimpleDB.framework
+${BUILT_PRODUCTS_DIR}/AWSUserPoolsSignIn/AWSUserPoolsSignIn.framework
 ${BUILT_PRODUCTS_DIR}/Amplify/Amplify.framework
 ${BUILT_PRODUCTS_DIR}/AmplifyPlugins/AmplifyPlugins.framework
-${BUILT_PRODUCTS_DIR}/AppSyncRealTimeClient/AppSyncRealTimeClient.framework
-${BUILT_PRODUCTS_DIR}/ReachabilitySwift/Reachability.framework
-${BUILT_PRODUCTS_DIR}/SQLite.swift/SQLite.framework
-${BUILT_PRODUCTS_DIR}/Starscream/Starscream.framework
+${BUILT_PRODUCTS_DIR}/FBSDKCoreKit/FBSDKCoreKit.framework
+${BUILT_PRODUCTS_DIR}/FBSDKLoginKit/FBSDKLoginKit.framework
+${BUILT_PRODUCTS_DIR}/FBSDKPlacesKit/FBSDKPlacesKit.framework
+${BUILT_PRODUCTS_DIR}/FBSDKShareKit/FBSDKShareKit.framework

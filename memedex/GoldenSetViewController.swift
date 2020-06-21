@@ -61,7 +61,12 @@ class GoldenSetViewController: UIViewController {
         // previous meme being rated
         var dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
         let meme = GoldenMeme()
-        meme?.username = user?.username as! NSString
+        if(AppDelegate.fbLoggedIn!){
+            meme?.username = AppDelegate.fb_username as! NSString
+        }
+        else{
+            meme?.username = user?.username as! NSString
+        }
         meme?.meme = self.keys[self.index] as NSString
         meme?.rating = slider.value as NSNumber
         let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
@@ -109,7 +114,10 @@ class GoldenSetViewController: UIViewController {
                 let username = goldy.username! as String
                 let memename = goldy.meme! as String
                 let rating = goldy.rating as! Double
-                if(username==self.user?.username!){
+                if(AppDelegate.fbLoggedIn! && username==AppDelegate.fb_username){
+                    user_ratings[memename] = rating
+                }
+                else if(!AppDelegate.fbLoggedIn! && username==self.user?.username!){
                     user_ratings[memename] = rating
                 }
                 // inefficient but makes sure that our user distance values are initialized
@@ -128,7 +136,13 @@ class GoldenSetViewController: UIViewController {
                 let username = goldy.username as! String
                 let memename = goldy.meme as! String
                 let rating = goldy.rating as! Double
-                if(username != self.user?.username!){
+                if(AppDelegate.fbLoggedIn! && username != AppDelegate.fb_username){
+                    var sum = user_ratings[memename]! - rating
+                    sum = sum*sum
+                    user_distances[username]! += sum
+                    user_memecount[username]! += 1
+                }
+                else if(!AppDelegate.fbLoggedIn! && username != self.user?.username!){
                     var sum = user_ratings[memename]! - rating
                     sum = sum*sum
                     user_distances[username]! += sum
@@ -160,7 +174,12 @@ class GoldenSetViewController: UIViewController {
             let sorted_distances = user_distances.sorted(by: byValue)
             let partner_matches = PartnerMatches()
             partner_matches?.setUsers(users: sorted_distances)
-            partner_matches?.username = user?.username as! NSString
+            if(AppDelegate.fbLoggedIn!){
+                partner_matches?.username = AppDelegate.fb_username as! NSString
+            }
+            else{
+                partner_matches?.username = user?.username as! NSString
+            }
             self.waitPotentialPartners.enter()
             dynamoDBObjectMapper.save(partner_matches!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
                 if let error = task.error as NSError? {

@@ -197,7 +197,6 @@ if [ -r "${ARTIFACT_LIST_FILE}" ]; then
 fi
 
 if [[ "$CONFIGURATION" == "Debug" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/AWSAppSync/AWSAppSync.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSAuthCore/AWSAuthCore.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSAutoScaling/AWSAutoScaling.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSCloudWatch/AWSCloudWatch.framework"
@@ -208,6 +207,7 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/AWSDynamoDB/AWSDynamoDB.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSEC2/AWSEC2.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSElasticLoadBalancing/AWSElasticLoadBalancing.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/AWSFacebookSignIn/AWSFacebookSignIn.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSIoT/AWSIoT.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSKinesis/AWSKinesis.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSLambda/AWSLambda.framework"
@@ -221,15 +221,15 @@ if [[ "$CONFIGURATION" == "Debug" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/AWSSNS/AWSSNS.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSSQS/AWSSQS.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSSimpleDB/AWSSimpleDB.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/AWSUserPoolsSignIn/AWSUserPoolsSignIn.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/Amplify/Amplify.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AmplifyPlugins/AmplifyPlugins.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/AppSyncRealTimeClient/AppSyncRealTimeClient.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/ReachabilitySwift/Reachability.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SQLite.swift/SQLite.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/Starscream/Starscream.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/FBSDKCoreKit/FBSDKCoreKit.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/FBSDKLoginKit/FBSDKLoginKit.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/FBSDKPlacesKit/FBSDKPlacesKit.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/FBSDKShareKit/FBSDKShareKit.framework"
 fi
 if [[ "$CONFIGURATION" == "Release" ]]; then
-  install_framework "${BUILT_PRODUCTS_DIR}/AWSAppSync/AWSAppSync.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSAuthCore/AWSAuthCore.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSAutoScaling/AWSAutoScaling.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSCloudWatch/AWSCloudWatch.framework"
@@ -240,6 +240,7 @@ if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/AWSDynamoDB/AWSDynamoDB.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSEC2/AWSEC2.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSElasticLoadBalancing/AWSElasticLoadBalancing.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/AWSFacebookSignIn/AWSFacebookSignIn.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSIoT/AWSIoT.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSKinesis/AWSKinesis.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSLambda/AWSLambda.framework"
@@ -253,12 +254,13 @@ if [[ "$CONFIGURATION" == "Release" ]]; then
   install_framework "${BUILT_PRODUCTS_DIR}/AWSSNS/AWSSNS.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSSQS/AWSSQS.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AWSSimpleDB/AWSSimpleDB.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/AWSUserPoolsSignIn/AWSUserPoolsSignIn.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/Amplify/Amplify.framework"
   install_framework "${BUILT_PRODUCTS_DIR}/AmplifyPlugins/AmplifyPlugins.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/AppSyncRealTimeClient/AppSyncRealTimeClient.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/ReachabilitySwift/Reachability.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/SQLite.swift/SQLite.framework"
-  install_framework "${BUILT_PRODUCTS_DIR}/Starscream/Starscream.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/FBSDKCoreKit/FBSDKCoreKit.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/FBSDKLoginKit/FBSDKLoginKit.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/FBSDKPlacesKit/FBSDKPlacesKit.framework"
+  install_framework "${BUILT_PRODUCTS_DIR}/FBSDKShareKit/FBSDKShareKit.framework"
 fi
 if [ "${COCOAPODS_PARALLEL_CODE_SIGN}" == "true" ]; then
   wait

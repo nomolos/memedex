@@ -14,6 +14,7 @@ import AWSCore
 import AWSDynamoDB
 import AVKit
 import AVFoundation
+import Amplify
 
 class ViewController: UIViewController {
     
@@ -59,8 +60,21 @@ class ViewController: UIViewController {
         let alert = UIAlertController(title: "Sign Out", message: "Do you want to sign out?", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction!) in
             self.dismiss(animated: true, completion: nil)
-            self.user?.signOut()
-            AppDelegate.defaultUserPool().currentUser()?.signOut()
+            if(AppDelegate.fbLoggedIn!){
+                AppDelegate.fbLoggedIn = false
+                _ = Amplify.Auth.signOut() { result in
+                    switch result {
+                    case .success:
+                        print("Successfully signed out")
+                    case .failure(let error):
+                        print("Sign out failed with error \(error)")
+                    }
+                }
+            }
+            else {
+                self.user?.signOut()
+                AppDelegate.defaultUserPool().currentUser()?.signOut()
+            }
             self.fetchUserAttributes()
             return
         }))
@@ -244,7 +258,12 @@ class ViewController: UIViewController {
         // Want to update this after every 10 labels
         if(self.index == 0 || (self.index % 10 == 0)){
             var active_user = ActiveUser()
-            active_user?.username = user?.username as! NSString
+            if(AppDelegate.fbLoggedIn!){
+                active_user?.username = AppDelegate.fb_username as! NSString
+            }
+            else{
+                active_user?.username = user?.username as! NSString
+            }
             active_user?.num_ratings = (self.index + 1) as! NSNumber
             let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
             let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
@@ -344,7 +363,12 @@ class ViewController: UIViewController {
         }
         print("PRINTING USER IN VIEWCONTROLLER")
         print("PRINTING USER IN VIEWCONTROLLER")
-        print(self.user?.username)
+        if(AppDelegate.fbLoggedIn!){
+            print(AppDelegate.fb_username)
+        }
+        else{
+            print(self.user?.username)
+        }
         print("PRINTING USER IN VIEWCONTROLLER")
         print("PRINTING USER IN VIEWCONTROLLER")
     }
@@ -352,7 +376,12 @@ class ViewController: UIViewController {
     func rateCurrentMeme() {
         let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
         let meme = Meme()
-        meme?.username = user?.username as! NSString
+        if(AppDelegate.fbLoggedIn!){
+            meme?.username = AppDelegate.fb_username as! NSString
+        }
+        else{
+            meme?.username = user?.username as! NSString
+        }
         meme?.meme = self.keys[self.index] as NSString
         meme?.rating = slider.value as NSNumber
         let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
@@ -541,6 +570,8 @@ class ViewController: UIViewController {
         s3.listObjects(listRequest).continueWith { (task) -> AnyObject? in
             let listObjectsOutput = task.result;
             if(task.error != nil || listObjectsOutput == nil || listObjectsOutput?.contents == nil){
+                print("PRINTING ERROR LOADING S3 MEMES")
+                print(task.error)
                 DispatchQueue.main.sync{
                     let alert = UIAlertController(title: "No Memes Right Now", message: "memedex is currently searching the internet for the latest memes. Usually this happens around 12AM Central Time (US) and lasts 20 minutes", preferredStyle: .alert)
                     self.present(alert, animated: true)
@@ -567,7 +598,8 @@ class ViewController: UIViewController {
         updateMapperConfig.saveBehavior = .updateSkipNullAttributes
         self.matches = dynamoDBObjectMapper.scan(ActiveUser.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
         if (task.error != nil){
-            print("error")
+            print("error in findPartnerMAtches")
+            print(task.error)
         }
         if (task.result != nil){
             self.waitPotentialPartners.leave()
@@ -639,7 +671,12 @@ class ViewController: UIViewController {
             // We have to settle ties using the golden set
             let queryExpression = AWSDynamoDBQueryExpression()
             queryExpression.keyConditionExpression = "username = :username"
-            queryExpression.expressionAttributeValues = [":username": self.user?.username]
+            if(AppDelegate.fbLoggedIn!){
+                queryExpression.expressionAttributeValues = [":username": AppDelegate.fb_username]
+            }
+            else{
+                queryExpression.expressionAttributeValues = [":username": self.user?.username]
+            }
             let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
             let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
             updateMapperConfig.saveBehavior = .updateSkipNullAttributes
@@ -647,7 +684,8 @@ class ViewController: UIViewController {
             self.waitPotentialActivePartner2.enter()
             var golden_matches = dynamoDBObjectMapper.query(PartnerMatches.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
             if (task.error != nil){
-                print("error")
+                print("error in findPartnerMatches2")
+                print(task.error)
             }
             if (task.result != nil){
                 self.waitPotentialActivePartner2.leave()
@@ -657,9 +695,17 @@ class ViewController: UIViewController {
             
             
             self.waitPotentialActivePartner2.notify(queue: .main){
+                print("LETS SEE IF IT BREAKS HERE")
+                // We don't have any golden set matches, we probably did not label the golden set
+                // Make partner the first who was active today
+                if(golden_matches.result!.items.count == 0){
+                    print("We have no matches from the golden set")
+                    self.user_to_pair_with = ten_or_more[0]
+                    self.waitFinalPartner.leave()
+                    return
+                }
                 let temp = golden_matches.result!.items[0] as! PartnerMatches
                 let golden_matches_strings = temp.getUsers()
-                
                 if(ten_or_more.count > 0){
                     self.found_match = true
                     if(eighty_or_more.count > 0){

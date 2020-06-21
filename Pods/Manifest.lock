@@ -1,71 +1,91 @@
 PODS:
-  - Amplify (0.11.0)
-  - AmplifyPlugins/AWSPinpointAnalyticsPlugin (0.11.0):
-    - AWSPinpoint (~> 2.13.0)
-    - AWSPluginsCore (= 0.11.0)
-  - AppSyncRealTimeClient (1.1.5):
-    - Starscream (= 3.0.6)
-  - AWSAppSync (3.1.0):
-    - AppSyncRealTimeClient (~> 1.1)
-    - AWSCore (~> 2.13.0)
-    - ReachabilitySwift (~> 5.0.0)
-    - SQLite.swift (~> 0.12.2)
-  - AWSAuthCore (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSAutoScaling (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSCloudWatch (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSCognito (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSCognitoIdentityProvider (2.13.1):
+  - Amplify (1.0.0):
+    - Amplify/Default (= 1.0.0)
+  - Amplify/Default (1.0.0)
+  - Amplify/Tools (1.0.0)
+  - AmplifyPlugins/AWSCognitoAuthPlugin (1.0.0):
+    - AWSMobileClient (~> 2.13.4)
+    - AWSPluginsCore (= 1.0.0)
+  - AmplifyPlugins/AWSPinpointAnalyticsPlugin (1.0.0):
+    - AWSPinpoint (~> 2.13.4)
+    - AWSPluginsCore (= 1.0.0)
+  - AWSAuthCore (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSAutoScaling (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSCloudWatch (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSCognito (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSCognitoIdentityProvider (2.13.4):
     - AWSCognitoIdentityProviderASF (= 1.0.1)
-    - AWSCore (= 2.13.1)
+    - AWSCore (= 2.13.4)
   - AWSCognitoIdentityProviderASF (1.0.1)
-  - AWSCore (2.13.1)
-  - AWSDynamoDB (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSEC2 (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSElasticLoadBalancing (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSIoT (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSKinesis (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSLambda (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSMachineLearning (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSMobileAnalytics (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSMobileClient (2.13.1):
-    - AWSAuthCore (= 2.13.1)
-    - AWSCognitoIdentityProvider (= 2.13.1)
-  - AWSPinpoint (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSPluginsCore (0.11.0):
-    - Amplify (= 0.11.0)
-    - AWSMobileClient (~> 2.13.0)
-  - AWSS3 (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSSES (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSSimpleDB (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSSNS (2.13.1):
-    - AWSCore (= 2.13.1)
-  - AWSSQS (2.13.1):
-    - AWSCore (= 2.13.1)
-  - ReachabilitySwift (5.0.0)
-  - SQLite.swift (0.12.2):
-    - SQLite.swift/standard (= 0.12.2)
-  - SQLite.swift/standard (0.12.2)
-  - Starscream (3.0.6)
+  - AWSCore (2.13.4)
+  - AWSDynamoDB (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSEC2 (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSElasticLoadBalancing (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSFacebookSignIn (2.13.4):
+    - AWSAuthCore (= 2.13.4)
+    - FBSDKCoreKit (= 5.8)
+    - FBSDKLoginKit (= 5.8)
+  - AWSIoT (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSKinesis (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSLambda (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSMachineLearning (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSMobileAnalytics (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSMobileClient (2.13.4):
+    - AWSAuthCore (= 2.13.4)
+    - AWSCognitoIdentityProvider (= 2.13.4)
+  - AWSPinpoint (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSPluginsCore (1.0.0):
+    - Amplify (= 1.0.0)
+    - AWSCore (~> 2.13.4)
+    - AWSMobileClient (~> 2.13.4)
+  - AWSS3 (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSSES (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSSimpleDB (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSSNS (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSSQS (2.13.4):
+    - AWSCore (= 2.13.4)
+  - AWSUserPoolsSignIn (2.13.4):
+    - AWSAuthCore (= 2.13.4)
+    - AWSCognitoIdentityProvider (= 2.13.4)
+  - FBSDKCoreKit (5.8.0):
+    - FBSDKCoreKit/Basics (= 5.8.0)
+    - FBSDKCoreKit/Core (= 5.8.0)
+  - FBSDKCoreKit/Basics (5.8.0)
+  - FBSDKCoreKit/Core (5.8.0):
+    - FBSDKCoreKit/Basics
+  - FBSDKLoginKit (5.8.0):
+    - FBSDKLoginKit/Login (= 5.8.0)
+  - FBSDKLoginKit/Login (5.8.0):
+    - FBSDKCoreKit (~> 5.0)
+  - FBSDKPlacesKit (5.15.0):
+    - FBSDKCoreKit (~> 5.0)
+  - FBSDKShareKit (5.15.1):
+    - FBSDKShareKit/Share (= 5.15.1)
+  - FBSDKShareKit/Share (5.15.1):
+    - FBSDKCoreKit (~> 5.0)
 
 DEPENDENCIES:
+  - Amplify
+  - Amplify/Tools (= 1.0.0)
+  - AmplifyPlugins/AWSCognitoAuthPlugin (= 1.0.0)
   - AmplifyPlugins/AWSPinpointAnalyticsPlugin
-  - AWSAppSync
   - AWSAutoScaling
   - AWSCloudWatch
   - AWSCognito
@@ -74,25 +94,30 @@ DEPENDENCIES:
   - AWSDynamoDB
   - AWSEC2
   - AWSElasticLoadBalancing
+  - AWSFacebookSignIn
   - AWSIoT
   - AWSKinesis
   - AWSLambda
   - AWSMachineLearning
   - AWSMobileAnalytics
-  - AWSMobileClient
+  - AWSMobileClient (= 2.13.4)
   - AWSPinpoint
+  - AWSPluginsCore
   - AWSS3
   - AWSSES
   - AWSSimpleDB
   - AWSSNS
   - AWSSQS
+  - AWSUserPoolsSignIn
+  - FBSDKCoreKit
+  - FBSDKLoginKit
+  - FBSDKPlacesKit
+  - FBSDKShareKit
 
 SPEC REPOS:
   https://github.com/CocoaPods/Specs.git:
     - Amplify
     - AmplifyPlugins
-    - AppSyncRealTimeClient
-    - AWSAppSync
     - AWSAuthCore
     - AWSAutoScaling
     - AWSCloudWatch
@@ -103,6 +128,7 @@ SPEC REPOS:
     - AWSDynamoDB
     - AWSEC2
     - AWSElasticLoadBalancing
+    - AWSFacebookSignIn
     - AWSIoT
     - AWSKinesis
     - AWSLambda
@@ -116,42 +142,45 @@ SPEC REPOS:
     - AWSSimpleDB
     - AWSSNS
     - AWSSQS
-    - ReachabilitySwift
-    - SQLite.swift
-    - Starscream
+    - AWSUserPoolsSignIn
+    - FBSDKCoreKit
+    - FBSDKLoginKit
+    - FBSDKPlacesKit
+    - FBSDKShareKit
 
 SPEC CHECKSUMS:
-  Amplify: 8df7d5a71945c57480c1bc3b353a936e908e4dc7
-  AmplifyPlugins: 00520be72202f55dbb2931bcfe0b05e104dd8334
-  AppSyncRealTimeClient: 610da868f8c56539a840ee848f968120a07a7b6f
-  AWSAppSync: 269c0f5ab575ef072c3ea91bcb14354cbc348f0c
-  AWSAuthCore: c15735eb14cccf2a26e371e3a6a841d613d411ef
-  AWSAutoScaling: 7c4046c852348bb85731baf787ecc9d6e789bb7f
-  AWSCloudWatch: 72972be043b698da3f5969968a06ef356c0f0bf4
-  AWSCognito: c6311e35fe74c9ee490fff3e03548afae629dc5c
-  AWSCognitoIdentityProvider: 78f240befbd2e47a8e644946a9dd19812b0e5044
+  Amplify: d993f9ab89645ffa58616b23f95a22e1038f46a2
+  AmplifyPlugins: 6f341b2013ba8a7389097287333324c8beeb43bd
+  AWSAuthCore: 72b4bd064c28985ea5345c62759632d511de342a
+  AWSAutoScaling: 5f81c178e50c84bd213bc925329dd431855236b8
+  AWSCloudWatch: 2ee5cb576ce309675c2c93a13848460c2649e02d
+  AWSCognito: 24403b3cd53bf2821018c9f9860f1f51bc71e2e8
+  AWSCognitoIdentityProvider: a2d1d2857316519c018c03ac8205cf78154db5c0
   AWSCognitoIdentityProviderASF: f94f1a502e72ef3d0a1de93e10bf7a79c8698118
-  AWSCore: ec394695d054fa4136b20ccd22d8901faea5de04
-  AWSDynamoDB: e672a3f1053a7aa28d9393d49589c4b0f6d2cb22
-  AWSEC2: b0af6c70701dc882cd9c2ee9fee98fde1b2aaa46
-  AWSElasticLoadBalancing: 9d9f0c4e7e424363d5f2980c37f45f30e88bafb4
-  AWSIoT: 0edc81defb5721e0a8c4352b938d3baad329b8c8
-  AWSKinesis: 47cbcb004963f536a3531127d4cf371ecae4941a
-  AWSLambda: 06e7dc0206f8ccef6380f096ab92503d5c96e96b
-  AWSMachineLearning: ef26bf81369b705ef87485aed408bb3788550094
-  AWSMobileAnalytics: 7b62b7c2d8257c423d0b3ac45b3558fc6363ca37
-  AWSMobileClient: 8aede2dc1b0760709a2c02465e2b0c286b7cd00b
-  AWSPinpoint: a0f1f76cd88b64cb365cae40ed049bcb151f445d
-  AWSPluginsCore: 139f4e028dbe9b0cadb5540440eb675d49863e53
-  AWSS3: 03511ee2f0482f1674b864d7f6ceddc7184f8491
-  AWSSES: 8813f22f111a27714bf916d02be63641781c5b42
-  AWSSimpleDB: 3f0dedf4ab6288bab30f2976fac704c3a597a9fa
-  AWSSNS: e6b9b684aec01af0f161670d3e1ebfe445b80426
-  AWSSQS: 75d9ed6ca59502445f3ca6c519335b8f5022849b
-  ReachabilitySwift: 985039c6f7b23a1da463388634119492ff86c825
-  SQLite.swift: d2b4642190917051ce6bd1d49aab565fe794eea3
-  Starscream: ef3ece99d765eeccb67de105bfa143f929026cf5
+  AWSCore: 06beea22b6bdbfe9f5ab5015c6901e8475c746a8
+  AWSDynamoDB: 6467f8446b4afd9feb6d5cad63b19a4af64d3af7
+  AWSEC2: 304eb810c808182b9fd8f31018e8e38744345aba
+  AWSElasticLoadBalancing: 997946e8e85125aea9551635316e9fb6c56899f0
+  AWSFacebookSignIn: 0f9cc7a0adbda5bcb8dc1775812a7cfdd70ba9ed
+  AWSIoT: d63cd08d0702627a0e9a66cb02c7f273784c0730
+  AWSKinesis: 3b44da717c028f0a63b0e9881b7229dd61116248
+  AWSLambda: 7cad8334e22c75ba3cd07543108345226e5c28d3
+  AWSMachineLearning: 973784f31ecf1b15eae346445ed43c4bc44ebbfe
+  AWSMobileAnalytics: 600e8d5e0c1cb7d7008d0a9ba2657f95a838394b
+  AWSMobileClient: 33ecce524fbc011d543dae8306ca29a43ecb72e5
+  AWSPinpoint: 82468e86fc58a5f0b9d9c115d705f034fb142286
+  AWSPluginsCore: bf9e284d77603892740526377af767498697b729
+  AWSS3: ab3965322c8e5ee069eaf9b3201c55557ad21be1
+  AWSSES: 2c872e2971aa0e24435d2946e30addd81c15f272
+  AWSSimpleDB: 7c06dc16e5a344c9fb34cada49a61488c8f4ce8c
+  AWSSNS: 07725d5ab55c0fac5de373477f848ad8677e4602
+  AWSSQS: bdac34b0aaecba91769d1aac87b8527f34c70d8b
+  AWSUserPoolsSignIn: 7b4a2ec2a1c1ca86cf68606c71c30f033ad90dd6
+  FBSDKCoreKit: e7dcac0aabcfb09d0166998edd95fe3b05a0ce5d
+  FBSDKLoginKit: 1b0cf04df0370b37404213157b060d6666ede814
+  FBSDKPlacesKit: 26d4033cb8cc8640f1e0eadb3635e7dd29c4d073
+  FBSDKShareKit: 259737eab3cc807087374553abdf588b3096ba55
 
-PODFILE CHECKSUM: 737ed5b3a714726e8ae1781d755161d27f1bb5d5
+PODFILE CHECKSUM: 227f531745c24da0e4bd514ede9634d02817ef1b
 
 COCOAPODS: 1.9.1

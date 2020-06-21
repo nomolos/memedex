@@ -1,7 +1,36 @@
 {
     "identityPoolName": "memedex_identitypool_5c9ca7d6",
-    "allowUnauthenticatedIdentities": true,
-    "authSelections": "identityPoolOnly",
+    "allowUnauthenticatedIdentities": false,
+    "resourceNameTruncated": "cognit11608973",
+    "userPoolName": "cognitod6dd35c5_userpool_11608973",
+    "autoVerifiedAttributes": [
+        "email"
+    ],
+    "mfaConfiguration": "OFF",
+    "mfaTypes": [
+        "SMS Text Message"
+    ],
+    "smsAuthenticationMessage": "Your authentication code is {####}",
+    "smsVerificationMessage": "Your verification code is {####}",
+    "emailVerificationSubject": "Your verification code",
+    "emailVerificationMessage": "Your verification code is {####}",
+    "defaultPasswordPolicy": false,
+    "passwordPolicyMinLength": 8,
+    "passwordPolicyCharacters": [],
+    "requiredAttributes": [
+        "email"
+    ],
+    "userpoolClientGenerateSecret": true,
+    "userpoolClientRefreshTokenValidity": 30,
+    "userpoolClientWriteAttributes": [
+        "email"
+    ],
+    "userpoolClientReadAttributes": [
+        "email"
+    ],
+    "userpoolClientLambdaRole": "cognit11608973_userpoolclient_lambda_role",
+    "userpoolClientSetAttributes": false,
+    "authSelections": "identityPoolAndUserPool",
     "resourceName": "cognitod6dd35c5",
     "authRoleArn": {
         "Fn::GetAtt": [
@@ -14,5 +43,15 @@
             "UnauthRole",
             "Arn"
         ]
-    }
+    },
+    "hostedUI": true,
+    "useDefault": "defaultSocial",
+    "hostedUIDomainName": "memedex",
+    "authProvidersUserPool": [
+        "Facebook"
+    ],
+    "hostedUIProviderMeta": "[{\"ProviderName\":\"Facebook\",\"authorize_scopes\":\"email,public_profile\",\"AttributeMapping\":{\"email\":\"email\",\"username\":\"id\"}}]",
+    "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"myapp://\",\"myapp://memedex.com//\"],\"LogoutURLs\":[\"myapp://signout/memedex.com//\"]}",
+    "userPoolGroupList": [],
+    "dependsOn": []
 }

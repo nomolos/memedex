@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="15705" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="sru-1l-f0V">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="16097" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="sru-1l-f0V">
     <device id="retina6_1" orientation="portrait" appearance="light"/>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="15706"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="16087"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -258,7 +258,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="P5I-oZ-DdD" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1204" y="-1205"/>
+            <point key="canvasLocation" x="1202.8985507246377" y="-1205.3571428571429"/>
         </scene>
         <!--VerifySegue2-->
         <scene sceneID="9cw-NJ-H2l">
@@ -419,6 +419,9 @@
             <point key="canvasLocation" x="157" y="-1222"/>
         </scene>
     </scenes>
+    <inferredMetricsTieBreakers>
+        <segue reference="gyI-wS-v5B"/>
+    </inferredMetricsTieBreakers>
     <resources>
         <image name="LoginSignup" width="343" height="48"/>
         <image name="back" width="39" height="34"/>
@@ -427,7 +430,4 @@
         <image name="share" width="37" height="37"/>
         <image name="textfield" width="343" height="48"/>
     </resources>
-    <inferredMetricsTieBreakers>
-        <segue reference="YpF-fo-M1p"/>
-    </inferredMetricsTieBreakers>
 </document>

@@ -9,8 +9,47 @@
 import UIKit
 import AWSCognito
 import AWSCognitoIdentityProvider
+import FBSDKLoginKit
+import Amplify
 
-class LoginViewController: UIViewController, UITextFieldDelegate {
+class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDelegate {
+    
+    func loginButtonDidLogOut(_ loginButton: FBLoginButton) {
+        print("here inside loginButtonDidLogOut")
+        print(self.user?.username)
+        _ = Amplify.Auth.signOut() { result in
+            switch result {
+            case .success:
+                print("Successfully signed out")
+            case .failure(let error):
+                print("Sign out failed with error \(error)")
+            }
+        }
+        //self.user?.signOut()
+        print(Amplify.Auth.getCurrentUser())
+        //Amplify.Auth.sign
+        Amplify.Auth.getCurrentUser()
+        /*LoginManager.logOut(<#T##self: LoginManager##LoginManager#>)
+        Amplify.Auth.signOut(options: [], listener: <#T##((AmplifyOperation<AuthSignOutRequest, Void, AuthError>.OperationResult) -> Void)?##((AmplifyOperation<AuthSignOutRequest, Void, AuthError>.OperationResult) -> Void)?##(AmplifyOperation<AuthSignOutRequest, Void, AuthError>.OperationResult) -> Void#>)
+        Amplify.Auth.signOut(listener: ((AmplifyOperation<AuthSignOutRequest, Void, AuthError>.OperationResult) -> Void)?)*/
+    }
+    
+    
+    func loginButton(_ loginButton: FBLoginButton, didCompleteWith result: LoginManagerLoginResult?, error: Error?) {
+        print("here inside loginButton - logged in")
+        /*let hacky_scene_access = UIApplication.shared.connectedScenes.first
+        let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
+        _ = Amplify.Auth.signInWithWebUI(for: .facebook, presentationAnchor: scene_delegate.window!) { result in
+            switch result {
+            case .success(_):
+                print("Sign in succeeded")
+            case .failure(let error):
+                print("Sign in failed \(error)")
+                print(result)
+                print("babababa")
+            }
+        }*/
+    }
     
     @IBOutlet weak var signup_requirements: UILabel!
     
@@ -35,6 +74,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     var viewController:ViewController?
     
     var goldenSetViewController:GoldenSetViewController?
+    
     
     override func viewWillAppear(_ animated: Bool) {
         if (self.password?.text?.count ?? 0 > 7) {
@@ -72,22 +112,38 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         //print("finding out if the user is signed in loginView")
         //print(self.user?.isSignedIn)
         
-        // User is already signed in
-        if(self.user?.isSignedIn ?? false){
-            //print("printing our window loginView")
-            //print(self.view.window)
-            //print("should be transitioning to viewController")
-            //print(appDelegate)
-            self.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-            //print(self.viewController)
-            self.viewController!.user = self.user
-            //print(self.navigationController)
-            // should be the same as accessing from scene delegate
-            self.navigationController?.setViewControllers([self.viewController!], animated: true)
-            //let sceneDelegate = UIApplication.shared.delegate as! SceneDelegate
-            //sceneDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
-            //print("should have transitioned to view controller")
-        }
+        AppDelegate.waitFBUser.notify(queue: .main){
+            if((self.user?.isSignedIn ?? false) && AppDelegate.fbLoggedIn!){
+                print("Both an FB User and a non-FB User are logged in?")
+                print("This shouldn't happen")
+            }
+            // Non-FB User is already signed in
+            if(self.user?.isSignedIn ?? false){
+                //print("printing our window loginView")
+                //print(self.view.window)
+                //print("should be transitioning to viewController")
+                //print(appDelegate)
+                self.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                //print(self.viewController)
+                self.viewController!.user = self.user
+                //print(self.navigationController)
+                // should be the same as accessing from scene delegate
+                self.navigationController?.setViewControllers([self.viewController!], animated: true)
+                //let sceneDelegate = UIApplication.shared.delegate as! SceneDelegate
+                //sceneDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
+                //print("should have transitioned to view controller")
+            }
+            if(AppDelegate.fbLoggedIn!){
+                print("We have a FB User that's logged in")
+                print("Our amplify user is below - are they nomolos@umich ?")
+                //print(Amplify.Auth.getCurrentUser())
+                //DispatchQueue.main.sync{
+                self.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                    //self.viewController!.user = Amplify.Auth.getCurrentUser() as! AWSCognitoIdentityUser
+                self.navigationController?.setViewControllers([self.viewController!], animated: true)
+                //}
+            }
+        
         
         self.password?.addTarget(self, action: #selector(self.inputDidChange(_:)), for: .editingChanged)
         self.email?.addTarget(self, action: #selector(self.inputDidChange(_:)), for: .editingChanged)
@@ -96,10 +152,85 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         self.email.delegate = self
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
         self.view.addGestureRecognizer(tap)
+        let loginButton2 = FBLoginButton()
+        loginButton2.center = self.view.center
+        print("printing targets for loginButton2")
+        print(loginButton2.allTargets)
+        var temp_origin = self.signup_button.frame.origin
+        temp_origin.y = temp_origin.y + 100
+        
+        
+        /*let hacky_scene_access = UIApplication.shared.connectedScenes.first
+        let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate*/
+        /*
+        _ = Amplify.Auth.signInWithWebUI(for: .facebook, presentationAnchor: scene_delegate.window!) { result in
+            switch result {
+            case .success(_):
+                print("Sign in succeeded")
+            case .failure(let error):
+                print("Sign in failed \(error)")
+                print(result)
+                print("babababa")
+            }
+        }*/
+        
+        
+        loginButton2.frame.origin = temp_origin
+        //loginButton2.frame.origin.x += 60
+        loginButton2.permissions = ["public_profile", "email"]
+        loginButton2.removeTarget(nil, action: nil, for: .allEvents)
+        //loginButton2.delegate = self
+        loginButton2.addTarget(self, action: (#selector(self.fbLogin)), for: .touchUpInside)
+        NotificationCenter.default.addObserver(forName: .AccessTokenDidChange, object: nil, queue: OperationQueue.main) { (notification) in
+            // Print out access token
+            print("FB Access Token: \(String(describing: AccessToken.current?.tokenString))")
+        }
+        //print("printing access token")
+        //print(AccessToken.current)
+        //loginButton2.addTarget(self, action:Selector(("fbLoginClicked:")), for: UIControl.Event.touchUpInside)
+        self.view.addSubview(loginButton2)
+        loginButton2.center.x = self.view.center.x
+        //loginButton2.setNeedsDisplay()
+        
         if(AppDelegate.loggedIn!){
             AppDelegate.loggedIn = false
         }
         self.user?.getDetails()
+        }
+    }
+    
+    @objc func fbLogin(sender: FBLoginButton){
+        print("here inside custom-made fbLogin")
+        let hacky_scene_access = UIApplication.shared.connectedScenes.first
+        let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
+        //self.view.window = scene_delegate.window!
+        _ = Amplify.Auth.signInWithWebUI(for: .facebook, presentationAnchor: self.view.window!) { result in
+            switch result {
+            case .success(_):
+                print("Sign in succeeded, printing result")
+                print(result)
+                //sleep(2)
+                DispatchQueue.main.sync{
+                    print(Amplify.Auth.getCurrentUser())
+                    print("Printing the default user pool's user")
+                    print(AppDelegate.defaultUserPool().currentUser()?.username)
+                    print(Amplify.log)
+                    AppDelegate.fetchCurrentAuthSession2()
+                    sleep(1)
+                }
+                //Amplify.Auth.cur
+                /*if(Amplify.Auth.getCurrentUser() != nil){
+                    self.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                    self.viewController!.user = Amplify.Auth.getCurrentUser() as! AWSCognitoIdentityUser
+                    self.navigationController?.setViewControllers([self.viewController!], animated: true)
+                }*/
+            case .failure(let error):
+                print("Sign in failed \(error)")
+                print(result)
+                print("babababa")
+            }
+        }
+        //sleep(5)
     }
     
     @IBAction func login(_ sender: Any) {

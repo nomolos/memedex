@@ -1,14 +1,15 @@
 {
-	"auth": {
-		"cognitod6dd35c5": {
-			"service": "Cognito",
-			"providerPlugin": "awscloudformation"
-		}
-	},
-	"analytics": {
-		"memedex": {
-			"service": "Pinpoint",
-			"providerPlugin": "awscloudformation"
-		}
-	}
+    "auth": {
+        "cognitod6dd35c5": {
+            "service": "Cognito",
+            "providerPlugin": "awscloudformation",
+            "dependsOn": []
+        }
+    },
+    "analytics": {
+        "memedex": {
+            "service": "Pinpoint",
+            "providerPlugin": "awscloudformation"
+        }
+    }
 }

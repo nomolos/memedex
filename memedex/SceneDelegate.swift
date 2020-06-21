@@ -146,10 +146,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     // from FB
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
+        print("herererere")
+        print("herererere")
+        print("herererere")
         guard let url = URLContexts.first?.url else {
             return
         }
-
+        print(url)
+        print("herererere")
         ApplicationDelegate.shared.application(
             UIApplication.shared,
             open: url,

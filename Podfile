@@ -4,9 +4,13 @@ platform :ios, '11.0'
 use_frameworks!
 
 target :'memedex' do
+    # pod 'amplify-tools'
+    pod 'Amplify'
+    pod 'AWSPluginsCore'
+    pod 'Amplify/Tools', '1.0.0'
     pod 'AmplifyPlugins/AWSPinpointAnalyticsPlugin'
+    pod 'AmplifyPlugins/AWSCognitoAuthPlugin', '1.0.0'
     pod 'AWSCore'
-    pod 'AWSAppSync'
     pod 'AWSAutoScaling'
     pod 'AWSCloudWatch'
     pod 'AWSCognito'
@@ -19,7 +23,7 @@ target :'memedex' do
     pod 'AWSLambda'
     pod 'AWSMachineLearning'
     pod 'AWSMobileAnalytics'
-    pod 'AWSMobileClient'
+    pod 'AWSMobileClient', '2.13.4'
     pod 'AWSPinpoint'
     pod 'AWSS3'
     pod 'AWSSES'
@@ -29,4 +33,7 @@ target :'memedex' do
     pod 'FBSDKCoreKit'
     pod 'FBSDKLoginKit'
     pod 'FBSDKShareKit'
+    pod 'FBSDKPlacesKit'
+    pod 'AWSFacebookSignIn'
+    pod 'AWSUserPoolsSignIn'
 end
