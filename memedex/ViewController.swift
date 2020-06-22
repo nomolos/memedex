@@ -283,6 +283,11 @@ class ViewController: UIViewController {
             generator.notificationOccurred(.error)
             return
         }
+        if(self.index + 1 == self.last_recommended_index){
+            let alert = UIAlertController(title: "End of Recommendations", message: "You looked through all the recommended memes! Now you're surfing the internet :)", preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+            self.present(alert, animated: true)
+        }
         // vibration indicating success
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
@@ -308,9 +313,6 @@ class ViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        //let appDelegate = UIApplication.shared.delegate as? AppDelegate
-        /*UIApplication.shared.windows.first?.rootViewController = appDelegate?.window?.rootViewController
-        UIApplication.shared.windows.first?.makeKeyAndVisible()*/
         let hacky_scene_access = UIApplication.shared.connectedScenes.first
         let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
         scene_delegate.viewController = self

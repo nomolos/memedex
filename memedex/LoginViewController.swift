@@ -113,6 +113,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
         //print(self.user?.isSignedIn)
         
         AppDelegate.waitFBUser.notify(queue: .main){
+            print("notified LoginView")
             if((self.user?.isSignedIn ?? false) && AppDelegate.fbLoggedIn!){
                 print("Both an FB User and a non-FB User are logged in?")
                 print("This shouldn't happen")
@@ -134,12 +135,15 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
                 //print("should have transitioned to view controller")
             }
             if(AppDelegate.fbLoggedIn!){
+                //AppDelegate.fetchCurrentAuthSession2()
                 print("We have a FB User that's logged in")
-                print("Our amplify user is below - are they nomolos@umich ?")
+                //print("Our amplify user is below - are they nomolos@umich ?")
                 //print(Amplify.Auth.getCurrentUser())
                 //DispatchQueue.main.sync{
+                print("Should have FB Username below")
+                print(AppDelegate.fb_username)
                 self.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-                    //self.viewController!.user = Amplify.Auth.getCurrentUser() as! AWSCognitoIdentityUser
+                //self.viewController!.user = Amplify.Auth.getCurrentUser() as! AWSCognitoIdentityUser
                 self.navigationController?.setViewControllers([self.viewController!], animated: true)
                 //}
             }
@@ -207,23 +211,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
         _ = Amplify.Auth.signInWithWebUI(for: .facebook, presentationAnchor: self.view.window!) { result in
             switch result {
             case .success(_):
-                print("Sign in succeeded, printing result")
-                print(result)
-                //sleep(2)
-                DispatchQueue.main.sync{
-                    print(Amplify.Auth.getCurrentUser())
-                    print("Printing the default user pool's user")
-                    print(AppDelegate.defaultUserPool().currentUser()?.username)
-                    print(Amplify.log)
-                    AppDelegate.fetchCurrentAuthSession2()
-                    sleep(1)
-                }
-                //Amplify.Auth.cur
-                /*if(Amplify.Auth.getCurrentUser() != nil){
-                    self.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-                    self.viewController!.user = Amplify.Auth.getCurrentUser() as! AWSCognitoIdentityUser
-                    self.navigationController?.setViewControllers([self.viewController!], animated: true)
-                }*/
+                print("FB Sign in succeeded")
             case .failure(let error):
                 print("Sign in failed \(error)")
                 print(result)

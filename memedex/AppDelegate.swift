@@ -37,6 +37,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     static var loggedIn: Bool?
     static var fbLoggedIn: Bool?
     static var waitFBUser = DispatchGroup()
+    static var waitFBUsername = DispatchGroup()
     static var fb_username: String?
     //var window: UIWindow?
    //var navigationController:UINavigationController?
@@ -68,24 +69,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        print("inside app delegate")
-        //do {try Amplify.configure()} catch { print("didn't configure")}
-        //print(self.window)
-        AppDelegate.waitFBUser.enter()
+        //AppDelegate.waitFBUser.enter()
         ApplicationDelegate.shared.application(
             application,
             didFinishLaunchingWithOptions: launchOptions
         )
-        
-        
         AppDelegate.loggedIn = false
         AppDelegate.fbLoggedIn = false
-        //print("printing Scenes app delegate")
-        //print(UIApplication.shared.connectedScenes)
-        /*self.window = UIWindow(frame: UIScreen.main.bounds)
-        self.navigationController = UINavigationController(rootViewController: LoginViewController())
-        self.window?.rootViewController = self.navigationController
-        self.window?.makeKeyAndVisible()*/
         
         // Initialize Pinpoint
         pinpoint = AWSPinpoint(configuration:
@@ -99,8 +89,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let configuration = AWSServiceConfiguration(region:.USWest1, credentialsProvider:credentialsProvider)
         AWSServiceManager.default().defaultServiceConfiguration = configuration
         AWSS3.register(with: configuration!, forKey: "defaultKey")
-        //AWSDDLog.sharedInstance.logLevel = .verbose
-        //AWSDDLog.add(AWSDDTTYLogger.sharedInstance)
+        AWSDDLog.sharedInstance.logLevel = .verbose
+        AWSDDLog.add(AWSDDTTYLogger.sharedInstance)
         self.cognitoConfig = CognitoConfig()
         self.setupCognitoUserPool()
         do {
@@ -113,7 +103,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         print("printing access token AppDelegate")
         print(AccessToken.current)
-        AppDelegate.fetchCurrentAuthSession2()
+        AppDelegate.waitFBUser.enter()
         self.fetchCurrentAuthSession()
         
         //self.window?.makeKeyAndVisible()
@@ -128,17 +118,19 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ = Amplify.Hub.listen(to: .auth) { payload in
             switch payload.eventName {
             case HubPayload.EventName.Auth.signedIn:
-                print("User signed in [printing from app delegate]")
-                //print(payload)
-                //print(Amplify.Auth.getCurrentUser())
                 DispatchQueue.main.sync{
-                    AppDelegate.fbLoggedIn = true
-                    if(self.loginViewController != nil){
-                        self.loginViewController!.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-                        self.loginViewController?.navigationController?.setViewControllers([self.loginViewController!.viewController!], animated: true)
-                    }
-                    else{
-                        print("ERROR - WE SIGNED IN BUT OUR LOGINVIEW IS NIL")
+                    //AppDelegate.fbLoggedIn = true
+                    AppDelegate.waitFBUser.enter()
+                    self.fetchCurrentAuthSession()
+                    AppDelegate.waitFBUser.notify(queue: .main){
+                        if(self.loginViewController != nil){
+                            self.loginViewController?.goldenSetViewController = self.storyboard?.instantiateViewController(withIdentifier: "GoldenSetViewController") as? GoldenSetViewController
+                            //self.loginViewController!.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                            self.loginViewController?.navigationController?.setViewControllers([self.loginViewController!.goldenSetViewController!], animated: true)
+                        }
+                        else{
+                            print("ERROR - WE SIGNED IN BUT OUR LOGINVIEW IS NIL")
+                        }
                     }
                 }
                 // Update UI
@@ -155,31 +147,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 break
             }
         }
-        
-        /*_ = Amplify.Auth.signOut() { result in
-            switch result {
-            case .success:
-                print("Successfully signed out")
-            case .failure(let error):
-                print("Sign out failed with error \(error)")
-            }
-        }*/
-        print("Printing the same shit in app delegate")
-        print(Amplify.Auth.getCurrentUser())
-        //AmplifyPlugins.AWSAuthCognitoSession.getUserSub(self.)
-        print("Printing the default user pool's user")
-        print(AppDelegate.defaultUserPool().currentUser()?.username)
-        print(Amplify.log)
+
         return AWSMobileClient.sharedInstance().interceptApplication(
             application,
             didFinishLaunchingWithOptions: launchOptions)
     }
     
-    //State restoration stuff
-    //Haven't gotten it to work yet
-    
     func application(_ application: UIApplication, shouldSaveSecureApplicationState coder: NSCoder) -> Bool {
-        //print("shouldsavesecureappstate")
         self.viewController?.encodeRestorableState(with: NSCoder())
         return true
     }
@@ -189,7 +163,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
     
     func application(_ application: UIApplication, shouldRestoreSecureApplicationState coder: NSCoder) -> Bool {
-        //print("shouldrestoresecureappstate")
         return true
     }
     
@@ -248,55 +221,38 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
     }
     
-    func fetchCurrentAuthSession() {
-        print("inside fetchCurrentAuthSession")
-        print("inside fetchCurrentAuthSession")
-        print("inside fetchCurrentAuthSession")
-        print(Amplify.Auth.categoryType)
-        //print(Amplify.Auth.)
+    /*func fetchCurrentAuthSession() {
         _ = Amplify.Auth.fetchAuthSession { result in
             switch result {
             case .success(let session):
                 print("fbLoggedIn should be set to - \(session.isSignedIn)")
                 print(result)
                 AppDelegate.fbLoggedIn = session.isSignedIn
+                //let session2 = try result.get() as! AWSAuthCognitoSession
                 AppDelegate.waitFBUser.leave()
             case .failure(let error):
                 print("Fetch session failed with error \(error)")
                 AppDelegate.waitFBUser.leave()
             }
         }
-    }
+    }*/
     
-    static func fetchCurrentAuthSession2() {
+    func fetchCurrentAuthSession() {
         _ = Amplify.Auth.fetchAuthSession { result in
             do {
                 print("inside fetchCurrentAuthSession2")
-                print("inside fetchCurrentAuthSession2")
-                print("inside fetchCurrentAuthSession2")
-                print("inside fetchCurrentAuthSession2")
-                //print(result)
-                //print(result)
                 let session = try result.get() as! AWSAuthCognitoSession
-                print(session.awsCredentialsResult)
-                print(".")
-                print(".")
-                print(session.getAWSCredentials())
-                print(".")
-                print(".")
-                print(session.getUserSub())
-                //AppDelegate.fb_username = session.getUserSub().get() as? String
-                print(".")
-                print(".")
-                //print(session)
+                print("fbLoggedIn should be set to - \(session.isSignedIn)")
+                AppDelegate.fbLoggedIn = session.isSignedIn
                 // Get user sub or identity id
                 if let identityProvider = session as? AuthCognitoIdentityProvider {
                     let usersub = try identityProvider.getUserSub().get()
                     AppDelegate.fb_username = usersub
                     let identityId = try identityProvider.getIdentityId().get()
                     print("User sub - \(usersub) and idenity id \(identityId)")
+                    print("Should have FB Username")
+                    print(AppDelegate.fb_username)
                 }
-
                 // Get aws credentials
                 if let awsCredentialsProvider = session as? AuthAWSCredentialsProvider {
                     let credentials = try awsCredentialsProvider.getAWSCredentials().get()
@@ -308,9 +264,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     let tokens = try cognitoTokenProvider.getCognitoTokens().get()
                     print("Id token - \(tokens.idToken) ")
                 }
-
+                AppDelegate.waitFBUser.leave()
             } catch {
                 print("Fetch auth session failed with error - \(error)")
+                AppDelegate.waitFBUser.leave()
             }
         }
     }
