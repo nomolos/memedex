@@ -256,8 +256,20 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var slider: CustomSlider!
     
+    
+    // We want to default to a value of 0 for a swipe left
+    // For now
+    @IBAction func swipeLeft(_ sender: Any) {
+        self.slider.value = 0
+        self.next(self)
+    }
+    
+    
+    
     @IBAction func next(_ sender: Any) {
         print("inside next")
+        print("printing value inside next")
+        print(slider.value)
         self.slider.isEnabled = false
         // This user is active
         // Send a notification to Dynamo
@@ -341,7 +353,7 @@ class ViewController: UIViewController {
         let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
         scene_delegate.viewController = self
         let nc = NotificationCenter.default
-        nc.addObserver(self, selector: #selector(next(_:)), name: NSNotification.Name(rawValue: "next"), object: nil)
+        nc.addObserver(self, selector: #selector(swipeLeft(_:)), name: NSNotification.Name(rawValue: "next"), object: nil)
         nc.addObserver(self, selector: #selector(back(_:)), name: NSNotification.Name(rawValue: "back"), object: nil)
         if(self.meme_link == nil){
             self.meme_link = UIButton()
@@ -513,6 +525,7 @@ class ViewController: UIViewController {
                         let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
                         let temp_url = URL(string: temp0_url)
                         self.player = AVPlayer(url: temp_url!)
+                        self.player?.isMuted = true
                         self.playerViewController = AVPlayerViewController()
                         self.playerViewController?.disableGestureRecognition()
                         let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.next(_:)))
@@ -580,6 +593,7 @@ class ViewController: UIViewController {
                 let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
                 let temp_url = URL(string: temp0_url)
                 self.player = AVPlayer(url: temp_url!)
+                self.player?.isMuted = true
                 self.playerViewController = AVPlayerViewController()
                 self.playerViewController?.disableGestureRecognition()
                 let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.next(_:)))
