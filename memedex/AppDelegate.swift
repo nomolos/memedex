@@ -89,8 +89,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         let configuration = AWSServiceConfiguration(region:.USWest1, credentialsProvider:credentialsProvider)
         AWSServiceManager.default().defaultServiceConfiguration = configuration
         AWSS3.register(with: configuration!, forKey: "defaultKey")
-        AWSDDLog.sharedInstance.logLevel = .verbose
-        AWSDDLog.add(AWSDDTTYLogger.sharedInstance)
+        //AWSDDLog.sharedInstance.logLevel = .verbose
+        //AWSDDLog.add(AWSDDTTYLogger.sharedInstance)
         self.cognitoConfig = CognitoConfig()
         self.setupCognitoUserPool()
         do {
@@ -124,9 +124,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     self.fetchCurrentAuthSession()
                     AppDelegate.waitFBUser.notify(queue: .main){
                         if(self.loginViewController != nil){
-                            self.loginViewController?.goldenSetViewController = self.storyboard?.instantiateViewController(withIdentifier: "GoldenSetViewController") as? GoldenSetViewController
+                            self.loginViewController?.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
                             //self.loginViewController!.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-                            self.loginViewController?.navigationController?.setViewControllers([self.loginViewController!.goldenSetViewController!], animated: true)
+                            self.loginViewController?.navigationController?.setViewControllers([self.loginViewController!.viewController!], animated: true)
                         }
                         else{
                             print("ERROR - WE SIGNED IN BUT OUR LOGINVIEW IS NIL")

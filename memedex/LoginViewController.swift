@@ -69,7 +69,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
     
     var activityIndicator = UIActivityIndicatorView()
     
-    var go_to_golden = false
+    //var go_to_golden = false
 
     var viewController:ViewController?
     
@@ -239,7 +239,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
         
         if(self.email.text == nil || self.password.text == nil || self.email.text == "" || self.password.text == ""){
             self.activityIndicator.stopAnimating()
-            self.go_to_golden = true
+            //self.go_to_golden = true
             self.performSegue(withIdentifier: "SignUpSegue", sender: self)
             return
         }
@@ -262,7 +262,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
                     }
                 }
                 else{
-                    self.go_to_golden = true
+                    //self.go_to_golden = true
                     self.user = response.result?.user
                     DispatchQueue.main.async {
                         self.activityIndicator.stopAnimating()
@@ -356,7 +356,7 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                 else{
                     self.activityIndicator.stopAnimating()
                     DispatchQueue.main.async {
-                        self.go_to_golden = true
+                        //self.go_to_golden = true
                         self.performSegue(withIdentifier: "VerifySegue", sender: self)
                     }
                 }
@@ -375,19 +375,19 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                         usleep(10000)
                         hundredth_second_count = hundredth_second_count + 1
                     }
-                    if(!self.go_to_golden){
-                        self.activityIndicator.stopAnimating()
-                        let hacky_scene_access = UIApplication.shared.connectedScenes.first
-                        let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
-                        scene_delegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-                        scene_delegate.navigationController?.setViewControllers([scene_delegate.viewController!], animated: true)
-                    }
-                    else{
+                    //if(!self.go_to_golden){
+                    self.activityIndicator.stopAnimating()
+                    let hacky_scene_access = UIApplication.shared.connectedScenes.first
+                    let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
+                    scene_delegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                    scene_delegate.navigationController?.setViewControllers([scene_delegate.viewController!], animated: true)
+                    //}
+                    /*else{
                         self.activityIndicator.stopAnimating()
                         self.goldenSetViewController = self.storyboard?.instantiateViewController(withIdentifier: "GoldenSetViewController") as? GoldenSetViewController
                         self.go_to_golden = false
                         self.navigationController?.setViewControllers([(self.goldenSetViewController!)], animated: true)
-                    }
+                    }*/
                 }
                 else{
                     print("logging out loginview")
