@@ -260,7 +260,7 @@ class ViewController: UIViewController {
     // We want to default to a value of 0 for a swipe left
     // For now
     @IBAction func swipeLeft(_ sender: Any) {
-        self.slider.value = 0
+        //self.slider.value = 0
         self.next(self)
     }
     
@@ -271,6 +271,7 @@ class ViewController: UIViewController {
         print("printing value inside next")
         print(slider.value)
         self.slider.isEnabled = false
+        //boofywoofy
         // This user is active
         // Send a notification to Dynamo
         // Adds them to today's Active Users table
@@ -347,6 +348,11 @@ class ViewController: UIViewController {
         self.configureSlider()
     }
     
+    @objc func update_slider() {
+        self.slider.value = ImageZoomView.slider_value!
+        self.sliderValueDidChange(sender: self.slider)
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
         self.show_share_popup = 0
         let hacky_scene_access = UIApplication.shared.connectedScenes.first
@@ -355,6 +361,7 @@ class ViewController: UIViewController {
         let nc = NotificationCenter.default
         nc.addObserver(self, selector: #selector(swipeLeft(_:)), name: NSNotification.Name(rawValue: "next"), object: nil)
         nc.addObserver(self, selector: #selector(back(_:)), name: NSNotification.Name(rawValue: "back"), object: nil)
+        nc.addObserver(self, selector: #selector(update_slider), name: NSNotification.Name(rawValue: "update_slider"), object: nil)
         if(self.meme_link == nil){
             self.meme_link = UIButton()
             let temp_image = UIImage(named: "link") as UIImage?
@@ -528,12 +535,12 @@ class ViewController: UIViewController {
                         self.player?.isMuted = true
                         self.playerViewController = AVPlayerViewController()
                         self.playerViewController?.disableGestureRecognition()
-                        let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.next(_:)))
+                        /*let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.next(_:)))
                         let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.back(_:)))
                         leftSwipe.direction = UISwipeGestureRecognizer.Direction.left
                         rightSwipe.direction = UISwipeGestureRecognizer.Direction.right
                         self.playerViewController!.view.addGestureRecognizer(leftSwipe)
-                        self.playerViewController!.view.addGestureRecognizer(rightSwipe)
+                        self.playerViewController!.view.addGestureRecognizer(rightSwipe)*/
                         self.playerViewController!.player = self.player
                         self.playerViewController!.view.frame = self.meme.frame
                         self.addChild(self.playerViewController!)
@@ -596,12 +603,12 @@ class ViewController: UIViewController {
                 self.player?.isMuted = true
                 self.playerViewController = AVPlayerViewController()
                 self.playerViewController?.disableGestureRecognition()
-                let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.next(_:)))
+                /*let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.next(_:)))
                 let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.back(_:)))
                 leftSwipe.direction = UISwipeGestureRecognizer.Direction.left
                 rightSwipe.direction = UISwipeGestureRecognizer.Direction.right
                 self.playerViewController!.view.addGestureRecognizer(leftSwipe)
-                self.playerViewController!.view.addGestureRecognizer(rightSwipe)
+                self.playerViewController!.view.addGestureRecognizer(rightSwipe)*/
                 self.playerViewController!.player = self.player
                 self.playerViewController!.view.frame = self.meme.frame
                 self.addChild(self.playerViewController!)
@@ -1060,12 +1067,12 @@ class ViewController: UIViewController {
     func updateUI(direction: Bool) {
         print("inside updateUI")
         if(!self.meme.isHidden){
-            if(direction){
+            /*if(direction){
                 self.imageView.slideInFromRight()
             }
             else{
                 self.imageView.slideInFromLeft()
-            }
+            }*/
             self.imageView?.image = self.image
             self.meme = ImageZoomView(frame: self.meme.frame, something: true)
             self.view.addSubview(self.meme)

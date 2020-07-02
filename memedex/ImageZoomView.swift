@@ -14,17 +14,22 @@ import UIKit
 class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDelegate {
     var imageView: UIImageView!
     var gestureRecognizer: UITapGestureRecognizer!
-    var swipeGestureRecognizer: UISwipeGestureRecognizer!
-    var swipeGestureRecognizer2: UISwipeGestureRecognizer!
+    //var swipeGestureRecognizer: UISwipeGestureRecognizer!
+    //var swipeGestureRecognizer2: UISwipeGestureRecognizer!
     var zoomHere:CGPoint?
     var pinchGesture = UIPinchGestureRecognizer()
-
+    //var panGesture = UIPanGestureRecognizer?
+    var panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePans))
+    var ultimate_center:CGPoint?
+    var ultimate_center_set = false
+    static var slider_value:Float?
     
     convenience init(frame: CGRect, something:Bool) {
         self.init(frame: frame)
         self.frame = frame
         setupGestureRecognizer()
-        setupSwipeGestureRecognizer()
+        //setupSwipeGestureRecognizer()
+        setupPanGestureRecognizer()
     }
     
     func getImage() -> UIImage {
@@ -43,8 +48,10 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
         self.setupScrollView(image: self.imageView.image!)
         self.removeConstraints(self.constraints)
         self.setNeedsLayout()
+        //self.ultimate_center = self.imageView.center
+        print("printing ultimate center in update image")
+        print(self.ultimate_center)
     }
-    
     
     // Sets the scroll view delegate and zoom scale limits.
     // Change the `maximumZoomScale` to allow zooming more than 2x.
@@ -61,7 +68,7 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
         addGestureRecognizer(gestureRecognizer)
     }
     
-    func setupSwipeGestureRecognizer() {
+    /*func setupSwipeGestureRecognizer() {
         print("Adding swipe gesture recognizer")
         swipeGestureRecognizer = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipe))
         swipeGestureRecognizer.direction = UISwipeGestureRecognizer.Direction.left
@@ -73,9 +80,15 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
         addGestureRecognizer(swipeGestureRecognizer2)
         self.panGestureRecognizer.require(toFail: swipeGestureRecognizer!)
         self.panGestureRecognizer.require(toFail: swipeGestureRecognizer2!)
+    }*/
+    
+    func setupPanGestureRecognizer() {
+        self.panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePans))
+        addGestureRecognizer(self.panGesture)
+        //let image =
     }
     
-    @IBAction func handleSwipe() {
+    /*@IBAction func handleSwipe() {
         print("inside handleSwipe")
         //let storyboard = UIStoryboard(name: "Main", bundle: nil)
         //let viewController = storyboard.instantiateViewController(identifier: "ViewController") as ViewController
@@ -86,12 +99,94 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
         //self.viewController?.
         //print(self.superview?.superview)
         //print(self.delegate)
-    }
+    }*/
     
-    @IBAction func handleSwipe2() {
+    /*@IBAction func handleSwipe2() {
         let nc = NotificationCenter.default
         nc.post(name: NSNotification.Name(rawValue: "back"), object: nil)
         print("done in handleSwipe2")
+    }*/
+    
+    @objc func handlePans() {
+        if(!ultimate_center_set){
+            self.ultimate_center = self.imageView.center
+            self.ultimate_center_set = true
+        }
+        //print("printing image center in handle pans")
+        //print(self.imageView.center)
+        //let temp_center = self.imageView.center
+        print("printing temp center 1")
+        //print(temp_center)
+        let square = self.imageView!
+        //print("printing superview")
+        //print(self.superview)
+        // Could be problematic that temp center is set every single time
+        if(!(self.panGesture.state == UIGestureRecognizer.State.ended)){
+            print("not in ended")
+            // point is currently defined within the ImageZoomView, not the overall view
+            
+            let point = self.panGesture.translation(in: self)
+            let divisor = (self.superview!.frame.width/2)/0.61
+            square.center.x = self.imageView.center.x + (point.x/15)
+            //square.center = CGPoint(x: self.imageView.center.x + (point.x/6), y: self.imageView.center.y + (point.y/6))
+            
+            print("printing square center x")
+            print(square.center.x)
+            print("printing point.x")
+            print(point.x)
+            
+            //550, 200, 0
+            
+            
+            //ImageZoomView.slider_value = Float((point.x+35)/13)
+            ImageZoomView.slider_value = Float(square.center.x/80)
+            
+            let nc = NotificationCenter.default
+            nc.post(name: NSNotification.Name(rawValue: "update_slider"), object: nil)
+            // (x + 40)/13
+            let xFromCenter = square.center.x - self.ultimate_center!.x
+            print("printing xFromCenter")
+            print(xFromCenter)
+            let scale = min(50/abs(xFromCenter), 1)
+            //print(temp_center)
+            square.transform = CGAffineTransform(rotationAngle: xFromCenter/divisor).scaledBy(x: scale, y: scale)
+        }
+        else if self.panGesture.state == UIGestureRecognizer.State.ended{
+            print("in ended")
+            //let square = self.imageView!
+            square.transform = CGAffineTransform.identity
+            /*if(square.center.x < 50){
+                print("shouldswipe")
+                let nc = NotificationCenter.default
+                nc.post(name: NSNotification.Name(rawValue: "next"), object: nil)
+                self.ultimate_center_set = false
+            }
+            else if(square.center.x > self.imageView.frame.width - 20){
+                print("shouldswipe")
+                let nc = NotificationCenter.default
+                nc.post(name: NSNotification.Name(rawValue: "next"), object: nil)
+                self.ultimate_center_set = false
+            }*/
+            /*UIView.animate(withDuration: 0.2, animations: {
+                square.center = temp_center
+                self.setNeedsDisplay()
+            })*/
+            //square.center = temp_center
+            //print("printing temp center 3")
+            //print(temp_center)
+            /*UIView.animate(withDuration: 0.2, animations: {
+                square.center = self.ultimate_center!
+                self.setNeedsDisplay()
+            })*/
+            let nc = NotificationCenter.default
+            nc.post(name: NSNotification.Name(rawValue: "next"), object: nil)
+            self.ultimate_center_set = false
+        }
+        //else if self.panGesture.state == UIGestureRecognizer.State.
+        /*UIView.animate(withDuration: 0.2, animations: {
+            square.center = temp_center
+            self.setNeedsDisplay()
+        })*/
     }
     
     @IBAction func handleDoubleTap() {
@@ -129,7 +224,7 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
 
 }
 
-extension UIImageView {
+/*extension UIImageView {
     // Name this function in a way that makes sense to you...
     // slideFromLeft, slideRight, slideLeftToRight, etc. are great alternative names
     func slideInFromRight(duration: TimeInterval = 0.3, completionDelegate: AnyObject? = nil) {
@@ -170,4 +265,4 @@ extension UIImageView {
         self.layer.add(slideInFromLeftTransition, forKey: "slideInFromLeftTransition")
     }
 
-}
+}*/
