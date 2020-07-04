@@ -284,16 +284,19 @@ extension AppDelegate: AWSCognitoIdentityInteractiveAuthenticationDelegate {
         //UIApplication.shared.connectedScenes
         let hacky_scene_access = UIApplication.shared.connectedScenes.first
         let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
-        if(AppDelegate.loggedIn!){
+        /*if(AppDelegate.loggedIn!){
+            print("we're logged in")
             //print("printing connected scenes from app delegate in auth")
             //print(self.window.rootViewController)
             //print(UIApplication.shared.connectedScenes)
             //print("printing scene delegate's navigationView and login view")
             //print(scene_delegate.navigationController)
             //print(scene_delegate.loginViewController)
-            scene_delegate.navigationController?.setViewControllers([scene_delegate.loginViewController!], animated: true)
+            DispatchQueue.main.sync(execute: {
+                scene_delegate.navigationController?.setViewControllers([scene_delegate.loginViewController!], animated: true)
+            })
             //self.navigationController!.setViewControllers([self.loginViewController!], animated: true)
-        }
+        }*/
         //print("printing scene delegate's navigationView and login view")
         //print(scene_delegate.navigationController)
         //print(scene_delegate.loginViewController)

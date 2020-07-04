@@ -50,6 +50,7 @@ class ViewController: UIViewController {
     let meme_cache_semaphore = DispatchSemaphore(value: 0)
     var previous_num_memes = -1
     var show_share_popup = 0
+    var videoPanGesture:UIPanGestureRecognizer?
     static let key_1 = "key_1"
     static let key_2 = "key_2"
     static let key_3 = "key_3"
@@ -257,10 +258,8 @@ class ViewController: UIViewController {
     @IBOutlet weak var slider: CustomSlider!
     
     
-    // We want to default to a value of 0 for a swipe left
-    // For now
+
     @IBAction func swipeLeft(_ sender: Any) {
-        //self.slider.value = 0
         self.next(self)
     }
     
@@ -354,6 +353,7 @@ class ViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        print("inside viewWillAppear")
         self.show_share_popup = 0
         let hacky_scene_access = UIApplication.shared.connectedScenes.first
         let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
@@ -404,6 +404,7 @@ class ViewController: UIViewController {
             // 66666666666
             self.waitMemeNamesS3.notify(queue: .main){
                 // We have a previous state
+                print("inside waitMemeNamesS3")
                 if(self.previous_num_memes != -1){
                     // This previous state was from a different day
                     if(self.previous_num_memes != self.keys.count){
@@ -450,6 +451,8 @@ class ViewController: UIViewController {
         else{
             meme?.username = user?.username as! NSString
         }
+        print("inside rateCurrentMeme")
+        print(self.index)
         meme?.meme = self.keys[self.index] as NSString
         meme?.rating = slider.value as NSNumber
         let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
@@ -535,6 +538,9 @@ class ViewController: UIViewController {
                         self.player?.isMuted = true
                         self.playerViewController = AVPlayerViewController()
                         self.playerViewController?.disableGestureRecognition()
+                        self.videoPanGesture = UIPanGestureRecognizer(target: self, action: #selector(self.handleVideoSwipe))
+                        self.playerViewController?.view.addGestureRecognizer(self.videoPanGesture!)
+                        //self.playerViewController.addgest
                         /*let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.next(_:)))
                         let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.back(_:)))
                         leftSwipe.direction = UISwipeGestureRecognizer.Direction.left
@@ -603,6 +609,8 @@ class ViewController: UIViewController {
                 self.player?.isMuted = true
                 self.playerViewController = AVPlayerViewController()
                 self.playerViewController?.disableGestureRecognition()
+                self.videoPanGesture = UIPanGestureRecognizer(target: self, action: #selector(self.handleVideoSwipe))
+                self.playerViewController?.view.addGestureRecognizer(self.videoPanGesture!)
                 /*let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.next(_:)))
                 let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.back(_:)))
                 leftSwipe.direction = UISwipeGestureRecognizer.Direction.left
@@ -624,6 +632,18 @@ class ViewController: UIViewController {
                 return
             }
         }
+    }
+    
+    @objc func handleVideoSwipe() {
+        print("printing something in handleVideoSwipe")
+        print(self.videoPanGesture?.location(in: self.view))
+        self.slider.value = Float((self.videoPanGesture?.location(in: self.view).x)!)/60
+        self.sliderValueDidChange(sender: self.slider)
+        if self.videoPanGesture!.state == UIGestureRecognizer.State.ended{
+            self.next(self)
+        }
+        // 0 to 330 (call it 300 for max)
+        // x / 60
     }
     
     func background_meme_download() {

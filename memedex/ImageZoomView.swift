@@ -125,9 +125,10 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
             print("not in ended")
             // point is currently defined within the ImageZoomView, not the overall view
             
-            let point = self.panGesture.translation(in: self)
+            //let point = self.panGesture.translation(in: self)
+            let point = self.panGesture.location(in: self.superview)
             let divisor = (self.superview!.frame.width/2)/0.61
-            square.center.x = self.imageView.center.x + (point.x/15)
+            square.center.x = /*self.imageView.center.x +*/ point.x
             //square.center = CGPoint(x: self.imageView.center.x + (point.x/6), y: self.imageView.center.y + (point.y/6))
             
             print("printing square center x")
@@ -139,7 +140,7 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
             
             
             //ImageZoomView.slider_value = Float((point.x+35)/13)
-            ImageZoomView.slider_value = Float(square.center.x/80)
+            ImageZoomView.slider_value = Float(square.center.x/60)
             
             let nc = NotificationCenter.default
             nc.post(name: NSNotification.Name(rawValue: "update_slider"), object: nil)
