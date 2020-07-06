@@ -280,23 +280,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 // 3. Log out
 extension AppDelegate: AWSCognitoIdentityInteractiveAuthenticationDelegate {
     func startPasswordAuthentication() -> AWSCognitoIdentityPasswordAuthentication {
-        //print("inside startPasswordAuthentication AppDelegate")
+        print("inside startPasswordAuthentication AppDelegate")
         //UIApplication.shared.connectedScenes
         let hacky_scene_access = UIApplication.shared.connectedScenes.first
         let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
-        /*if(AppDelegate.loggedIn!){
-            print("we're logged in")
+        if(AppDelegate.loggedIn!){
+            print("we're logged in, going to navigate to loginView to log out")
             //print("printing connected scenes from app delegate in auth")
             //print(self.window.rootViewController)
             //print(UIApplication.shared.connectedScenes)
             //print("printing scene delegate's navigationView and login view")
             //print(scene_delegate.navigationController)
             //print(scene_delegate.loginViewController)
-            DispatchQueue.main.sync(execute: {
-                scene_delegate.navigationController?.setViewControllers([scene_delegate.loginViewController!], animated: true)
-            })
+            scene_delegate.navigationController?.setViewControllers([scene_delegate.loginViewController!], animated: true)
             //self.navigationController!.setViewControllers([self.loginViewController!], animated: true)
-        }*/
+        }
         //print("printing scene delegate's navigationView and login view")
         //print(scene_delegate.navigationController)
         //print(scene_delegate.loginViewController)

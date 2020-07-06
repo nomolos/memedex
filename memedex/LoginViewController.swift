@@ -75,8 +75,37 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
     
     var goldenSetViewController:GoldenSetViewController?
     
+    var loginButton2:FBLoginButton?
+    
     
     override func viewWillAppear(_ animated: Bool) {
+        
+        // SET UP FB LOGIN BUTTON FIRST BECAUSE THAT TAKES A SECOND
+        if(self.loginButton2 == nil){
+            self.loginButton2 = FBLoginButton()
+            self.loginButton2!.center = self.view.center
+            print("printing targets for loginButton2")
+            print(self.loginButton2!.allTargets)
+            var temp_origin = self.signup_button.frame.origin
+            temp_origin.y = temp_origin.y + 100
+            
+            self.loginButton2!.frame.origin = temp_origin
+            //loginButton2.frame.origin.x += 60
+            self.loginButton2!.permissions = ["public_profile", "email"]
+            self.loginButton2!.removeTarget(nil, action: nil, for: .allEvents)
+            //loginButton2.delegate = self
+            self.loginButton2!.addTarget(self, action: (#selector(self.fbLogin)), for: .touchUpInside)
+            NotificationCenter.default.addObserver(forName: .AccessTokenDidChange, object: nil, queue: OperationQueue.main) { (notification) in
+                // Print out access token
+                print("FB Access Token: \(String(describing: AccessToken.current?.tokenString))")
+            }
+            //print("printing access token")
+            //print(AccessToken.current)
+            //loginButton2.addTarget(self, action:Selector(("fbLoginClicked:")), for: UIControl.Event.touchUpInside)
+            self.view.addSubview(self.loginButton2!)
+            self.loginButton2!.center.x = self.view.center.x
+        }
+        
         if (self.password?.text?.count ?? 0 > 7) {
             self.loginButton?.isEnabled = true
             self.signup_button?.isEnabled = true
@@ -156,12 +185,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
         self.email.delegate = self
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
         self.view.addGestureRecognizer(tap)
-        let loginButton2 = FBLoginButton()
-        loginButton2.center = self.view.center
-        print("printing targets for loginButton2")
-        print(loginButton2.allTargets)
-        var temp_origin = self.signup_button.frame.origin
-        temp_origin.y = temp_origin.y + 100
         
         
         /*let hacky_scene_access = UIApplication.shared.connectedScenes.first
@@ -178,22 +201,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
             }
         }*/
         
-        
-        loginButton2.frame.origin = temp_origin
-        //loginButton2.frame.origin.x += 60
-        loginButton2.permissions = ["public_profile", "email"]
-        loginButton2.removeTarget(nil, action: nil, for: .allEvents)
-        //loginButton2.delegate = self
-        loginButton2.addTarget(self, action: (#selector(self.fbLogin)), for: .touchUpInside)
-        NotificationCenter.default.addObserver(forName: .AccessTokenDidChange, object: nil, queue: OperationQueue.main) { (notification) in
-            // Print out access token
-            print("FB Access Token: \(String(describing: AccessToken.current?.tokenString))")
-        }
-        //print("printing access token")
-        //print(AccessToken.current)
-        //loginButton2.addTarget(self, action:Selector(("fbLoginClicked:")), for: UIControl.Event.touchUpInside)
-        self.view.addSubview(loginButton2)
-        loginButton2.center.x = self.view.center.x
+    
         //loginButton2.setNeedsDisplay()
         
         if(AppDelegate.loggedIn!){
@@ -330,7 +338,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
 
 extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
     public func getDetails(_ authenticationInput: AWSCognitoIdentityPasswordAuthenticationInput, passwordAuthenticationCompletionSource: AWSTaskCompletionSource<AWSCognitoIdentityPasswordAuthenticationDetails>) {
-        //print("inside getDetails loginView")
+        print("inside getDetails loginView")
         self.passwordAuthenticationCompletion = passwordAuthenticationCompletionSource
         /*DispatchQueue.main.async {
             if (self.email.text == nil) {
@@ -340,7 +348,7 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
     }
     
     public func didCompleteStepWithError(_ error: Error?) {
-        //print("inside didCompleteStepWithError LoginView")
+        print("inside didCompleteStepWithError LoginView")
         DispatchQueue.main.async {
             if let error = error as NSError? {
                 let casted = error as NSError
@@ -361,8 +369,10 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                     }
                 }
             } else {
+                print("here LoginView22222")
                 let appDelegate = UIApplication.shared.delegate as! AppDelegate
-                if (!AppDelegate.loggedIn!){
+                if (!(AppDelegate.loggedIn!)){
+                    print("we are logging in loginview")
                     self.email.text = nil
                     self.password.text = nil
                     let temp_old_name = AppDelegate.defaultUserPool().currentUser()?.username
@@ -390,7 +400,8 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                     }*/
                 }
                 else{
-                    print("logging out loginview")
+                    print("we are logging out loginview")
+                    AppDelegate.loggedIn = false
                 }
             }
         }

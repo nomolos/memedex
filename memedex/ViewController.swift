@@ -38,6 +38,8 @@ class ViewController: UIViewController {
     let waitMemeNamesS3 = DispatchGroup()
     let waitPotentialActivePartner2 = DispatchGroup()
     let waitURL = DispatchGroup()
+    let waitTopSources = DispatchGroup()
+    let waitNonFBUser = DispatchGroup()
     let dispatchQueue = DispatchQueue(label: "com.queue.Serial")
     var emitter = CAEmitterLayer()
     var player: AVPlayer?
@@ -51,6 +53,7 @@ class ViewController: UIViewController {
     var previous_num_memes = -1
     var show_share_popup = 0
     var videoPanGesture:UIPanGestureRecognizer?
+    var top_sources = [String]()
     static let key_1 = "key_1"
     static let key_2 = "key_2"
     static let key_3 = "key_3"
@@ -77,6 +80,8 @@ class ViewController: UIViewController {
                 }
             }
             else {
+                // Don't change logged in variable, it'll be modified in LoginViewController
+                // AppDelegate.loggedIn = false
                 self.user?.signOut()
                 AppDelegate.defaultUserPool().currentUser()?.signOut()
             }
@@ -327,7 +332,10 @@ class ViewController: UIViewController {
         }
         if(self.show_share_popup == 3){
             let alert = UIAlertController(title: "Share this meme?", message: "Sharing memes helps us buy groceries", preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Heck No", style: .default, handler: nil))
+            alert.addAction(UIAlertAction(title: "Heck No", style: .default, handler: { (action: UIAlertAction!) in
+                self.rateCurrentMeme()
+                self.loadNextMeme(first: false, direction: true)
+            }))
             alert.addAction(UIAlertAction(title: "Heck Yes", style: .default, handler: { (action: UIAlertAction!) in
                 self.share(self.shareButton)
                 return
@@ -354,6 +362,8 @@ class ViewController: UIViewController {
     
     override func viewWillAppear(_ animated: Bool) {
         print("inside viewWillAppear")
+        super.viewWillAppear(animated)
+        //self.waitNonFBUser.enter()
         self.show_share_popup = 0
         let hacky_scene_access = UIApplication.shared.connectedScenes.first
         let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
@@ -362,6 +372,27 @@ class ViewController: UIViewController {
         nc.addObserver(self, selector: #selector(swipeLeft(_:)), name: NSNotification.Name(rawValue: "next"), object: nil)
         nc.addObserver(self, selector: #selector(back(_:)), name: NSNotification.Name(rawValue: "back"), object: nil)
         nc.addObserver(self, selector: #selector(update_slider), name: NSNotification.Name(rawValue: "update_slider"), object: nil)
+        
+        
+        /*AppDelegate.waitFBUser.notify(queue: .main){
+            print("PRINTING USER IN VIEWCONTROLLER")
+            print("PRINTING USER IN VIEWCONTROLLER")
+            if(AppDelegate.fbLoggedIn!){
+                print("fb logged in")
+                print(AppDelegate.fb_username)
+                self.waitTopSources.enter()
+                self.loadTopSources()
+            }
+            else{
+                print("fb not logged in")
+                print(self.user?.username)
+                self.waitTopSources.enter()
+                self.loadTopSources()
+            }
+            print("PRINTING USER IN VIEWCONTROLLER")
+            print("PRINTING USER IN VIEWCONTROLLER")
+        }*/
+        
         if(self.meme_link == nil){
             self.meme_link = UIButton()
             let temp_image = UIImage(named: "link") as UIImage?
@@ -377,68 +408,148 @@ class ViewController: UIViewController {
         self.activityIndicator.hidesWhenStopped = true
         self.activityIndicator.layer.zPosition = 1
         view.addSubview(self.activityIndicator)
-        super.viewWillAppear(animated)
-        self.fetchUserAttributes()
+        //self.activityIndicator.startAnimating()
         AppDelegate.loggedIn = true
         self.waitMemeNamesS3.enter()
         self.waitMemesUpdated.enter()
         self.loadAllS3MemeNames()
         self.waitPotentialPartners.enter()
         self.waitFinalPartner.enter()
+        // Just looks for active users, don't need to know our username yet
         self.findPartnerMatchesPart1()
         self.waitPotentialPartners.notify(queue: .main){
-            self.findPartnerMatchesPart2()
-            self.waitFinalPartner.notify(queue: .main){
-                if self.found_match{
-                    print("we found a match - the user we're matched with is " + self.user_to_pair_with!)
-                    self.loadMemesRecommendedByPartner()
+            print("done waiting to see if we have some active users today")
+            print("done waiting to see if we have a non FB User")
+            AppDelegate.waitFBUser.notify(queue: .main){
+                self.user = AppDelegate.defaultUserPool().currentUser()
+                if(!AppDelegate.fbLoggedIn! && AppDelegate.defaultUserPool().currentUser()?.username == nil){
+                    print("we don't have a FB User and our username for non-FB is nil.. this is a problem")
+                }
+                print("done waiting to see if we have a FB User, about to call findPartnerMatchesPart2 and loadTopSources")
+                print("PRINTING USER IN VIEWCONTROLLER")
+                print("PRINTING USER IN VIEWCONTROLLER")
+                if(AppDelegate.fbLoggedIn!){
+                    print("fb logged in")
+                    print(AppDelegate.fb_username)
+                    self.waitTopSources.enter()
+                    self.loadTopSources()
                 }
                 else{
-                    let alert = UIAlertController(title: "No A.I.", message: "We could not find memes to recommend to you", preferredStyle: .alert)
-                    alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
-                    self.present(alert, animated: true)
-                    self.waitMemesUpdated.leave()
+                    print("fb not logged in")
+                    print(self.user?.username)
+                    self.waitTopSources.enter()
+                    self.loadTopSources()
+                }
+                print("PRINTING USER IN VIEWCONTROLLER")
+                print("PRINTING USER IN VIEWCONTROLLER")
+                self.findPartnerMatchesPart2()
+                self.waitTopSources.enter()
+                self.loadTopSources()
+                self.waitFinalPartner.notify(queue: .main){
+                    print("notified about final partner")
+                    self.waitMemeNamesS3.notify(queue: .main){
+                        self.waitTopSources.notify(queue: .main){
+                            print("have our meme names S3")
+                            // We have a previous state
+                            // We have a previous state
+                            if(self.previous_num_memes != -1){
+                                print("we have a previous state")
+                                // This previous state was from a different day
+                                // This previous state was from a different day
+                                // shuffle and prioritize top sources
+                                // load partners recommended memes afterwards if we have them
+                                if(self.previous_num_memes != self.keys.count){
+                                    print("This previous state was from a different day")
+                                    self.keys.shuffle()
+                                    self.waitTopSources.notify(queue: .main){
+                                        // only prioritizing very top source for now
+                                        print("printing our top sources in viewdidappear")
+                                        print(self.top_sources[0])
+                                        if self.top_sources[0] != ""{
+                                            print("about to loop through keys and move top sources up")
+                                            var current_index = 0
+                                            var swap_index = 0
+                                            for keyster in self.keys{
+                                                if keyster.contains(self.top_sources[0]){
+                                                    print(keyster + " contains substring " + self.top_sources[0])
+                                                    self.keys.swapAt(current_index, swap_index)
+                                                    swap_index = swap_index + 1
+                                                }
+                                                current_index = current_index + 1
+                                            }
+                                        }
+                                        self.index = 0
+                                        if self.found_match{
+                                            print("we found a match - the user we're matched with is " + self.user_to_pair_with!)
+                                            self.loadMemesRecommendedByPartner()
+                                        }
+                                        else{
+                                            let alert = UIAlertController(title: "No A.I.", message: "We could not find memes to recommend to you", preferredStyle: .alert)
+                                            alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
+                                            self.present(alert, animated: true)
+                                            self.waitMemesUpdated.leave()
+                                        }
+                                        self.waitMemesUpdated.notify(queue: .main){
+                                            self.loadNextMeme(first: true, direction: true)
+                                        }
+                                    }
+                                }
+                                // This previous state was from a different day END
+                                // This previous state was from a different day END
+                                
+                                // The previous state was from today
+                                // The previous state was from today
+                                else{
+                                    print("This previous state was from today")
+                                    self.keys = self.previous_keys
+                                    self.loadNextMeme(first: true, direction: true)
+                                }
+                            }
+                            // We have a previous state END
+                            // We have a previous state END
+                                    
+                            // We don't have a previous state
+                            // shuffle and prioritize top sources
+                            else{
+                                print("we don't have a previous state")
+                                self.keys.shuffle()
+                                self.waitTopSources.notify(queue: .main){
+                                    print("printing our top sources in viewdidappear")
+                                    print(self.top_sources[0])
+                                    if self.top_sources[0] != ""{
+                                        var current_index = 0
+                                        var swap_index = 0
+                                        for keyster in self.keys{
+                                            // only prioritizing very top source for now
+                                            if keyster.contains(self.top_sources[0]){
+                                                print(keyster + " contains substring " + self.top_sources[0])
+                                                self.keys.swapAt(current_index, swap_index)
+                                                swap_index = swap_index + 1
+                                            }
+                                            current_index = current_index + 1
+                                        }
+                                    }
+                                    self.index = 0
+                                    if self.found_match{
+                                        print("we found a match - the user we're matched with is " + self.user_to_pair_with!)
+                                        self.loadMemesRecommendedByPartner()
+                                    }
+                                    else{
+                                        let alert = UIAlertController(title: "No A.I.", message: "We could not find memes to recommend to you", preferredStyle: .alert)
+                                        alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
+                                        self.present(alert, animated: true)
+                                        self.waitMemesUpdated.leave()
+                                    }
+                                    self.waitMemesUpdated.notify(queue: .main){
+                                        self.loadNextMeme(first: true, direction: true)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
-            // THIS GROUP IS DEPENDENT ON QUERY FOUR AND THE BLOCK ABOVE AS WELL
-            // 66666666666
-            self.waitMemeNamesS3.notify(queue: .main){
-                // We have a previous state
-                print("inside waitMemeNamesS3")
-                if(self.previous_num_memes != -1){
-                    // This previous state was from a different day
-                    if(self.previous_num_memes != self.keys.count){
-                        print("This previous state was from a different day")
-                        //print("")
-                        self.keys.shuffle()
-                        self.index = 0
-                    }
-                    // This previous state was from today
-                    else{
-                        print("This previous state was from today")
-                        self.keys = self.previous_keys
-                    }
-                }
-                // We don't have a previous state
-                else{
-                    print("We don't have a previous state")
-                    self.keys.shuffle()
-                }
-                self.waitMemesUpdated.notify(queue: .main){
-                    self.loadNextMeme(first: true, direction: true)
-                }
-            }
         }
-        print("PRINTING USER IN VIEWCONTROLLER")
-        print("PRINTING USER IN VIEWCONTROLLER")
-        if(AppDelegate.fbLoggedIn!){
-            print(AppDelegate.fb_username)
-        }
-        else{
-            print(self.user?.username)
-        }
-        print("PRINTING USER IN VIEWCONTROLLER")
-        print("PRINTING USER IN VIEWCONTROLLER")
     }
     
     func rateCurrentMeme() {
@@ -688,12 +799,59 @@ class ViewController: UIViewController {
             }
             for object in (listObjectsOutput?.contents)! {
                 self.keys.append(String(object.key!))
-                print(String(object.key!))
+                //print(String(object.key!))
             }
             self.waitMemeNamesS3.leave()
             return nil
         }
     }
+    
+    // EDIT
+    func loadTopSources(){
+        let queryExpression = AWSDynamoDBQueryExpression()
+        let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+        let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+        updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+        queryExpression.keyConditionExpression = "username = :username"
+        if(AppDelegate.fbLoggedIn!){
+            queryExpression.expressionAttributeValues = [":username": AppDelegate.fb_username]
+        }
+        else{
+            queryExpression.expressionAttributeValues = [":username": AppDelegate.defaultUserPool().currentUser()?.username]
+        }
+        print("printing queryexpression")
+        print(queryExpression)
+        print(queryExpression.expressionAttributeValues)
+        var response = dynamoDBObjectMapper.query(TopSources.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+            if (task.error != nil){
+                print("error in loadTopSources")
+                print(task.error)
+                self.waitTopSources.leave()
+            }
+            if (task.result != nil){
+                print("printing result in loadTopSources")
+                print(task.result?.items)
+                let temp = task.result?.items[0] as! TopSources
+                let first_string = temp.first as! String
+                let second_string = temp.second as! String
+                let third_string = temp.third as! String
+                if(first_string != "nil"){
+                    self.top_sources.append(first_string)
+                }
+                if(second_string != "nil"){
+                    self.top_sources.append(second_string)
+                }
+                if(third_string != "nil"){
+                    self.top_sources.append(third_string)
+                }
+                self.waitTopSources.leave()
+            }
+        return task.result
+        }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+        //print("printing response")
+        //print(response)
+    }
+    
     
     // Grab all active uesrs today
     // These are in the users_active_today DynamoDB table
@@ -706,6 +864,7 @@ class ViewController: UIViewController {
         if (task.error != nil){
             print("error in findPartnerMAtches")
             print(task.error)
+            //self.waitPotentialPartners.leave()
         }
         if (task.result != nil){
             self.waitPotentialPartners.leave()
@@ -786,6 +945,7 @@ class ViewController: UIViewController {
             if (task.error != nil){
                 print("error in findPartnerMatches2")
                 print(task.error)
+                //self.waitPotentialActivePartner2.leave()
             }
             if (task.result != nil){
                 self.waitPotentialActivePartner2.leave()
@@ -1063,12 +1223,16 @@ class ViewController: UIViewController {
     }
     
     func fetchUserAttributes() {
-        user = AppDelegate.defaultUserPool().currentUser()
+        print("inside fetchUserAttributes")
         user?.getDetails().continueOnSuccessWith(block: { (task) -> Any? in
+            //print("inside here in fetchUserAttributes")
             guard task.result != nil else {
                 print("fetchuserattributes failed in viewdidload")
+                //self.waitNonFBUser.leave()
                 return nil
             }
+            print("fetchuserattributes succeded viewdidLoad")
+            //self.waitNonFBUser.leave()
             self.userAttributes = task.result?.userAttributes
             /*DispatchQueue.main.async {
                 //print("fetchuserattributes worked in viewdidload")
@@ -1196,9 +1360,9 @@ class ViewController: UIViewController {
             print(self.index)
         }
         if(activityUserInfo[ViewController.key_3] != nil){
-            print("printing keys from restored state")
+            //print("printing keys from restored state")
             self.previous_keys = activityUserInfo[ViewController.key_3] as! [String]
-            print(self.previous_keys)
+            //print(self.previous_keys)
         }
         
         // Store our previous # of memes

@@ -84,6 +84,7 @@
 		BD9D8F9124674946008AC0FE /* AWSPinpoint.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD9D8F9024674946008AC0FE /* AWSPinpoint.framework */; };
 		BDA6FD502433CEFC00D5BDD5 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDA6FD4F2433CEFC00D5BDD5 /* LoginViewController.swift */; };
 		BDA6FD522433F35500D5BDD5 /* CognitoConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDA6FD512433F35500D5BDD5 /* CognitoConfig.swift */; };
+		BDA9B85224B27CFA0019FD54 /* TopSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDA9B85124B27CFA0019FD54 /* TopSources.swift */; };
 		BDCC9F8224674F0A004BB8F5 /* Amplify.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BDCC9F8124674F0A004BB8F5 /* Amplify.framework */; };
 		BDCC9F8424674F10004BB8F5 /* AmplifyPlugins.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BDCC9F8324674F10004BB8F5 /* AmplifyPlugins.framework */; };
 		BDCC9F8624675048004BB8F5 /* amplifyconfiguration.json in Resources */ = {isa = PBXBuildFile; fileRef = BDCC9F8524675048004BB8F5 /* amplifyconfiguration.json */; };
@@ -176,6 +177,7 @@
 		BD9D8F9024674946008AC0FE /* AWSPinpoint.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AWSPinpoint.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDA6FD4F2433CEFC00D5BDD5 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		BDA6FD512433F35500D5BDD5 /* CognitoConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CognitoConfig.swift; sourceTree = "<group>"; };
+		BDA9B85124B27CFA0019FD54 /* TopSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TopSources.swift; sourceTree = "<group>"; };
 		BDCC9F8124674F0A004BB8F5 /* Amplify.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = Amplify.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDCC9F8324674F10004BB8F5 /* AmplifyPlugins.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AmplifyPlugins.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BDCC9F8524675048004BB8F5 /* amplifyconfiguration.json */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.json; path = amplifyconfiguration.json; sourceTree = "<group>"; };
@@ -278,6 +280,7 @@
 				BD29747D245505E000DBBF9E /* PartnerMatches.swift */,
 				BD4921FB2468C541004F8408 /* Launch Screen.storyboard */,
 				BD13220E24785DC1007EB9AF /* URL4Meme.swift */,
+				BDA9B85124B27CFA0019FD54 /* TopSources.swift */,
 				BD132210247DDEE2007EB9AF /* SignUpViewController.swift */,
 				BD13221224818FEA007EB9AF /* ImageZoomView.swift */,
 				BDFD1779248DD644005CCC6B /* SceneDelegate.swift */,
@@ -562,6 +565,7 @@
 				BDE7EA32244D267B008A603B /* CustomSlider.swift in Sources */,
 				BD29747A2452005300DBBF9E /* GoldenMeme.swift in Sources */,
 				BD220CE123F4B25800D93CBE /* AppDelegate.swift in Sources */,
+				BDA9B85224B27CFA0019FD54 /* TopSources.swift in Sources */,
 				BDFD177A248DD644005CCC6B /* SceneDelegate.swift in Sources */,
 				BD25D751243FBDD8002A03BF /* VerificationViewController.swift in Sources */,
 				BD220CE623F4B25800D93CBE /* memedex.xcdatamodeld in Sources */,
