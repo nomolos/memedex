@@ -24,18 +24,18 @@
                                 <state key="normal" title="Button" image="back"/>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rva-RG-UbF">
-                                <rect key="frame" x="189.5" y="750" width="35" height="35"/>
+                                <rect key="frame" x="186" y="750" width="42" height="35"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="35" id="F8q-1T-UVr"/>
+                                    <constraint firstAttribute="width" constant="42" id="F8q-1T-UVr"/>
                                     <constraint firstAttribute="height" constant="35" id="xBQ-bU-Uxf"/>
                                 </constraints>
                                 <state key="normal" image="share"/>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="dcO-cv-qLA">
-                                <rect key="frame" x="360" y="749" width="28" height="36"/>
+                                <rect key="frame" x="353" y="749" width="35" height="36"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="36" id="6fk-Ud-xiA"/>
-                                    <constraint firstAttribute="width" constant="28" id="x7j-Na-Ofu"/>
+                                    <constraint firstAttribute="width" constant="35" id="x7j-Na-Ofu"/>
                                 </constraints>
                                 <state key="normal" title="Button" image="set"/>
                             </button>
@@ -76,7 +76,7 @@
         <image name="back" width="39" height="34"/>
         <image name="fakenavbar" width="375" height="89"/>
         <image name="logout" width="37" height="36"/>
-        <image name="set" width="30" height="38"/>
-        <image name="share" width="37" height="37"/>
+        <image name="set" width="37" height="37"/>
+        <image name="share" width="17" height="43"/>
     </resources>
 </document>

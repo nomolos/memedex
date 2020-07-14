@@ -61,15 +61,18 @@ class ViewController: UIViewController {
     @IBOutlet weak var back_button: UIButton!
     var meme_link:UIButton?
     
-    @IBOutlet weak var shareButton: UIButton!
+    @IBOutlet weak var shareButton2: UIButton!
+
+    @IBOutlet weak var saveButton: UIButton!
+    
     @IBOutlet var meme: ImageZoomView!
     
     @IBAction func logout(_ sender: Any) {
         let alert = UIAlertController(title: "Sign Out", message: "Do you want to sign out?", preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "Yes", style: .default, handler: { (action: UIAlertAction!) in
             self.dismiss(animated: true, completion: nil)
-            if(AppDelegate.fbLoggedIn!){
-                AppDelegate.fbLoggedIn = false
+            if(AppDelegate.socialLoggedIn!){
+                AppDelegate.socialLoggedIn = false
                 _ = Amplify.Auth.signOut() { result in
                     switch result {
                     case .success:
@@ -82,7 +85,6 @@ class ViewController: UIViewController {
             else {
                 // Don't change logged in variable, it'll be modified in LoginViewController
                 // AppDelegate.loggedIn = false
-                self.user?.signOut()
                 AppDelegate.defaultUserPool().currentUser()?.signOut()
             }
             self.fetchUserAttributes()
@@ -142,7 +144,53 @@ class ViewController: UIViewController {
         self.present(alert, animated: true)
     }
     
+
     
+    @IBAction func saveImage(_ sender: UIButton) {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+        UIView.animate(withDuration: 2.0,
+                                   delay: 0,
+                                   usingSpringWithDamping: CGFloat(0.20),
+                                   initialSpringVelocity: CGFloat(6.0),
+                                   options: UIView.AnimationOptions.allowUserInteraction,
+                                   animations: {
+                                    sender.transform = CGAffineTransform.identity
+            },
+                                   completion: { Void in()  }
+        )
+        let imageExtensions = ["png", "jpg","JPG","PNG", "gif", "ifv"]
+        let last3 = self.keys[self.index].suffix(3)
+        if imageExtensions.contains(String(last3)){
+            if last3.contains("gif") || last3.contains("ifv"){
+                print("we have a gif, not saving it")
+                guard let saveMe = self.image else {return}
+                UIImageWriteToSavedPhotosAlbum(saveMe, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
+            }
+            else{
+                guard let saveMe = self.meme.imageView.image else { return }
+                UIImageWriteToSavedPhotosAlbum(saveMe, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
+            }
+        }
+        else{
+            print("we have a video, not saving it")
+            let ac = UIAlertController(title: "Can't save videos yet", message: "Haven't implemented this yet - should be available in the next version :)", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "OK", style: .default))
+            present(ac, animated: true)
+        }
+    }
+    
+    @objc func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
+        if let error = error {
+            // we got back an error!
+            let ac = UIAlertController(title: "Save failed for some reason", message: "Please email memedex2020@gmail.com if this happens", preferredStyle: .alert)
+            ac.addAction(UIAlertAction(title: "OK", style: .default))
+            present(ac, animated: true)
+        } else {
+            print("Save succeeded")
+        }
+    }
     
     @IBAction func share(_ sender: UIButton) {
         let generator = UINotificationFeedbackGenerator()
@@ -191,6 +239,9 @@ class ViewController: UIViewController {
     }
     
     
+    
+    
+    
     @IBAction func back(_ sender: Any) {
         self.back_button.isEnabled = false
         if(self.index > 0){
@@ -219,23 +270,6 @@ class ViewController: UIViewController {
             self.present(alert, animated: true)
             return
         }
-    }
-    
-    @IBAction func gotogolden(_ sender: UIButton) {
-        let generator = UINotificationFeedbackGenerator()
-        generator.notificationOccurred(.success)
-        sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
-        UIView.animate(withDuration: 2.0,
-                                   delay: 0,
-                                   usingSpringWithDamping: CGFloat(0.20),
-                                   initialSpringVelocity: CGFloat(6.0),
-                                   options: UIView.AnimationOptions.allowUserInteraction,
-                                   animations: {
-                                    sender.transform = CGAffineTransform.identity
-            },
-                                   completion: { Void in()  }
-        )
-        self.performSegue(withIdentifier: "goldensegue", sender: self)
     }
     
     @objc func sliderValueDidChange(sender:UISlider) {
@@ -271,22 +305,18 @@ class ViewController: UIViewController {
     
     
     @IBAction func next(_ sender: Any) {
-        print("inside next")
-        print("printing value inside next")
-        print(slider.value)
         self.slider.isEnabled = false
-        //boofywoofy
         // This user is active
         // Send a notification to Dynamo
         // Adds them to today's Active Users table
         // Want to update this after every 10 labels
         if(self.index == 0 || (self.index % 10 == 0)){
             var active_user = ActiveUser()
-            if(AppDelegate.fbLoggedIn!){
-                active_user?.username = AppDelegate.fb_username as! NSString
+            if(AppDelegate.socialLoggedIn!){
+                active_user?.username = AppDelegate.social_username as! NSString
             }
             else{
-                active_user?.username = user?.username as! NSString
+                active_user?.username = AppDelegate.defaultUserPool().currentUser()?.username as! NSString
             }
             active_user?.num_ratings = (self.index + 1) as! NSNumber
             let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
@@ -337,7 +367,7 @@ class ViewController: UIViewController {
                 self.loadNextMeme(first: false, direction: true)
             }))
             alert.addAction(UIAlertAction(title: "Heck Yes", style: .default, handler: { (action: UIAlertAction!) in
-                self.share(self.shareButton)
+                self.share(self.shareButton2)
                 return
             }))
             self.present(alert, animated: true)
@@ -361,9 +391,8 @@ class ViewController: UIViewController {
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        print("inside viewWillAppear")
+        print("inside viewWillAppear ViewController")
         super.viewWillAppear(animated)
-        //self.waitNonFBUser.enter()
         self.show_share_popup = 0
         let hacky_scene_access = UIApplication.shared.connectedScenes.first
         let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
@@ -373,26 +402,6 @@ class ViewController: UIViewController {
         nc.addObserver(self, selector: #selector(back(_:)), name: NSNotification.Name(rawValue: "back"), object: nil)
         nc.addObserver(self, selector: #selector(update_slider), name: NSNotification.Name(rawValue: "update_slider"), object: nil)
         
-        
-        /*AppDelegate.waitFBUser.notify(queue: .main){
-            print("PRINTING USER IN VIEWCONTROLLER")
-            print("PRINTING USER IN VIEWCONTROLLER")
-            if(AppDelegate.fbLoggedIn!){
-                print("fb logged in")
-                print(AppDelegate.fb_username)
-                self.waitTopSources.enter()
-                self.loadTopSources()
-            }
-            else{
-                print("fb not logged in")
-                print(self.user?.username)
-                self.waitTopSources.enter()
-                self.loadTopSources()
-            }
-            print("PRINTING USER IN VIEWCONTROLLER")
-            print("PRINTING USER IN VIEWCONTROLLER")
-        }*/
-        
         if(self.meme_link == nil){
             self.meme_link = UIButton()
             let temp_image = UIImage(named: "link") as UIImage?
@@ -401,6 +410,7 @@ class ViewController: UIViewController {
             self.meme_link?.isHidden = true
             self.view.addSubview(self.meme_link!)
         }
+        
         self.activityIndicator = UIActivityIndicatorView()
         self.activityIndicator.color = UIColor.white
         self.activityIndicator.style = UIActivityIndicatorView.Style.large
@@ -408,7 +418,6 @@ class ViewController: UIViewController {
         self.activityIndicator.hidesWhenStopped = true
         self.activityIndicator.layer.zPosition = 1
         view.addSubview(self.activityIndicator)
-        //self.activityIndicator.startAnimating()
         AppDelegate.loggedIn = true
         self.waitMemeNamesS3.enter()
         self.waitMemesUpdated.enter()
@@ -420,25 +429,32 @@ class ViewController: UIViewController {
         self.waitPotentialPartners.notify(queue: .main){
             print("done waiting to see if we have some active users today")
             print("done waiting to see if we have a non FB User")
-            AppDelegate.waitFBUser.notify(queue: .main){
-                self.user = AppDelegate.defaultUserPool().currentUser()
-                if(!AppDelegate.fbLoggedIn! && AppDelegate.defaultUserPool().currentUser()?.username == nil){
-                    print("we don't have a FB User and our username for non-FB is nil.. this is a problem")
+            AppDelegate.waitSocialUser.notify(queue: .main){
+                if(!AppDelegate.socialLoggedIn! && AppDelegate.defaultUserPool().currentUser()?.username == nil){
+                    print("we don't have a FB User, Apple User, or regular user.. this is a problem. Signing out")
+                    self.dismiss(animated: true, completion: nil)
+                    AppDelegate.socialLoggedIn = false
+                    _ = Amplify.Auth.signOut() { result in
+                        switch result {
+                        case .success:
+                            print("Successfully signed out")
+                        case .failure(let error):
+                            print("Sign out failed with error \(error)")
+                        }
+                    }
+                    AppDelegate.defaultUserPool().currentUser()?.signOut()
+                    self.fetchUserAttributes()
+                    return
                 }
-                print("done waiting to see if we have a FB User, about to call findPartnerMatchesPart2 and loadTopSources")
                 print("PRINTING USER IN VIEWCONTROLLER")
                 print("PRINTING USER IN VIEWCONTROLLER")
-                if(AppDelegate.fbLoggedIn!){
-                    print("fb logged in")
-                    print(AppDelegate.fb_username)
-                    self.waitTopSources.enter()
-                    self.loadTopSources()
+                if(AppDelegate.socialLoggedIn!){
+                    print("social logged in")
+                    print(AppDelegate.social_username)
                 }
                 else{
-                    print("fb not logged in")
-                    print(self.user?.username)
-                    self.waitTopSources.enter()
-                    self.loadTopSources()
+                    print("No social login, printing regular username")
+                    print(AppDelegate.defaultUserPool().currentUser()?.username)
                 }
                 print("PRINTING USER IN VIEWCONTROLLER")
                 print("PRINTING USER IN VIEWCONTROLLER")
@@ -463,9 +479,9 @@ class ViewController: UIViewController {
                                     self.keys.shuffle()
                                     self.waitTopSources.notify(queue: .main){
                                         // only prioritizing very top source for now
-                                        print("printing our top sources in viewdidappear")
-                                        print(self.top_sources[0])
-                                        if self.top_sources[0] != ""{
+                                        //print("printing our top sources in viewdidappear")
+                                        //print(self.top_sources[0])
+                                        if self.top_sources.count != 0{
                                             print("about to loop through keys and move top sources up")
                                             var current_index = 0
                                             var swap_index = 0
@@ -514,9 +530,9 @@ class ViewController: UIViewController {
                                 print("we don't have a previous state")
                                 self.keys.shuffle()
                                 self.waitTopSources.notify(queue: .main){
-                                    print("printing our top sources in viewdidappear")
-                                    print(self.top_sources[0])
-                                    if self.top_sources[0] != ""{
+                                    //print("printing our top sources in viewdidappear")
+                                    //print(self.top_sources[0])
+                                    if self.top_sources.count != 0{
                                         var current_index = 0
                                         var swap_index = 0
                                         for keyster in self.keys{
@@ -531,7 +547,7 @@ class ViewController: UIViewController {
                                     }
                                     self.index = 0
                                     if self.found_match{
-                                        print("we found a match - the user we're matched with is " + self.user_to_pair_with!)
+                                        //print("we found a match - the user we're matched with is " + self.user_to_pair_with!)
                                         self.loadMemesRecommendedByPartner()
                                     }
                                     else{
@@ -556,11 +572,11 @@ class ViewController: UIViewController {
         // If they've given
         let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
         let meme = Meme()
-        if(AppDelegate.fbLoggedIn!){
-            meme?.username = AppDelegate.fb_username as! NSString
+        if(AppDelegate.socialLoggedIn!){
+            meme?.username = AppDelegate.social_username as! NSString
         }
         else{
-            meme?.username = user?.username as! NSString
+            meme?.username = AppDelegate.defaultUserPool().currentUser()?.username as! NSString
         }
         print("inside rateCurrentMeme")
         print(self.index)
@@ -746,8 +762,8 @@ class ViewController: UIViewController {
     }
     
     @objc func handleVideoSwipe() {
-        print("printing something in handleVideoSwipe")
-        print(self.videoPanGesture?.location(in: self.view))
+        //print("printing something in handleVideoSwipe")
+        //print(self.videoPanGesture?.location(in: self.view))
         self.slider.value = Float((self.videoPanGesture?.location(in: self.view).x)!)/60
         self.sliderValueDidChange(sender: self.slider)
         if self.videoPanGesture!.state == UIGestureRecognizer.State.ended{
@@ -813,15 +829,12 @@ class ViewController: UIViewController {
         let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
         updateMapperConfig.saveBehavior = .updateSkipNullAttributes
         queryExpression.keyConditionExpression = "username = :username"
-        if(AppDelegate.fbLoggedIn!){
-            queryExpression.expressionAttributeValues = [":username": AppDelegate.fb_username]
+        if(AppDelegate.socialLoggedIn!){
+            queryExpression.expressionAttributeValues = [":username": AppDelegate.social_username]
         }
         else{
             queryExpression.expressionAttributeValues = [":username": AppDelegate.defaultUserPool().currentUser()?.username]
         }
-        print("printing queryexpression")
-        print(queryExpression)
-        print(queryExpression.expressionAttributeValues)
         var response = dynamoDBObjectMapper.query(TopSources.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
             if (task.error != nil){
                 print("error in loadTopSources")
@@ -831,6 +844,11 @@ class ViewController: UIViewController {
             if (task.result != nil){
                 print("printing result in loadTopSources")
                 print(task.result?.items)
+                if(task.result?.items.count == 0){
+                    print("We have no top sources, likely a new sign up")
+                    self.waitTopSources.leave()
+                    return task.result
+                }
                 let temp = task.result?.items[0] as! TopSources
                 let first_string = temp.first as! String
                 let second_string = temp.second as! String
@@ -877,7 +895,6 @@ class ViewController: UIViewController {
     // Search through users_active_today
     // Find the person who has labeled the most memes
     // Up until max of 80 [threshold can be changed later]
-    // If multiple users have labeled this many memes, settle the tie by referencing the golden set
     func findPartnerMatchesPart2() {
         print("inside findPartnerMatchesPart2")
         let matches2 = self.matches?.result?.items
@@ -924,238 +941,43 @@ class ViewController: UIViewController {
                     eighty_or_more.append(String(casted_user.username!))
                 }
             }
-            
-            
-            // in case we have multiple users who have labeled
-            // roughly the same # of memes
-            // We have to settle ties using the golden set
-            let queryExpression = AWSDynamoDBQueryExpression()
-            queryExpression.keyConditionExpression = "username = :username"
-            if(AppDelegate.fbLoggedIn!){
-                queryExpression.expressionAttributeValues = [":username": AppDelegate.fb_username]
+            // Make partner the person who labeled the most memes today
+            // If there are ties, we are just picking the first person who labeled the most memes
+            // Eventually we should add more intelligence here
+            if(ten_or_more.count > 0){
+                self.found_match = true
+                if(eighty_or_more.count > 0){
+                    self.user_to_pair_with = eighty_or_more[0]
+                }
+                else if(seventy_or_more.count > 0){
+                    self.user_to_pair_with = seventy_or_more[0]
+                }
+                else if(sixty_or_more.count > 0){
+                    self.user_to_pair_with = sixty_or_more[0]
+                }
+                else if(fifty_or_more.count > 0){
+                    self.user_to_pair_with = fifty_or_more[0]
+                }
+                else if(forty_or_more.count > 0){
+                    self.user_to_pair_with = forty_or_more[0]
+                }
+                else if(thirty_or_more.count > 0){
+                    self.user_to_pair_with = thirty_or_more[0]
+                }
+                else if(twenty_or_more.count > 0){
+                    self.user_to_pair_with = twenty_or_more[0]
+                }
+                else if(ten_or_more.count > 0){
+                    self.user_to_pair_with = ten_or_more[0]
+                }
+                self.waitFinalPartner.leave()
+                return
             }
+            // Nobody with sufficient labels to build out
+            // recommendation
             else{
-                queryExpression.expressionAttributeValues = [":username": self.user?.username]
+                self.waitFinalPartner.leave()
             }
-            let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
-            let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
-            updateMapperConfig.saveBehavior = .updateSkipNullAttributes
-            self.waitPotentialActivePartner2.enter()
-            var golden_matches = dynamoDBObjectMapper.query(PartnerMatches.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
-            if (task.error != nil){
-                print("error in findPartnerMatches2")
-                print(task.error)
-                //self.waitPotentialActivePartner2.leave()
-            }
-            if (task.result != nil){
-                self.waitPotentialActivePartner2.leave()
-            }
-            return task.result
-            }) as! AWSTask<AWSDynamoDBPaginatedOutput>
-            
-            
-            self.waitPotentialActivePartner2.notify(queue: .main){
-                // We don't have any golden set matches, we probably did not label the golden set
-                // Make partner the person who labeled the most memes today
-                print("printing golden matches")
-                print(golden_matches.result!.items)
-                print(golden_matches.result!.items.count)
-                if(golden_matches.result!.items.count == 0){
-                    self.found_match = true
-                    if(eighty_or_more.count > 0){
-                        self.user_to_pair_with = eighty_or_more[0]
-                    }
-                    else if(seventy_or_more.count > 0){
-                        self.user_to_pair_with = seventy_or_more[0]
-                    }
-                    else if(sixty_or_more.count > 0){
-                        self.user_to_pair_with = sixty_or_more[0]
-                    }
-                    else if(fifty_or_more.count > 0){
-                        self.user_to_pair_with = fifty_or_more[0]
-                    }
-                    else if(forty_or_more.count > 0){
-                        self.user_to_pair_with = forty_or_more[0]
-                    }
-                    else if(thirty_or_more.count > 0){
-                        self.user_to_pair_with = thirty_or_more[0]
-                    }
-                    else if(twenty_or_more.count > 0){
-                        self.user_to_pair_with = twenty_or_more[0]
-                    }
-                    else if(ten_or_more.count > 0){
-                        self.user_to_pair_with = ten_or_more[0]
-                    }
-                    self.waitFinalPartner.leave()
-                    return
-                }
-                let temp = golden_matches.result!.items[0] as! PartnerMatches
-                let golden_matches_strings = temp.getUsers()
-                if(ten_or_more.count > 0){
-                    print("we found a match in this part")
-                    self.found_match = true
-                    if(eighty_or_more.count > 0){
-                        if(eighty_or_more.count > 1){
-                            // if we find a user who is in our list of golden set matches
-                            // immediately return them
-                            for potential_match in eighty_or_more{
-                                if(golden_matches_strings.contains(potential_match)){
-                                    self.user_to_pair_with = potential_match
-                                    self.waitFinalPartner.leave()
-                                    return
-                                }
-                            }
-                            // None of the active users were matches
-                            // from the golden set
-                            // Simply select the first and use them
-                            self.user_to_pair_with = eighty_or_more[0]
-                            self.waitFinalPartner.leave()
-                            return
-                        }
-                        else{
-                            self.user_to_pair_with = eighty_or_more[0]
-                            self.waitFinalPartner.leave()
-                        }
-                    }
-                    else if(seventy_or_more.count > 0){
-                        if(seventy_or_more.count > 1){
-                            for potential_match in seventy_or_more{
-                                if(golden_matches_strings.contains(potential_match)){
-                                    self.user_to_pair_with = potential_match
-                                    self.waitFinalPartner.leave()
-                                    return
-                                }
-                            }
-                            self.user_to_pair_with = seventy_or_more[0]
-                            self.waitFinalPartner.leave()
-                            return
-                        }
-                        else{
-                            self.user_to_pair_with = seventy_or_more[0]
-                            self.waitFinalPartner.leave()
-                        }
-                    }
-                    else if(sixty_or_more.count > 0){
-                        if(sixty_or_more.count > 1){
-                            for potential_match in sixty_or_more{
-                                if(golden_matches_strings.contains(potential_match)){
-                                    self.user_to_pair_with = potential_match
-                                    self.waitFinalPartner.leave()
-                                    return
-                                }
-                            }
-                            self.user_to_pair_with = sixty_or_more[0]
-                            self.waitFinalPartner.leave()
-                            return
-                        }
-                        else{
-                            self.user_to_pair_with = sixty_or_more[0]
-                            self.waitFinalPartner.leave()
-                        }
-                    }
-                    else if(fifty_or_more.count > 0){
-                        if(fifty_or_more.count > 1){
-                            for potential_match in fifty_or_more{
-                                if(golden_matches_strings.contains(potential_match)){
-                                    self.user_to_pair_with = potential_match
-                                    self.waitFinalPartner.leave()
-                                    return
-                                }
-                            }
-                            self.user_to_pair_with = fifty_or_more[0]
-                            self.waitFinalPartner.leave()
-                            return
-                        }
-                        else{
-                            self.user_to_pair_with = fifty_or_more[0]
-                            self.waitFinalPartner.leave()
-                        }
-                    }
-                    else if(forty_or_more.count > 0){
-                        if(forty_or_more.count > 1){
-                            for potential_match in forty_or_more{
-                                if(golden_matches_strings.contains(potential_match)){
-                                    self.user_to_pair_with = potential_match
-                                    self.waitFinalPartner.leave()
-                                    return
-                                }
-                            }
-                            self.user_to_pair_with = forty_or_more[0]
-                            self.waitFinalPartner.leave()
-                            return
-                        }
-                        else{
-                            self.user_to_pair_with = forty_or_more[0]
-                            self.waitFinalPartner.leave()
-                        }
-                    }
-                    else if(thirty_or_more.count > 0){
-                        if(thirty_or_more.count > 1){
-                            for potential_match in thirty_or_more{
-                                if(golden_matches_strings.contains(potential_match)){
-                                    self.user_to_pair_with = potential_match
-                                    self.waitFinalPartner.leave()
-                                    return
-                                }
-                            }
-                            self.user_to_pair_with = thirty_or_more[0]
-                            self.waitFinalPartner.leave()
-                            return
-                        }
-                        else{
-                            self.user_to_pair_with = thirty_or_more[0]
-                            self.waitFinalPartner.leave()
-                        }
-                    }
-                    else if(twenty_or_more.count > 0){
-                        if(twenty_or_more.count > 1){
-                            for potential_match in twenty_or_more{
-                                if(golden_matches_strings.contains(potential_match)){
-                                    self.user_to_pair_with = potential_match
-                                    self.waitFinalPartner.leave()
-                                    return
-                                }
-                            }
-                            self.user_to_pair_with = twenty_or_more[0]
-                            self.waitFinalPartner.leave()
-                            return
-                        }
-                        else{
-                            self.user_to_pair_with = twenty_or_more[0]
-                            self.waitFinalPartner.leave()
-                        }
-                    }
-                        // Only ten-ish labels
-                    else{
-                        if(ten_or_more.count > 1){
-                            for potential_match in ten_or_more{
-                                if(golden_matches_strings.contains(potential_match)){
-                                    self.user_to_pair_with = potential_match
-                                    self.waitFinalPartner.leave()
-                                    return
-                                }
-                            }
-                            self.user_to_pair_with = ten_or_more[0]
-                            self.waitFinalPartner.leave()
-                            return
-                        }
-                        else{
-                            self.user_to_pair_with = ten_or_more[0]
-                            self.waitFinalPartner.leave()
-                        }
-                    }
-                }
-                // Nobody with sufficient labels to build out
-                // recommendation
-                else{
-                    self.waitFinalPartner.leave()
-                }
-            }
-        }
-        // We didn't have any matches to begin with (need to fill out golden set)
-        else {
-            print("we don't have a match")
-            self.waitFinalPartner.leave()
         }
     }
     
@@ -1190,8 +1012,6 @@ class ViewController: UIViewController {
         self.waitMemeNamesS3.notify(queue: .main){
             self.waitPartnerMemes.notify(queue: self.dispatchQueue){
                 let all_ratings_of_partner = matches5?.result?.items
-                print("printing ratings of partner")
-                print(all_ratings_of_partner)
                 var temp_keys = [String]()
                 for meme_rating_pair in all_ratings_of_partner!{
                     let meme_rating_pair2 = meme_rating_pair as! Meme
@@ -1224,7 +1044,7 @@ class ViewController: UIViewController {
     
     func fetchUserAttributes() {
         print("inside fetchUserAttributes")
-        user?.getDetails().continueOnSuccessWith(block: { (task) -> Any? in
+        AppDelegate.defaultUserPool().currentUser()?.getDetails().continueOnSuccessWith(block: { (task) -> Any? in
             //print("inside here in fetchUserAttributes")
             guard task.result != nil else {
                 print("fetchuserattributes failed in viewdidload")
@@ -1233,7 +1053,6 @@ class ViewController: UIViewController {
             }
             print("fetchuserattributes succeded viewdidLoad")
             //self.waitNonFBUser.leave()
-            self.userAttributes = task.result?.userAttributes
             /*DispatchQueue.main.async {
                 //print("fetchuserattributes worked in viewdidload")
             }*/
@@ -1264,8 +1083,8 @@ class ViewController: UIViewController {
         }
         if((self.image) != nil){
             let real_image_rect = AVMakeRect(aspectRatio: self.meme.getImage().size, insideRect: self.meme.bounds)
-            self.meme_link?.widthAnchor.constraint(equalToConstant: 54.0).isActive = true
-            self.meme_link?.heightAnchor.constraint(equalToConstant: 33.0).isActive = true
+            self.meme_link?.widthAnchor.constraint(equalToConstant: 44.0).isActive = true
+            self.meme_link?.heightAnchor.constraint(equalToConstant: 37.0).isActive = true
             self.meme_link?.frame.origin.x = self.view.frame.width - 85
             // An image/gif
             if(!self.meme.isHidden){

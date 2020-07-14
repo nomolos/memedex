@@ -11,8 +11,9 @@ import AWSCognito
 import AWSCognitoIdentityProvider
 import FBSDKLoginKit
 import Amplify
+import AuthenticationServices
 
-class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDelegate {
+class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDelegate, ASAuthorizationControllerDelegate{
     
     func loginButtonDidLogOut(_ loginButton: FBLoginButton) {
         print("here inside loginButtonDidLogOut")
@@ -68,14 +69,12 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
     var passwordAuthenticationCompletion: AWSTaskCompletionSource<AWSCognitoIdentityPasswordAuthenticationDetails>?
     
     var activityIndicator = UIActivityIndicatorView()
-    
-    //var go_to_golden = false
 
     var viewController:ViewController?
     
-    var goldenSetViewController:GoldenSetViewController?
-    
     var loginButton2:FBLoginButton?
+    
+    var appleLoginButton:ASAuthorizationAppleIDButton?
     
     
     override func viewWillAppear(_ animated: Bool) {
@@ -86,10 +85,9 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
             self.loginButton2!.center = self.view.center
             print("printing targets for loginButton2")
             print(self.loginButton2!.allTargets)
-            var temp_origin = self.signup_button.frame.origin
-            temp_origin.y = temp_origin.y + 100
-            
-            self.loginButton2!.frame.origin = temp_origin
+            //var temp_origin = self.view.frame.origin.
+            //temp_origin.y = temp_origin.y + 100
+            //self.loginButton2!.frame.origin = temp_origin
             //loginButton2.frame.origin.x += 60
             self.loginButton2!.permissions = ["public_profile", "email"]
             self.loginButton2!.removeTarget(nil, action: nil, for: .allEvents)
@@ -102,8 +100,17 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
             //print("printing access token")
             //print(AccessToken.current)
             //loginButton2.addTarget(self, action:Selector(("fbLoginClicked:")), for: UIControl.Event.touchUpInside)
+            print("printing login button frame")
+            print(self.loginButton2?.frame)
+            self.loginButton2?.isHidden = false
+            print("printing signup button frame")
+            print(self.signup_button.frame)
             self.view.addSubview(self.loginButton2!)
+            self.loginButton2!.translatesAutoresizingMaskIntoConstraints = false
+            self.loginButton2?.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+            //self.loginButton2?.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -175).isActive = true
             self.loginButton2!.center.x = self.view.center.x
+            self.view.setNeedsDisplay()
         }
         
         if (self.password?.text?.count ?? 0 > 7) {
@@ -112,7 +119,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
             self.signup_requirements.isHidden = true
         } else {
             self.loginButton?.isEnabled = false
-            //self.signup_button?.isEnabled = false
             self.signup_requirements.isHidden = false
         }
 
@@ -133,48 +139,21 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
         if(self.user == nil){
             self.user = AppDelegate.defaultUserPool().currentUser()
         }
-        
-        //if (appDelegate.navigationController == nil){
-         //   appDelegate.navigationController = appDelegate.window?.rootViewController as? UINavigationController
-        //}
-        
-        //print("finding out if the user is signed in loginView")
-        //print(self.user?.isSignedIn)
-        
-        AppDelegate.waitFBUser.notify(queue: .main){
+
+        AppDelegate.waitSocialUser.notify(queue: .main){
             print("notified LoginView")
-            if((self.user?.isSignedIn ?? false) && AppDelegate.fbLoggedIn!){
-                print("Both an FB User and a non-FB User are logged in?")
-                print("This shouldn't happen")
+            if((self.user?.isSignedIn ?? false) && AppDelegate.socialLoggedIn!){
+                print("Both a social user and non social user are logged in, this shouldn't happen")
             }
             // Non-FB User is already signed in
             if(self.user?.isSignedIn ?? false){
-                //print("printing our window loginView")
-                //print(self.view.window)
-                //print("should be transitioning to viewController")
-                //print(appDelegate)
                 self.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-                //print(self.viewController)
                 self.viewController!.user = self.user
-                //print(self.navigationController)
-                // should be the same as accessing from scene delegate
                 self.navigationController?.setViewControllers([self.viewController!], animated: true)
-                //let sceneDelegate = UIApplication.shared.delegate as! SceneDelegate
-                //sceneDelegate.navigationController?.setViewControllers([appDelegate.viewController!], animated: true)
-                //print("should have transitioned to view controller")
             }
-            if(AppDelegate.fbLoggedIn!){
-                //AppDelegate.fetchCurrentAuthSession2()
-                print("We have a FB User that's logged in")
-                //print("Our amplify user is below - are they nomolos@umich ?")
-                //print(Amplify.Auth.getCurrentUser())
-                //DispatchQueue.main.sync{
-                print("Should have FB Username below")
-                print(AppDelegate.fb_username)
+            if(AppDelegate.socialLoggedIn!){
                 self.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-                //self.viewController!.user = Amplify.Auth.getCurrentUser() as! AWSCognitoIdentityUser
                 self.navigationController?.setViewControllers([self.viewController!], animated: true)
-                //}
             }
         
         
@@ -185,24 +164,9 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
         self.email.delegate = self
         let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
         self.view.addGestureRecognizer(tap)
-        
-        
-        /*let hacky_scene_access = UIApplication.shared.connectedScenes.first
-        let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate*/
-        /*
-        _ = Amplify.Auth.signInWithWebUI(for: .facebook, presentationAnchor: scene_delegate.window!) { result in
-            switch result {
-            case .success(_):
-                print("Sign in succeeded")
-            case .failure(let error):
-                print("Sign in failed \(error)")
-                print(result)
-                print("babababa")
-            }
-        }*/
-        
-    
-        //loginButton2.setNeedsDisplay()
+            
+        // for setting up Apple Login
+        self.setupProviderLoginView()
         
         if(AppDelegate.loggedIn!){
             AppDelegate.loggedIn = false
@@ -210,6 +174,115 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
         self.user?.getDetails()
         }
     }
+    
+    
+    // SET UP APPLE LOGIN BUTTON
+    func setupProviderLoginView() {
+        print("inside setupProviderLoginView")
+        self.appleLoginButton = ASAuthorizationAppleIDButton()
+        self.appleLoginButton?.isUserInteractionEnabled = true
+        self.appleLoginButton!.removeTarget(nil, action: nil, for: .allEvents)
+        self.appleLoginButton!.addTarget(self, action: #selector(self.handleAuthorizationAppleIDButtonPress), for: .allEvents)
+        self.view.addSubview(self.appleLoginButton!)
+        self.appleLoginButton!.translatesAutoresizingMaskIntoConstraints = false
+        self.appleLoginButton!.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+        //self.appleLoginButton!.bottomAnchor.constraint(equalTo: self.view.bottomAnchor, constant: -100).isActive = true
+        self.appleLoginButton!.center.x = self.view.center.x
+        var temp_frame = self.appleLoginButton?.frame
+        self.view.addConstraint(NSLayoutConstraint(item: self.appleLoginButton, attribute: .trailing, relatedBy: .equal, toItem: self.view, attribute: .trailing, multiplier: 1, constant: -35))
+        self.view.addConstraint(NSLayoutConstraint(item: self.appleLoginButton, attribute: .leading, relatedBy: .equal, toItem: self.view, attribute: .leading, multiplier: 1, constant: 35))
+        self.view.addConstraint(NSLayoutConstraint(item: self.appleLoginButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute,multiplier: 1, constant: 48))
+        self.view.addConstraint(NSLayoutConstraint(item: self.loginButton2, attribute: .trailing, relatedBy: .equal, toItem: self.view, attribute: .trailing, multiplier: 1, constant: -35))
+        self.view.addConstraint(NSLayoutConstraint(item: self.loginButton2, attribute: .leading, relatedBy: .equal, toItem: self.view, attribute: .leading, multiplier: 1, constant: 35))
+        self.view.addConstraint(NSLayoutConstraint(item: self.loginButton2, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute,multiplier: 1, constant: 48))
+        
+        self.view.addConstraint(NSLayoutConstraint(item: self.appleLoginButton, attribute: .top, relatedBy: .equal, toItem: self.loginButton2, attribute: .bottom, multiplier: 1, constant: 20))
+        self.view.addConstraint(NSLayoutConstraint(item: self.loginButton2, attribute: .top, relatedBy: .equal, toItem: self.signup_button, attribute: .bottom, multiplier: 1, constant: 20))
+    }
+    
+    // FOR APPLE SIGN IN
+    @objc func handleAuthorizationAppleIDButtonPress() {
+        _ = Amplify.Auth.signInWithWebUI(for: .apple, presentationAnchor: self.view.window!) { result in
+            switch result {
+            case .success(_):
+                print("Apple Sign in succeeded")
+            case .failure(let error):
+                print("Sign in failed \(error)")
+                print(result)
+                print("babababa")
+            }
+        }
+        /*self.performExistingAccountSetupFlows()
+        print("inside handleAuthorizationAppleIDButtonPress")
+        let appleIDProvider = ASAuthorizationAppleIDProvider()
+        let request = appleIDProvider.createRequest()
+        request.requestedScopes = [.fullName, .email]
+        let authorizationController = ASAuthorizationController(authorizationRequests: [request])
+        authorizationController.delegate = self
+        authorizationController.presentationContextProvider = self
+        authorizationController.performRequests()*/
+    }
+    
+    // FOR APPLE SIGN IN
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithAuthorization authorization: ASAuthorization) {
+        switch authorization.credential {
+        case let appleIDCredential as ASAuthorizationAppleIDCredential:
+            print("in this part")
+            
+            /*let userIdentifier = appleIDCredential.user
+            let fullName = appleIDCredential.fullName
+            let email = appleIDCredential.email
+            let cognito_conversion = AWSCognitoIdentityUser()
+            Amplify.Auth.signUp(username: userIdentifier, password: "password", options: nil, listener: nil)
+            AppDelegate.appleLoggedIn = true
+            AppDelegate.apple_username = userIdentifier
+            //cognito_conversion.username = userIdentifier
+            //c//ognito_conversion.isSignedIn = true
+            //AppDelegate.defaultUserPool().currentUser() = cognito_conversion
+            self.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+            self.navigationController?.setViewControllers([self.viewController!], animated: true)*/
+        case let passwordCredential as ASPasswordCredential:
+            print("in this part2")
+            // Sign in using an existing iCloud Keychain credential.
+            let username = passwordCredential.user
+            let password = passwordCredential.password
+            self.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+            self.navigationController?.setViewControllers([self.viewController!], animated: true)
+        default:
+            break
+        }
+    }
+    
+    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
+        print("inside this thing")
+        print(error)
+        // Handle error.
+    }
+    
+    private func showPasswordCredentialAlert(username: String, password: String) {
+        let message = "The app has received your selected credential from the keychain. \n\n Username: \(username)\n Password: \(password)"
+        let alertController = UIAlertController(title: "Keychain Credential Received",
+                                                message: message,
+                                                preferredStyle: .alert)
+        alertController.addAction(UIAlertAction(title: "Dismiss", style: .cancel, handler: nil))
+        self.present(alertController, animated: true, completion: nil)
+    }
+    
+    func performExistingAccountSetupFlows() {
+        print("inside performExistingAccountSetupFlows")
+        // Prepare requests for both Apple ID and password providers.
+        let requests = [ASAuthorizationAppleIDProvider().createRequest(),
+                        ASAuthorizationPasswordProvider().createRequest()]
+        
+        // Create an authorization controller with the given requests.
+        let authorizationController = ASAuthorizationController(authorizationRequests: requests)
+        authorizationController.delegate = self
+        authorizationController.presentationContextProvider = self
+        authorizationController.performRequests()
+    }
+    
+    
+    
     
     @objc func fbLogin(sender: FBLoginButton){
         print("here inside custom-made fbLogin")
@@ -247,7 +320,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
         
         if(self.email.text == nil || self.password.text == nil || self.email.text == "" || self.password.text == ""){
             self.activityIndicator.stopAnimating()
-            //self.go_to_golden = true
             self.performSegue(withIdentifier: "SignUpSegue", sender: self)
             return
         }
@@ -270,7 +342,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate, LoginButtonDel
                     }
                 }
                 else{
-                    //self.go_to_golden = true
                     self.user = response.result?.user
                     DispatchQueue.main.async {
                         self.activityIndicator.stopAnimating()
@@ -364,7 +435,6 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                 else{
                     self.activityIndicator.stopAnimating()
                     DispatchQueue.main.async {
-                        //self.go_to_golden = true
                         self.performSegue(withIdentifier: "VerifySegue", sender: self)
                     }
                 }
@@ -385,19 +455,12 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                         usleep(10000)
                         hundredth_second_count = hundredth_second_count + 1
                     }
-                    //if(!self.go_to_golden){
                     self.activityIndicator.stopAnimating()
                     let hacky_scene_access = UIApplication.shared.connectedScenes.first
                     let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
-                    scene_delegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                    scene_delegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as! ViewController
+                    scene_delegate.viewController!.user = self.user
                     scene_delegate.navigationController?.setViewControllers([scene_delegate.viewController!], animated: true)
-                    //}
-                    /*else{
-                        self.activityIndicator.stopAnimating()
-                        self.goldenSetViewController = self.storyboard?.instantiateViewController(withIdentifier: "GoldenSetViewController") as? GoldenSetViewController
-                        self.go_to_golden = false
-                        self.navigationController?.setViewControllers([(self.goldenSetViewController!)], animated: true)
-                    }*/
                 }
                 else{
                     print("we are logging out loginview")
@@ -405,6 +468,14 @@ extension LoginViewController: AWSCognitoIdentityPasswordAuthentication {
                 }
             }
         }
+    }
+}
+
+extension LoginViewController: ASAuthorizationControllerPresentationContextProviding {
+    
+    func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
+        print("in presentationAnchor")
+        return self.view.window!
     }
 }
 

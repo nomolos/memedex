@@ -14,7 +14,7 @@ import FBSDKCoreKit
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     var window: UIWindow?
     var navigationController: UINavigationController?
-    var viewController: UIViewController?
+    var viewController: ViewController?
     var loginViewController: LoginViewController?
     
         /** Applications should configure their UIWindow, and attach the UIWindow to the provided UIWindowScene scene.

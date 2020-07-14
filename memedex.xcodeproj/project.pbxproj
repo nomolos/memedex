@@ -68,10 +68,10 @@
 		BD25D7B62440C344002A03BF /* SF-Pro-Display-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = BD25D7832440C343002A03BF /* SF-Pro-Display-Medium.otf */; };
 		BD25D7B72440C344002A03BF /* SF-Pro-Text-Medium.otf in Resources */ = {isa = PBXBuildFile; fileRef = BD25D7842440C344002A03BF /* SF-Pro-Text-Medium.otf */; };
 		BD25D7B82440C344002A03BF /* SF-Pro-Text-SemiboldItalic.otf in Resources */ = {isa = PBXBuildFile; fileRef = BD25D7852440C344002A03BF /* SF-Pro-Text-SemiboldItalic.otf */; };
-		BD2974782450D1E800DBBF9E /* GoldenSetViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD2974772450D1E800DBBF9E /* GoldenSetViewController.swift */; };
 		BD29747A2452005300DBBF9E /* GoldenMeme.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD2974792452005300DBBF9E /* GoldenMeme.swift */; };
 		BD29747C24534BF000DBBF9E /* ActiveUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD29747B24534BF000DBBF9E /* ActiveUser.swift */; };
 		BD29747E245505E000DBBF9E /* PartnerMatches.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD29747D245505E000DBBF9E /* PartnerMatches.swift */; };
+		BD4888D224B90C3F001DEA7C /* KeychainItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4888CF24B90ADF001DEA7C /* KeychainItem.swift */; };
 		BD4921FC2468C541004F8408 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD4921FB2468C541004F8408 /* Launch Screen.storyboard */; };
 		BD4B85412442410D00C67E09 /* TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4B85402442410D00C67E09 /* TextField.swift */; };
 		BD57D62624955289005C73E3 /* FacebookCore in Frameworks */ = {isa = PBXBuildFile; productRef = BD57D62524955289005C73E3 /* FacebookCore */; };
@@ -163,10 +163,11 @@
 		BD25D7832440C343002A03BF /* SF-Pro-Display-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "SF-Pro-Display-Medium.otf"; path = "../../../../../../Library/Fonts/SF-Pro-Display-Medium.otf"; sourceTree = "<group>"; };
 		BD25D7842440C344002A03BF /* SF-Pro-Text-Medium.otf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "SF-Pro-Text-Medium.otf"; path = "../../../../../../Library/Fonts/SF-Pro-Text-Medium.otf"; sourceTree = "<group>"; };
 		BD25D7852440C344002A03BF /* SF-Pro-Text-SemiboldItalic.otf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "SF-Pro-Text-SemiboldItalic.otf"; path = "../../../../../../Library/Fonts/SF-Pro-Text-SemiboldItalic.otf"; sourceTree = "<group>"; };
-		BD2974772450D1E800DBBF9E /* GoldenSetViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldenSetViewController.swift; sourceTree = "<group>"; };
 		BD2974792452005300DBBF9E /* GoldenMeme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoldenMeme.swift; sourceTree = "<group>"; };
 		BD29747B24534BF000DBBF9E /* ActiveUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveUser.swift; sourceTree = "<group>"; };
 		BD29747D245505E000DBBF9E /* PartnerMatches.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerMatches.swift; sourceTree = "<group>"; };
+		BD4888CF24B90ADF001DEA7C /* KeychainItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeychainItem.swift; sourceTree = "<group>"; };
+		BD4888D124B90C04001DEA7C /* memedex.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = memedex.entitlements; sourceTree = "<group>"; };
 		BD4921FB2468C541004F8408 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		BD4B85402442410D00C67E09 /* TextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextField.swift; sourceTree = "<group>"; };
 		BD767C4324328CE200A813C7 /* CognitoConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = CognitoConfig.plist; sourceTree = "<group>"; };
@@ -256,8 +257,10 @@
 		BD220CDF23F4B25800D93CBE /* memedex */ = {
 			isa = PBXGroup;
 			children = (
+				BD4888D124B90C04001DEA7C /* memedex.entitlements */,
 				BD25D7522440C2FD002A03BF /* Fonts */,
 				BD220CE023F4B25800D93CBE /* AppDelegate.swift */,
+				BD4888CF24B90ADF001DEA7C /* KeychainItem.swift */,
 				BD220CE923F4B25A00D93CBE /* Assets.xcassets */,
 				BD220CF723F4B3A200D93CBE /* ViewController.swift */,
 				BD220CF123F4B25A00D93CBE /* Info.plist */,
@@ -274,7 +277,6 @@
 				BDE7EA2D244A45EB008A603B /* VideoPlayerView.swift */,
 				BDE7EA2F244B5CDD008A603B /* gif.swift */,
 				BDE7EA31244D267B008A603B /* CustomSlider.swift */,
-				BD2974772450D1E800DBBF9E /* GoldenSetViewController.swift */,
 				BD2974792452005300DBBF9E /* GoldenMeme.swift */,
 				BD29747B24534BF000DBBF9E /* ActiveUser.swift */,
 				BD29747D245505E000DBBF9E /* PartnerMatches.swift */,
@@ -566,10 +568,10 @@
 				BD29747A2452005300DBBF9E /* GoldenMeme.swift in Sources */,
 				BD220CE123F4B25800D93CBE /* AppDelegate.swift in Sources */,
 				BDA9B85224B27CFA0019FD54 /* TopSources.swift in Sources */,
+				BD4888D224B90C3F001DEA7C /* KeychainItem.swift in Sources */,
 				BDFD177A248DD644005CCC6B /* SceneDelegate.swift in Sources */,
 				BD25D751243FBDD8002A03BF /* VerificationViewController.swift in Sources */,
 				BD220CE623F4B25800D93CBE /* memedex.xcdatamodeld in Sources */,
-				BD2974782450D1E800DBBF9E /* GoldenSetViewController.swift in Sources */,
 				BDE7EA2E244A45EB008A603B /* VideoPlayerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -697,8 +699,9 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = memedex/memedex.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.5;
+				CURRENT_PROJECT_VERSION = 1.9;
 				DEVELOPMENT_ASSET_PATHS = "\"memedex/Preview Content\"";
 				DEVELOPMENT_TEAM = 4DPF6Z8WW9;
 				ENABLE_PREVIEWS = YES;
@@ -707,7 +710,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = solomon.memedex;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;
@@ -721,8 +724,9 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = memedex/memedex.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1.5;
+				CURRENT_PROJECT_VERSION = 1.9;
 				DEVELOPMENT_ASSET_PATHS = "\"memedex/Preview Content\"";
 				DEVELOPMENT_TEAM = 4DPF6Z8WW9;
 				ENABLE_PREVIEWS = YES;
@@ -731,7 +735,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.9;
 				PRODUCT_BUNDLE_IDENTIFIER = solomon.memedex;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_VERSION = 5.0;

@@ -19,6 +19,7 @@ import Amplify
 import AmplifyPlugins
 import FBSDKCoreKit
 import AWSPluginsCore
+import AuthenticationServices
 
 
 let userPoolID = "SampleUserPool"
@@ -27,20 +28,15 @@ var pinpoint: AWSPinpoint?
 @UIApplicationMain
 class AppDelegate: UIResponder, UIApplicationDelegate {
 
-    
-    //var navigationController: UINavigationController?
     var viewController: UIViewController?
     var loginViewController: LoginViewController?
     var verificationViewController: VerificationViewController?
-    var goldenSetViewController: GoldenSetViewController?
     static var pool: AWSCognitoIdentityUserPool?
     static var loggedIn: Bool?
-    static var fbLoggedIn: Bool?
-    static var waitFBUser = DispatchGroup()
-    static var waitFBUsername = DispatchGroup()
-    static var fb_username: String?
-    //var window: UIWindow?
-   //var navigationController:UINavigationController?
+    static var socialLoggedIn: Bool?
+    static var waitSocialUser = DispatchGroup()
+    static var waitSocialUsername = DispatchGroup()
+    static var social_username:String?
     
     var storyboard: UIStoryboard? {
         return UIStoryboard(name: "Main", bundle: nil)
@@ -75,7 +71,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             didFinishLaunchingWithOptions: launchOptions
         )
         AppDelegate.loggedIn = false
-        AppDelegate.fbLoggedIn = false
+        AppDelegate.socialLoggedIn = false
         
         // Initialize Pinpoint
         pinpoint = AWSPinpoint(configuration:
@@ -103,26 +99,43 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         print("printing access token AppDelegate")
         print(AccessToken.current)
-        AppDelegate.waitFBUser.enter()
+        AppDelegate.waitSocialUser.enter()
         self.fetchCurrentAuthSession()
         
-        //self.window?.makeKeyAndVisible()
-        // Override point for customization after application launch.
-        print(AWSMobileClient.sharedInstance().getTokens)
-        if let token = AccessToken.current,
-            !token.isExpired {
-            print("we're logged in FB")
-            // User is logged in, do work such as go to next view controller.
+        let appleIDProvider = ASAuthorizationAppleIDProvider()
+        appleIDProvider.getCredentialState(forUserID: KeychainItem.currentUserIdentifier) { (credentialState, error) in
+            switch credentialState {
+            case .authorized:
+                if(self.loginViewController != nil){
+                    self.loginViewController?.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                    //self.loginViewController!.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
+                    self.loginViewController?.navigationController?.setViewControllers([self.loginViewController!.viewController!], animated: true)
+                }
+                else{
+                    print("ERROR - WE SIGNED IN BUT OUR LOGINVIEW IS NIL")
+                }
+                break // The Apple ID credential is valid.
+            case .revoked, .notFound:
+                // The Apple ID credential is either revoked or was not found, so show the sign-in UI.
+                DispatchQueue.main.async {
+                    //self.navigationController.showLoginViewController()
+                    print("here wtf")
+                }
+            default:
+                break
+            }
         }
+
         
         _ = Amplify.Hub.listen(to: .auth) { payload in
             switch payload.eventName {
             case HubPayload.EventName.Auth.signedIn:
                 DispatchQueue.main.sync{
                     //AppDelegate.fbLoggedIn = true
-                    AppDelegate.waitFBUser.enter()
+                    print("Amplify has someone signed in")
+                    AppDelegate.waitSocialUser.enter()
                     self.fetchCurrentAuthSession()
-                    AppDelegate.waitFBUser.notify(queue: .main){
+                    AppDelegate.waitSocialUser.notify(queue: .main){
                         if(self.loginViewController != nil){
                             self.loginViewController?.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
                             //self.loginViewController!.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
@@ -141,6 +154,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
 
             case HubPayload.EventName.Auth.signedOut:
                 print("User signed out")
+                if(AppDelegate.loggedIn!){
+                    print("we're logged in, going to navigate to loginView to log out")
+                    //print("printing connected scenes from app delegate in auth")
+                    //print(self.window.rootViewController)
+                    //print(UIApplication.shared.connectedScenes)
+                    //print("printing scene delegate's navigationView and login view")
+                    //print(scene_delegate.navigationController)
+                    //print(scene_delegate.loginViewController)
+                    DispatchQueue.main.async {
+                        let hacky_scene_access = UIApplication.shared.connectedScenes.first
+                        let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
+                        scene_delegate.navigationController?.setViewControllers([scene_delegate.loginViewController!], animated: true)
+                    }
+                    //self.navigationController!.setViewControllers([self.loginViewController!], animated: true)
+                }
                 // Update UI
 
             default:
@@ -157,6 +185,17 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         self.viewController?.encodeRestorableState(with: NSCoder())
         return true
     }
+    
+    
+    /*func finishedWithAuth(auth: ASAuthorizationAppleIDCredential!, error: NSError!) {
+        if error != nil {
+          print(error.localizedDescription)
+        }
+        else {
+          let idToken = auth.identityToken,
+          credentialsProvider.logins = ["appleid.apple.com": idToken!]
+        }
+    }*/
     
     func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
         return true
@@ -243,15 +282,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 print("inside fetchCurrentAuthSession2")
                 let session = try result.get() as! AWSAuthCognitoSession
                 print("fbLoggedIn should be set to - \(session.isSignedIn)")
-                AppDelegate.fbLoggedIn = session.isSignedIn
+                AppDelegate.socialLoggedIn = session.isSignedIn
                 // Get user sub or identity id
                 if let identityProvider = session as? AuthCognitoIdentityProvider {
                     let usersub = try identityProvider.getUserSub().get()
-                    AppDelegate.fb_username = usersub
+                    AppDelegate.social_username = usersub
                     let identityId = try identityProvider.getIdentityId().get()
                     print("User sub - \(usersub) and idenity id \(identityId)")
-                    print("Should have FB Username")
-                    print(AppDelegate.fb_username)
+                    print("Should have Social Username")
+                    print(AppDelegate.social_username)
                 }
                 // Get aws credentials
                 if let awsCredentialsProvider = session as? AuthAWSCredentialsProvider {
@@ -264,10 +303,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                     let tokens = try cognitoTokenProvider.getCognitoTokens().get()
                     print("Id token - \(tokens.idToken) ")
                 }
-                AppDelegate.waitFBUser.leave()
+                AppDelegate.waitSocialUser.leave()
             } catch {
                 print("Fetch auth session failed with error - \(error)")
-                AppDelegate.waitFBUser.leave()
+                AppDelegate.waitSocialUser.leave()
             }
         }
     }
@@ -292,7 +331,9 @@ extension AppDelegate: AWSCognitoIdentityInteractiveAuthenticationDelegate {
             //print("printing scene delegate's navigationView and login view")
             //print(scene_delegate.navigationController)
             //print(scene_delegate.loginViewController)
-            scene_delegate.navigationController?.setViewControllers([scene_delegate.loginViewController!], animated: true)
+            DispatchQueue.main.async {
+                scene_delegate.navigationController?.setViewControllers([scene_delegate.loginViewController!], animated: true)
+            }
             //self.navigationController!.setViewControllers([self.loginViewController!], animated: true)
         }
         //print("printing scene delegate's navigationView and login view")
