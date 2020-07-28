@@ -16,8 +16,25 @@ import AVKit
 import AVFoundation
 import Amplify
 
-class ViewController: UIViewController {
+class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate {
+    func numberOfComponents(in pickerView: UIPickerView) -> Int {
+        return 1
+    }
     
+    func pickerView(_ pickerView: UIPickerView, numberOfRowsInComponent component: Int) -> Int {
+        return groups.count
+    }
+    
+    var groups = [String]()
+    var groupname:UITextField?
+    
+    func pickerView(_ pickerView: UIPickerView, titleForRow row: Int, forComponent component: Int) -> String? {
+        return groups[row]
+    }
+    
+    func pickerView( _ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
+        self.groupname?.text = groups[row]
+    }
 
     let s3bucket = "memedexbucket"
     var keys = [String]()
@@ -31,6 +48,8 @@ class ViewController: UIViewController {
     var playerViewController:AVPlayerViewController?
     var user_to_pair_with:String?
     let waitPartnerMemes = DispatchGroup()
+    let waitGroupNames = DispatchGroup()
+    let waitGroupNamesFinal = DispatchGroup()
     let waitMemesUpdated = DispatchGroup()
     let waitPotentialPartners = DispatchGroup()
     let waitPotentialActivePartner = DispatchGroup()
@@ -60,6 +79,7 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var back_button: UIButton!
     var meme_link:UIButton?
+    var meme_group_add:UIButton?
     
     @IBOutlet weak var shareButton2: UIButton!
 
@@ -96,6 +116,66 @@ class ViewController: UIViewController {
         self.present(alert, animated: true)
     }
 
+    @objc func addMemeToGroup(_ sender:UIButton) {
+        self.waitGroupNamesFinal.enter()
+        self.loadGroupNames()
+        self.waitGroupNamesFinal.notify(queue: .main){
+            let alert = UIAlertController(title: "Add to Group", message: "Add this meme to a group", preferredStyle: .alert)
+            self.groupname = UITextField()
+            var caption = UITextField()
+            alert.addAction(UIAlertAction(title: "Cancel", style: .default, handler: { (action: UIAlertAction!) in
+                return
+            }))
+            alert.addTextField(configurationHandler: {(textfield: UITextField!) in
+                textfield.placeholder = "Group name"
+                self.groupname = textfield
+                let pickerView = UIPickerView(frame:
+                    CGRect(x: 0, y: 50, width: 260, height: 162))
+                pickerView.dataSource = self
+                pickerView.delegate = self
+                // comment this line to use white color
+                pickerView.backgroundColor = UIColor.white
+                textfield.inputView = pickerView
+            })
+            alert.addTextField(configurationHandler: {(textfield: UITextField!) in
+                textfield.placeholder = "Caption"
+                caption = textfield
+            })
+            alert.addAction(UIAlertAction(title: "Done", style: .default, handler: { (action: UIAlertAction!) in
+                let key = self.keys[self.index]
+                let upload_me = self.meme.imageView.image
+                let upload_data : Data = (upload_me?.pngData())!
+
+                let completionHandler = { (task:AWSS3TransferUtilityUploadTask, error:NSError?) -> Void in
+                    if(error != nil){
+                        print("Failure uploading file")
+                        
+                    }else{
+                        print("Success uploading file")
+                    }
+                } as? AWSS3TransferUtilityUploadCompletionHandlerBlock
+                
+                
+                let expression  = AWSS3TransferUtilityUploadExpression()
+                let transferUtility = AWSS3TransferUtility.default()
+                transferUtility.uploadData(upload_data, bucket: self.s3bucket, key: (self.groupname!.text! + "/" + key), contentType: "image/png", expression: expression, completionHandler: completionHandler).continueWith { (task) -> Any? in
+                    if let error = task.error {
+                        print("Error : \(error.localizedDescription)")
+                    }
+
+                    if task.result != nil {
+                        print(task.result)
+                    }
+
+                    return nil
+                }
+                print("END OF DONE")
+            }))
+            self.present(alert, animated: true)
+        }
+    }
+    
+    
     @objc func goToURL(_ sender:UIButton) {
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
@@ -402,13 +482,25 @@ class ViewController: UIViewController {
         nc.addObserver(self, selector: #selector(back(_:)), name: NSNotification.Name(rawValue: "back"), object: nil)
         nc.addObserver(self, selector: #selector(update_slider), name: NSNotification.Name(rawValue: "update_slider"), object: nil)
         
-        if(self.meme_link == nil){
+        if(self.meme_link == nil || self.meme_group_add == nil){
             self.meme_link = UIButton()
+            self.meme_group_add = UIButton()
             let temp_image = UIImage(named: "link") as UIImage?
+            var temp_image2 = UIImage(systemName: "plus.circle") as UIImage?
+            let new_width_meme_group = temp_image2!.size.width*2
+            let new_height_meme_group = temp_image2!.size.height*2
+            let new_size = CGSize(width: new_width_meme_group, height: new_height_meme_group)
+            temp_image2 = temp_image2?.resizeImage(targetSize: new_size)
             self.meme_link?.setImage(temp_image, for: .normal)
+            self.meme_group_add?.setImage(temp_image2, for: .normal)
+            self.meme_group_add?.frame = CGRect(x: 100,y: 100,width: 100,height: 100)
+            
+            
             self.meme_link?.frame = CGRect(x: 100,y: 100,width: 100,height: 100)
+            self.meme_group_add?.isHidden = true
             self.meme_link?.isHidden = true
             self.view.addSubview(self.meme_link!)
+            self.view.addSubview(self.meme_group_add!)
         }
         
         self.activityIndicator = UIActivityIndicatorView()
@@ -661,7 +753,20 @@ class ViewController: UIViewController {
                         }
                         let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
                         let temp_url = URL(string: temp0_url)
+                        print("we have a video")
+                        if(temp_url == nil){
+                            print("this video wasn't loading")
+                            self.next(self)
+                            return
+                        }
                         self.player = AVPlayer(url: temp_url!)
+                        print(self.player?.currentItem?.duration)
+                        // This video isn't loading properly
+                        if(self.player?.currentItem?.duration == CMTime(seconds: 0, preferredTimescale: CMTimeScale())){
+                            print("this video wasn't loading")
+                            self.next(self)
+                            return
+                        }
                         self.player?.isMuted = true
                         self.playerViewController = AVPlayerViewController()
                         self.playerViewController?.disableGestureRecognition()
@@ -732,7 +837,19 @@ class ViewController: UIViewController {
                 }
                 let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
                 let temp_url = URL(string: temp0_url)
+                print("we have a video")
+                if(temp_url == nil){
+                    print("this video wasn't loading")
+                    self.next(self)
+                    return
+                }
                 self.player = AVPlayer(url: temp_url!)
+                print(self.player?.currentItem?.duration)
+                if(self.player?.currentItem?.duration == CMTime(seconds: 0, preferredTimescale: CMTimeScale())){
+                    print("this video wasn't loading")
+                    self.next(self)
+                    return
+                }
                 self.player?.isMuted = true
                 self.playerViewController = AVPlayerViewController()
                 self.playerViewController?.disableGestureRecognition()
@@ -819,6 +936,61 @@ class ViewController: UIViewController {
             }
             self.waitMemeNamesS3.leave()
             return nil
+        }
+    }
+    
+    func loadGroupNames(){
+        self.waitGroupNames.enter()
+        let queryExpression = AWSDynamoDBQueryExpression()
+        let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+        let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+        updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+        queryExpression.keyConditionExpression = "#sub2 = :sub"
+        queryExpression.expressionAttributeNames = ["#sub2": "sub"]
+        
+        
+        if(AppDelegate.socialLoggedIn!){
+            queryExpression.expressionAttributeValues = [":sub": AppDelegate.social_username]
+            print("[in loadGroupNames], our user's sub is : " + AppDelegate.social_username!)
+        }
+        else{
+            queryExpression.expressionAttributeValues = [":sub": AppDelegate.defaultUserPool().currentUser()?.username]
+            print("[in loadGroupNames], our user's sub is : " + (AppDelegate.defaultUserPool().currentUser()?.username)!)
+        }
+
+        var user_sub_response = dynamoDBObjectMapper.query(UserSub.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+            if (task.error != nil){
+                print("error in loadGroupNames")
+                print(task.error)
+            }
+            else if (task.result != nil){
+                print("printing result in loadGroupNames")
+                print(task.result?.items)
+                if(task.result?.items.count == 0){
+                    print("We have no items in loadGroupNames, there was no element at this user's sub")
+                    return task.result
+                }
+            }
+            self.waitGroupNames.leave()
+            return task.result
+        }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+    
+        self.waitGroupNames.notify(queue: .main){
+            if (user_sub_response.result?.items.count == 0){
+                print("Error in waitGroupNames. There was no user with this sub")
+                return
+            }
+            let casted = user_sub_response.result?.items[0] as! UserSub
+            if(casted.groups!.count == 0){
+                print("No groups for this user in waitGroupNames")
+                return
+            }
+            print("printing group names")
+            for group in casted.groups!{
+                print(group)
+                self.groups.append(group as! String)
+            }
+            self.waitGroupNamesFinal.leave()
         }
     }
     
@@ -1079,24 +1251,41 @@ class ViewController: UIViewController {
             self.imageView?.image = self.image
             self.meme = ImageZoomView(frame: self.meme.frame, something: true)
             self.view.addSubview(self.meme)
-            self.meme.updateImage(imageView: self.imageView!)
+            if(self.imageView.image != nil){
+                print("image not nil")
+                self.meme.updateImage(imageView: self.imageView!)
+            }
+            else{
+                print("image was nil")
+                self.next(self)
+            }
         }
         if((self.image) != nil){
             let real_image_rect = AVMakeRect(aspectRatio: self.meme.getImage().size, insideRect: self.meme.bounds)
             self.meme_link?.widthAnchor.constraint(equalToConstant: 44.0).isActive = true
+            self.meme_group_add?.widthAnchor.constraint(equalToConstant: 44.0).isActive = true
             self.meme_link?.heightAnchor.constraint(equalToConstant: 37.0).isActive = true
+            self.meme_group_add?.heightAnchor.constraint(equalToConstant: 37.0).isActive = true
+            //print("PRINTING SELF VIEW FRAME ")
+            //print(self.view.frame.width)
             self.meme_link?.frame.origin.x = self.view.frame.width - 85
+            self.meme_group_add?.frame.origin.x = -15
             // An image/gif
             if(!self.meme.isHidden){
                 self.meme_link?.frame.origin.y = real_image_rect.origin.y + 80
+                self.meme_group_add?.frame.origin.y = real_image_rect.origin.y + 80
             }
             // a video
             else{
                 self.meme_link?.frame.origin.y = self.meme.frame.origin.y - 70
+                self.meme_group_add?.frame.origin.y = self.meme.frame.origin.y - 70
             }
             self.meme_link?.isHidden = false
+            self.meme_group_add?.isHidden = false
             self.meme_link?.addTarget(self, action: #selector(goToURL(_:)), for: .touchUpInside)
+            self.meme_group_add?.addTarget(self, action: #selector(addMemeToGroup(_:)), for: .touchUpInside)
             self.view.bringSubviewToFront(meme_link!)
+            self.view.bringSubviewToFront(meme_group_add!)
         }
     }
     
@@ -1271,3 +1460,19 @@ extension AVPlayerViewController {
     }
 }
 
+extension UIImage {
+  func resizeImage(targetSize: CGSize) -> UIImage {
+    let size = self.size
+    let widthRatio  = targetSize.width  / size.width
+    let heightRatio = targetSize.height / size.height
+    let newSize = widthRatio > heightRatio ?  CGSize(width: size.width * heightRatio, height: size.height * heightRatio) : CGSize(width: size.width * widthRatio,  height: size.height * widthRatio)
+    let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
+
+    UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
+    self.draw(in: rect)
+    let newImage = UIGraphicsGetImageFromCurrentImageContext()
+    UIGraphicsEndImageContext()
+
+    return newImage!
+  }
+}

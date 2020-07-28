@@ -72,6 +72,11 @@
 		BD29747C24534BF000DBBF9E /* ActiveUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD29747B24534BF000DBBF9E /* ActiveUser.swift */; };
 		BD29747E245505E000DBBF9E /* PartnerMatches.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD29747D245505E000DBBF9E /* PartnerMatches.swift */; };
 		BD4888D224B90C3F001DEA7C /* KeychainItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4888CF24B90ADF001DEA7C /* KeychainItem.swift */; };
+		BD4888D424C4F58A001DEA7C /* GroupViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4888D324C4F58A001DEA7C /* GroupViewController.swift */; };
+		BD4888DD24C650F1001DEA7C /* CollectionViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4888DB24C63454001DEA7C /* CollectionViewController.swift */; };
+		BD4888DF24C8AE54001DEA7C /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4888DE24C8AE54001DEA7C /* Group.swift */; };
+		BD4888E124CA41D7001DEA7C /* Email.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4888E024CA41D7001DEA7C /* Email.swift */; };
+		BD4888E324CF9928001DEA7C /* UserSub.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4888E224CF9928001DEA7C /* UserSub.swift */; };
 		BD4921FC2468C541004F8408 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD4921FB2468C541004F8408 /* Launch Screen.storyboard */; };
 		BD4B85412442410D00C67E09 /* TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4B85402442410D00C67E09 /* TextField.swift */; };
 		BD57D62624955289005C73E3 /* FacebookCore in Frameworks */ = {isa = PBXBuildFile; productRef = BD57D62524955289005C73E3 /* FacebookCore */; };
@@ -168,6 +173,11 @@
 		BD29747D245505E000DBBF9E /* PartnerMatches.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PartnerMatches.swift; sourceTree = "<group>"; };
 		BD4888CF24B90ADF001DEA7C /* KeychainItem.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = KeychainItem.swift; sourceTree = "<group>"; };
 		BD4888D124B90C04001DEA7C /* memedex.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = memedex.entitlements; sourceTree = "<group>"; };
+		BD4888D324C4F58A001DEA7C /* GroupViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroupViewController.swift; sourceTree = "<group>"; };
+		BD4888DB24C63454001DEA7C /* CollectionViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionViewController.swift; sourceTree = "<group>"; wrapsLines = 0; };
+		BD4888DE24C8AE54001DEA7C /* Group.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
+		BD4888E024CA41D7001DEA7C /* Email.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Email.swift; sourceTree = "<group>"; };
+		BD4888E224CF9928001DEA7C /* UserSub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSub.swift; sourceTree = "<group>"; };
 		BD4921FB2468C541004F8408 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		BD4B85402442410D00C67E09 /* TextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextField.swift; sourceTree = "<group>"; };
 		BD767C4324328CE200A813C7 /* CognitoConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = CognitoConfig.plist; sourceTree = "<group>"; };
@@ -263,6 +273,8 @@
 				BD4888CF24B90ADF001DEA7C /* KeychainItem.swift */,
 				BD220CE923F4B25A00D93CBE /* Assets.xcassets */,
 				BD220CF723F4B3A200D93CBE /* ViewController.swift */,
+				BD4888DB24C63454001DEA7C /* CollectionViewController.swift */,
+				BD4888D324C4F58A001DEA7C /* GroupViewController.swift */,
 				BD220CF123F4B25A00D93CBE /* Info.plist */,
 				BD220CE423F4B25800D93CBE /* memedex.xcdatamodeld */,
 				BD220CEB23F4B25A00D93CBE /* Preview Content */,
@@ -279,6 +291,9 @@
 				BDE7EA31244D267B008A603B /* CustomSlider.swift */,
 				BD2974792452005300DBBF9E /* GoldenMeme.swift */,
 				BD29747B24534BF000DBBF9E /* ActiveUser.swift */,
+				BD4888DE24C8AE54001DEA7C /* Group.swift */,
+				BD4888E224CF9928001DEA7C /* UserSub.swift */,
+				BD4888E024CA41D7001DEA7C /* Email.swift */,
 				BD29747D245505E000DBBF9E /* PartnerMatches.swift */,
 				BD4921FB2468C541004F8408 /* Launch Screen.storyboard */,
 				BD13220E24785DC1007EB9AF /* URL4Meme.swift */,
@@ -552,8 +567,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BD4888DD24C650F1001DEA7C /* CollectionViewController.swift in Sources */,
 				BD29747E245505E000DBBF9E /* PartnerMatches.swift in Sources */,
 				BDA6FD502433CEFC00D5BDD5 /* LoginViewController.swift in Sources */,
+				BD4888DF24C8AE54001DEA7C /* Group.swift in Sources */,
 				BDA6FD522433F35500D5BDD5 /* CognitoConfig.swift in Sources */,
 				BDE7EA30244B5CDD008A603B /* gif.swift in Sources */,
 				BD220CF823F4B3A200D93CBE /* ViewController.swift in Sources */,
@@ -566,6 +583,9 @@
 				BD13220F24785DC1007EB9AF /* URL4Meme.swift in Sources */,
 				BDE7EA32244D267B008A603B /* CustomSlider.swift in Sources */,
 				BD29747A2452005300DBBF9E /* GoldenMeme.swift in Sources */,
+				BD4888E124CA41D7001DEA7C /* Email.swift in Sources */,
+				BD4888E324CF9928001DEA7C /* UserSub.swift in Sources */,
+				BD4888D424C4F58A001DEA7C /* GroupViewController.swift in Sources */,
 				BD220CE123F4B25800D93CBE /* AppDelegate.swift in Sources */,
 				BDA9B85224B27CFA0019FD54 /* TopSources.swift in Sources */,
 				BD4888D224B90C3F001DEA7C /* KeychainItem.swift in Sources */,

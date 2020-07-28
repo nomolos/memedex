@@ -41,6 +41,7 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
         self.imageView.centerXAnchor.constraint(equalTo: self.contentLayoutGuide.centerXAnchor).isActive = true
         self.imageView.centerYAnchor.constraint(equalTo: self.contentLayoutGuide.centerYAnchor).isActive = true
         self.imageView.translatesAutoresizingMaskIntoConstraints = false
+        
         self.setupScrollView(image: self.imageView.image!)
         self.removeConstraints(self.constraints)
         self.setNeedsLayout()
