@@ -19,14 +19,27 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
 
     var meme_container = [Data]()
     var keys = [String]()
+    var captions = [String]()
     let s3bucket = "memedexbucket"
-    let meme_cache_semaphore = DispatchSemaphore(value: 0)
+    let meme_collection_semaphore = DispatchSemaphore(value: 0)
+    let meme_caption_semaphore = DispatchSemaphore(value: 0)
     let dispatchQueue = DispatchQueue(label: "com.queue.Serial")
     let waitMemeNamesS3 = DispatchGroup()
     var group:String?
+    var activityIndicator = UIActivityIndicatorView()
+    var modification_times = [Date]()
+    var date_to_key = [Date:String]()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.activityIndicator = UIActivityIndicatorView()
+        self.activityIndicator.color = UIColor.gray
+        self.activityIndicator.style = UIActivityIndicatorView.Style.large
+        self.activityIndicator.frame = CGRect(x: self.view.bounds.midX - 50, y: self.view.bounds.midY - 100, width: 100, height: 100)
+        self.activityIndicator.hidesWhenStopped = true
+        self.activityIndicator.layer.zPosition = 1
+        self.collectionView.addSubview(self.activityIndicator)
+        self.activityIndicator.startAnimating()
         self.dispatchQueue.async{
             var x = 0
             self.waitMemeNamesS3.enter()
@@ -41,15 +54,22 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                             print(error)
                             return
                         }
-                        self.meme_cache_semaphore.signal()
+                        print("printing data collection view")
+                        print(data)
+                        //print(task)
+                        //print(url)
+                        //print(task.result)
+                        //print(data)
+                        self.meme_collection_semaphore.signal()
                         self.meme_container.append(data!)
                         return
                     }
-                    self.meme_cache_semaphore.wait()
+                    self.meme_collection_semaphore.wait()
                     x = x + 1
                 }
                 DispatchQueue.main.async {
                     self.collectionView.reloadData()
+                    self.activityIndicator.stopAnimating()
                 }
             }
             //self.collectionView.reloadData()
@@ -104,14 +124,21 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             let image_for_cell = UIImage(data: self.meme_container[indexPath.row])
             var imageview_for_cell = UIImageView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: (self.view.frame.width*1.42)))
             imageview_for_cell.image = image_for_cell
+            let textfield_for_cell = UITextField(frame: CGRect(x: 10, y: imageview_for_cell.frame.maxY - 60, width: self.view.frame.width, height: (self.view.frame.width/5)))
+            textfield_for_cell.text = self.captions[indexPath.row]
+            textfield_for_cell.font = UIFont.systemFont(ofSize: 20)
+            
 //            if(Float((image_for_cell?.size.width)!) > Float((image_for_cell?.size.height)!)){
 //                imageview_for_cell.contentMode = .scaleAspectFit
 //            }
 //            else{
 //                imageview_for_cell.contentMode = .scaleAspectFill
 //            }
+            
             imageview_for_cell.contentMode = .scaleAspectFit
             cell.contentView.addSubview(imageview_for_cell)
+            cell.contentView.addSubview(textfield_for_cell)
+            //textfield_for_cell.topAnchor = imageview_for_cell
             //cell.imageV
             //cell.co
         }
@@ -173,18 +200,69 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             for object in (listObjectsOutput?.contents)! {
                 print("printing key")
                 print(object.key)
-                self.keys.append(String(object.key!))
+                print("printing modification time")
+                print(object.lastModified)
+                self.modification_times.append(object.lastModified!)
+                self.date_to_key[object.lastModified!] = object.key!
+                //self.keys.append(String(object.key!))
+                print("sizes should be equal")
+                print(self.modification_times.count)
+                print(self.keys.count)
                 x = x + 1
                 if(x == 100){
                     break
                 }
                 //print(String(object.key!))
             }
+            print("pre-sort")
+            print("pre-sort")
+            print(self.modification_times)
+            print("attempting to sort dates")
+            print("attempting to sort dates")
+            self.modification_times = self.modification_times.sorted(by: self.sortByDate(time1:time2:))
+            print(self.modification_times)
+            for date in self.modification_times{
+                self.keys.append(self.date_to_key[date]!)
+            }
+            
+            for key in self.keys{
+                print("END OF LOAD ALL MEMES, CHECKING DYNAMO")
+                let queryExpression = AWSDynamoDBQueryExpression()
+                queryExpression.keyConditionExpression = "imagepath = :imagepath"
+                queryExpression.expressionAttributeValues = [":imagepath": key]
+                let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+                let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+                var somefin = dynamoDBObjectMapper.query(Caption.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+                    if (task.error != nil){
+                        print("error in querying for Caption")
+                        self.captions.append("")
+                    }
+                    if (task.result != nil){
+                        if(task.result?.items.count != 0){
+                            print("Caption result is ")
+                            print(task.result?.items[0])
+                            let casted = task.result?.items[0] as! Caption
+                            self.captions.append(casted.caption as! String)
+                        }
+                        else{
+                            self.captions.append("")
+                        }
+                    }
+                    self.meme_caption_semaphore.signal()
+                    return task.result
+                }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+                self.meme_caption_semaphore.wait()
+            }
+            print("printing captions")
+            print(self.captions)
             self.waitMemeNamesS3.leave()
             return nil
         }
     }
     
+    func sortByDate(time1:Date, time2:Date) -> Bool {
+      return time1 > time2
+    }
     
     @IBAction func open_settings(_ sender: Any) {
         let popup = UIAlertController(title: "Settings", message: "", preferredStyle: .alert)

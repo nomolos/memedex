@@ -117,6 +117,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
 
     @objc func addMemeToGroup(_ sender:UIButton) {
+        print("inside addMemeToGroup")
         self.waitGroupNamesFinal.enter()
         self.loadGroupNames()
         self.waitGroupNamesFinal.notify(queue: .main){
@@ -169,7 +170,24 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
 
                     return nil
                 }
-                print("END OF DONE")
+                
+                var caption_to_send = Caption()
+                caption_to_send?.caption = caption.text as! NSString
+                caption_to_send?.imagepath = (self.groupname!.text! + "/" + self.keys[self.index]) as! NSString
+                let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+                let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+                updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+                dynamoDBObjectMapper.save(caption_to_send!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
+                    if let error = task.error as NSError? {
+                        print("The request failed. Error: \(error)")
+                    } else {
+                        print("Caption should have been sent")
+                        // Do something with task.result or perform other operations.
+                    }
+                    return 0
+                })
+ 
+                print("addToMemeGroup")
             }))
             self.present(alert, animated: true)
         }
@@ -931,6 +949,9 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 return nil
             }
             for object in (listObjectsOutput?.contents)! {
+                //print(object.)
+                print("PRINTING WHEN OBJECT WAS MODIFIED")
+                print(object.lastModified)
                 self.keys.append(String(object.key!))
                 //print(String(object.key!))
             }
@@ -940,6 +961,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     func loadGroupNames(){
+        print("inside loadGroupNames")
         self.waitGroupNames.enter()
         let queryExpression = AWSDynamoDBQueryExpression()
         let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
@@ -981,14 +1003,16 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 return
             }
             let casted = user_sub_response.result?.items[0] as! UserSub
-            if(casted.groups!.count == 0){
+            if(casted.groups == nil || casted.groups.count == 0){
                 print("No groups for this user in waitGroupNames")
                 return
             }
             print("printing group names")
-            for group in casted.groups!{
+            for group in casted.groups{
                 print(group)
-                self.groups.append(group as! String)
+                if(!self.groups.contains(group as! String)){
+                    self.groups.append(group as! String)
+                }
             }
             self.waitGroupNamesFinal.leave()
         }

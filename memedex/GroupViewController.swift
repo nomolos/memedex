@@ -27,6 +27,8 @@ class GroupViewController: UITableViewController {
     let waitUserSub = DispatchGroup()
     let waitOurGroups = DispatchGroup()
     let waitOurGroupsMemberCount = DispatchGroup()
+    var casted_user_sub_item:UserSub?
+    var activityIndicator = UIActivityIndicatorView()
     
     @IBAction func add_group(_ sender: Any) {
         let popup = UIAlertController(title: "New Group", message: "", preferredStyle: .alert)
@@ -42,6 +44,7 @@ class GroupViewController: UITableViewController {
             
             let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
             let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+            updateMapperConfig.saveBehavior = .updateSkipNullAttributes
             var invalid_users = ""
             
             self.dispatchQueue.async {
@@ -83,7 +86,7 @@ class GroupViewController: UITableViewController {
                                         print("error in querying for this sub")
                                         print(task.error)
                                         self.waitUserSub.leave()
-                                        self.adding_user_semaphore.signal()
+                                        //self.adding_user_semaphore.signal()
                                     }
                                     else if (task.result != nil){
                                         print("successfully queried for this sub")
@@ -98,20 +101,31 @@ class GroupViewController: UITableViewController {
                                     // APPEND THIS NEW GROUP NAME TO THAT USER
                                     // SO THEY CAN ACCESS THE GROUP ON THEIR DEVICE
                                     if(user_sub_match.result?.items.count != 0){
-                                        var casted_user_sub_item = user_sub_match.result?.items[0] as! UserSub
-                                        casted_user_sub_item.updateGroup(group: self.new_group_textfield.text!)
+                                        self.casted_user_sub_item = user_sub_match.result?.items[0] as! UserSub
+                                        print("THIS IS WHAT WE'RE UPDATING WITH")
+                                        print(self.new_group_textfield.text)
+                                        let string_literal = self.new_group_textfield.text as! String
+                                        self.casted_user_sub_item!.updateGroup(group: string_literal)
+                                        print("This is the new object")
+                                        print(self.casted_user_sub_item)
                                         print("Attempting to re-write to dynamo user_sub table for " + String(casted.id!))
-                                        dynamoDBObjectMapper.save(casted_user_sub_item, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
+                                        dynamoDBObjectMapper.save(self.casted_user_sub_item!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
                                             if let error = task.error as NSError? {
                                                 print("The request failed. Error: \(error)")
                                                 self.adding_user_semaphore.signal()
                                             } else {
                                                 print("Saved new user sub to dynamo")
+                                                print(task.result)
+                                                //print(task.result?.item)
+                                                // print(task.result?.items)
                                                 self.adding_user_semaphore.signal()
                                                 // Do something with task.result or perform other operations.
                                             }
                                             return 0
                                         })
+                                    }
+                                    else{
+                                       self.adding_user_semaphore.signal()
                                     }
                                 }
                             }
@@ -120,6 +134,8 @@ class GroupViewController: UITableViewController {
                     }) as! AWSTask<AWSDynamoDBPaginatedOutput>
                     self.adding_user_semaphore.wait()
                 }
+                //dynamoDBObjectMapper.
+                //dynamoDBObjectMapper = nil
                 
                 // ONE OF THE USERS ADDED HERE WAS INVALID
                 // SHOW AN ALERT SO THEY KNOW
@@ -131,10 +147,11 @@ class GroupViewController: UITableViewController {
                         self.present(invalid_user_alert,animated: true,completion: nil)
                     }
                 }
+                
+                
             }
             // THE GROUPS TABLE STILL HOLDS THE INVALID USERS
             // MIGHT WANT TO EVENTUALLY CHANGE THAT
-            updateMapperConfig.saveBehavior = .updateSkipNullAttributes
             dynamoDBObjectMapper.save(group!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
                 if let error = task.error as NSError? {
                     print("The request failed. Error: \(error)")
@@ -161,11 +178,20 @@ class GroupViewController: UITableViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         print("In viewDidLoad GroupViewController")
+        self.activityIndicator = UIActivityIndicatorView()
+        self.activityIndicator.color = UIColor.white
+        self.activityIndicator.style = UIActivityIndicatorView.Style.large
+        self.activityIndicator.frame = CGRect(x: self.view.bounds.midX - 50, y: self.view.bounds.midY - 100, width: 100, height: 100)
+        self.activityIndicator.hidesWhenStopped = true
+        self.activityIndicator.layer.zPosition = 1
+        self.tableView.addSubview(self.activityIndicator)
+        self.activityIndicator.startAnimating()
         self.waitOurGroups.enter()
         self.waitOurGroupsMemberCount.enter()
         self.loadOurGroupNames()
         self.waitOurGroupsMemberCount.notify(queue: .main){
             self.tableView.reloadData()
+            self.activityIndicator.stopAnimating()
         }
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -232,6 +258,7 @@ class GroupViewController: UITableViewController {
                     return task.result
                 }
             }
+            print("leaving waitOurGroups")
             self.waitOurGroups.leave()
             return task.result
         }) as! AWSTask<AWSDynamoDBPaginatedOutput>
@@ -247,8 +274,13 @@ class GroupViewController: UITableViewController {
                 return
             }
             let casted_user_sub = user_sub_response.result?.items[0] as! UserSub
+            if(casted_user_sub.groups == nil || casted_user_sub.groups.count == 0){
+                print("No groups for this user")
+                self.waitOurGroupsMemberCount.leave()
+                return
+            }
             self.dispatchQueue.async {
-                for group in casted_user_sub.groups!{
+                for group in casted_user_sub.groups{
                     print("iterating over " + (group as String))
                     self.group_names.append(group as String)
                     queryExpression2.keyConditionExpression = "group_name = :group_name"
@@ -338,5 +370,17 @@ class GroupViewController: UITableViewController {
             // Pass the selected object to the new view controller.
         }
     }
-
+    
+    
+    @IBAction func backToView(_ sender: Any) {
+        print("PRINTING CASTED USER SUB ITEM")
+        print(self.casted_user_sub_item)
+        DispatchQueue.main.async{
+            let hacky_scene_access = UIApplication.shared.connectedScenes.first
+            let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
+            scene_delegate.navigationController?.setViewControllers([scene_delegate.viewController!], animated: true)
+            //self.removeFromParent()
+        }
+    }
+    
 }

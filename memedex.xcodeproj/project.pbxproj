@@ -77,6 +77,7 @@
 		BD4888DF24C8AE54001DEA7C /* Group.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4888DE24C8AE54001DEA7C /* Group.swift */; };
 		BD4888E124CA41D7001DEA7C /* Email.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4888E024CA41D7001DEA7C /* Email.swift */; };
 		BD4888E324CF9928001DEA7C /* UserSub.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4888E224CF9928001DEA7C /* UserSub.swift */; };
+		BD4888E524D37A90001DEA7C /* Caption.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4888E424D37A90001DEA7C /* Caption.swift */; };
 		BD4921FC2468C541004F8408 /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BD4921FB2468C541004F8408 /* Launch Screen.storyboard */; };
 		BD4B85412442410D00C67E09 /* TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4B85402442410D00C67E09 /* TextField.swift */; };
 		BD57D62624955289005C73E3 /* FacebookCore in Frameworks */ = {isa = PBXBuildFile; productRef = BD57D62524955289005C73E3 /* FacebookCore */; };
@@ -178,6 +179,7 @@
 		BD4888DE24C8AE54001DEA7C /* Group.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Group.swift; sourceTree = "<group>"; };
 		BD4888E024CA41D7001DEA7C /* Email.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Email.swift; sourceTree = "<group>"; };
 		BD4888E224CF9928001DEA7C /* UserSub.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserSub.swift; sourceTree = "<group>"; };
+		BD4888E424D37A90001DEA7C /* Caption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Caption.swift; sourceTree = "<group>"; };
 		BD4921FB2468C541004F8408 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		BD4B85402442410D00C67E09 /* TextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextField.swift; sourceTree = "<group>"; };
 		BD767C4324328CE200A813C7 /* CognitoConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = CognitoConfig.plist; sourceTree = "<group>"; };
@@ -292,6 +294,7 @@
 				BD2974792452005300DBBF9E /* GoldenMeme.swift */,
 				BD29747B24534BF000DBBF9E /* ActiveUser.swift */,
 				BD4888DE24C8AE54001DEA7C /* Group.swift */,
+				BD4888E424D37A90001DEA7C /* Caption.swift */,
 				BD4888E224CF9928001DEA7C /* UserSub.swift */,
 				BD4888E024CA41D7001DEA7C /* Email.swift */,
 				BD29747D245505E000DBBF9E /* PartnerMatches.swift */,
@@ -569,6 +572,7 @@
 			files = (
 				BD4888DD24C650F1001DEA7C /* CollectionViewController.swift in Sources */,
 				BD29747E245505E000DBBF9E /* PartnerMatches.swift in Sources */,
+				BD4888E524D37A90001DEA7C /* Caption.swift in Sources */,
 				BDA6FD502433CEFC00D5BDD5 /* LoginViewController.swift in Sources */,
 				BD4888DF24C8AE54001DEA7C /* Group.swift in Sources */,
 				BDA6FD522433F35500D5BDD5 /* CognitoConfig.swift in Sources */,
