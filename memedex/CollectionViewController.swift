@@ -121,26 +121,89 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             for subview in cell.contentView.subviews{
                 subview.removeFromSuperview()
             }
+            print("printing cell frame")
+            //cell.frame = CGRect(x: 0.0, y: 0.0, width: self.view.frame.width, height: self.view.frame.width*1.42)
+            //cell.contentView.frame = CGRect(x: 0.0, y: 0.0, width: self.view.frame.width, height: self.view.frame.width*1.42)
+            print(cell.frame)
+            print(cell.contentView.frame)
             let image_for_cell = UIImage(data: self.meme_container[indexPath.row])
-            var imageview_for_cell = UIImageView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: (self.view.frame.width*1.42)))
+            var container_for_imageview = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.width*1.1))
+            print("printing container for image view frame")
+            print(container_for_imageview.frame)
+            print("printing imageview frame")
+            var imageview_for_cell = UIImageView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: (self.view.frame.width*1.1)))
+            print(imageview_for_cell.frame)
             imageview_for_cell.image = image_for_cell
-            let textfield_for_cell = UITextField(frame: CGRect(x: 10, y: imageview_for_cell.frame.maxY - 60, width: self.view.frame.width, height: (self.view.frame.width/5)))
-            textfield_for_cell.text = self.captions[indexPath.row]
-            textfield_for_cell.font = UIFont.systemFont(ofSize: 20)
+            print("printing content clipping rect")
+            print(imageview_for_cell.contentClippingRect)
             
-//            if(Float((image_for_cell?.size.width)!) > Float((image_for_cell?.size.height)!)){
-//                imageview_for_cell.contentMode = .scaleAspectFit
-//            }
-//            else{
-//                imageview_for_cell.contentMode = .scaleAspectFill
-//            }
-            
+            // within it's container
+            // So we have room underneath for the label superview
             imageview_for_cell.contentMode = .scaleAspectFit
-            cell.contentView.addSubview(imageview_for_cell)
-            cell.contentView.addSubview(textfield_for_cell)
-            //textfield_for_cell.topAnchor = imageview_for_cell
-            //cell.imageV
-            //cell.co
+            
+            //imageview_for_cell.translatesAutoresizingMaskIntoConstraints = false
+            //let label_superview_for_padding = UIView(frame: CGRect(x: 20, y: cell.contentView.frame.maxY - 100, width: self.view.frame.width - 40, height: (100)))
+            //let label_for_cell = UILabel(frame: CGRect(x: 30, y: cell.contentView.frame.maxY - 100, width: self.view.frame.width - 60, height: (100)))
+            let label_superview_for_padding = UIView(frame: CGRect(x: 20, y: imageview_for_cell.contentClippingRect.minY + imageview_for_cell.contentClippingRect.height + 20, width: self.view.frame.width - 40, height: (100)))
+            let label_for_cell = UILabel(frame: CGRect(x: 30, y: imageview_for_cell.contentClippingRect.minY + imageview_for_cell.contentClippingRect.height + 20, width: self.view.frame.width - 60, height: (100)))
+
+            print("printing image size")
+            print(image_for_cell!.size)
+            print("printing imageview size")
+            print(imageview_for_cell.frame)
+            
+            label_superview_for_padding.layer.backgroundColor = UIColor.white.cgColor
+            label_superview_for_padding.layer.cornerRadius = 10.0
+            label_superview_for_padding.layer.masksToBounds = true
+            label_superview_for_padding.layer.borderWidth = 1
+            label_superview_for_padding.layer.borderColor = UIColor.lightGray.cgColor
+            
+            label_for_cell.lineBreakMode = .byWordWrapping
+            label_for_cell.numberOfLines = 0
+            label_for_cell.adjustsFontSizeToFitWidth = true
+            label_for_cell.minimumScaleFactor = 0.1
+            label_for_cell.text = self.captions[indexPath.row]
+            label_for_cell.font = UIFont.systemFont(ofSize: 20)
+            label_for_cell.textColor = UIColor.black
+            label_for_cell.isHidden = false
+            
+            
+            print("printing content clipping rect22222")
+            print(imageview_for_cell.contentClippingRect)
+            
+            container_for_imageview.addSubview(imageview_for_cell)
+            label_superview_for_padding.addSubview(label_for_cell)
+            label_for_cell.layoutIfNeeded()
+            label_superview_for_padding.layoutIfNeeded()
+            cell.contentView.addSubview(container_for_imageview)
+            cell.contentView.addSubview(label_superview_for_padding)
+            cell.contentView.addSubview(label_for_cell)
+            //cell.contentView.bringSubviewToFront(label_superview_for_padding)
+            label_superview_for_padding.bringSubviewToFront(label_for_cell)
+            cell.contentView.layoutIfNeeded()
+            
+            
+            label_superview_for_padding.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor, constant:0).isActive = true
+            label_for_cell.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor, constant:0).isActive = true
+            //label_for_cell.translatesAutoresizingMaskIntoConstraints = true
+            
+            print("PRINTING LABEL SUPERVIEW FRAME")
+            print(label_superview_for_padding.frame)
+            print("PRINTING LABEL FRAME")
+            print(label_for_cell.frame)
+            print(label_for_cell.text)
+            print(label_for_cell.layer.zPosition)
+            print(label_superview_for_padding.layer.zPosition)
+            print("ATTEMPTING TO PRINT BOUNDS")
+            print(label_for_cell.bounds)
+            print(label_superview_for_padding.bounds)
+            print("printing image size2222")
+            print(image_for_cell!.size)
+            print("printing imageview size2222")
+            print(imageview_for_cell.frame)
+            //label_for_cell.leftAnchor.constraint(equalTo: label_superview_for_padding.leftAnchor, constant: 10).isActive = true
+            //label_for_cell.rightAnchor.constraint(equalTo: label_superview_for_padding.rightAnchor, constant: -10).isActive = true
+            //label_superview_for_padding.bringSubviewToFront(label_for_cell)
         }
         else{
             for subview in cell.subviews{
@@ -175,6 +238,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
     // Uncomment this method to specify if the specified item should be selected
     override func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
         print("in selected")
+        print(indexPath)
         return true
     }
     
@@ -301,6 +365,27 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
     }
     */
 
+}
+
+extension UIImageView {
+    var contentClippingRect: CGRect {
+        guard let image = image else { return bounds }
+        guard contentMode == .scaleAspectFit else { return bounds }
+        guard image.size.width > 0 && image.size.height > 0 else { return bounds }
+
+        let scale: CGFloat
+        if image.size.width > image.size.height {
+            scale = bounds.width / image.size.width
+        } else {
+            scale = bounds.height / image.size.height
+        }
+
+        let size = CGSize(width: image.size.width * scale, height: image.size.height * scale)
+        let x = (bounds.width - size.width) / 2.0
+        let y = (bounds.height - size.height) / 2.0
+
+        return CGRect(x: x, y: y, width: size.width, height: size.height)
+    }
 }
 
 
