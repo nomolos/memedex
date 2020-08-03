@@ -12,7 +12,7 @@ class CustomSlider: UISlider {
     
     // Change this to make slider circle larger
     // Should eventually increase box size without larger icon
-    @IBInspectable var thumbRadius: CGFloat = 50
+    @IBInspectable var thumbRadius: CGFloat = 30
     
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -26,7 +26,7 @@ class CustomSlider: UISlider {
     
     override func trackRect(forBounds bounds: CGRect) -> CGRect {
        var newBounds = super.trackRect(forBounds: bounds)
-       newBounds.size.height = 15
+       newBounds.size.height = 9
        return newBounds
     }
     
@@ -46,5 +46,15 @@ class CustomSlider: UISlider {
         thumb.layer.borderColor = UIColor.darkGray.cgColor
         return thumb
     }()
+    
+    override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        let newArea = CGRect(
+            x: self.bounds.origin.x - 5.0,
+            y: self.bounds.origin.y - 5.0,
+            width: self.bounds.size.width + 10.0,
+            height: self.bounds.size.height + 20.0
+        )
+        return newArea.contains(point)
+    }
 
 }

@@ -177,6 +177,20 @@ class GroupViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        //SET UP THE RIGHT BAR BUTTON
+        let rightButton = UIButton(type: .custom)
+        rightButton.frame = CGRect(x: 0.0, y: 0.0, width: 27.0, height: 27.0)
+        rightButton.setImage(UIImage(named:"addToGroup"), for: .normal)
+        rightButton.addTarget(self, action: #selector(add_group(_:)), for: UIControl.Event.touchUpInside)
+        let rightBarItem = UIBarButtonItem(customView: rightButton)
+        let currWidth = rightBarItem.customView?.widthAnchor.constraint(equalToConstant: 27)
+        currWidth?.isActive = true
+        let currHeight = rightBarItem.customView?.heightAnchor.constraint(equalToConstant: 27)
+        currHeight?.isActive = true
+        self.navigationItem.rightBarButtonItem = rightBarItem
+        //SET UP THE RIGHT BAR BUTTON
+        
+        
         print("In viewDidLoad GroupViewController")
         self.activityIndicator = UIActivityIndicatorView()
         self.activityIndicator.color = UIColor.white
@@ -373,12 +387,17 @@ class GroupViewController: UITableViewController {
     
     
     @IBAction func backToView(_ sender: Any) {
-        print("PRINTING CASTED USER SUB ITEM")
+        print("IN BACKTOVIEW")
         print(self.casted_user_sub_item)
         DispatchQueue.main.async{
+            //self.dismiss(animated: true, completion: nil)
             let hacky_scene_access = UIApplication.shared.connectedScenes.first
             let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
-            scene_delegate.navigationController?.setViewControllers([scene_delegate.viewController!], animated: true)
+            scene_delegate.viewController?.fromGroups = true
+            //scene_delegate.navigationController?.dis
+            //self.dismiss(animated: true, completion: nil)
+            scene_delegate.navigationController?.popViewController(animated: true)
+            //setViewControllers([scene_delegate.viewController!], animated: true)
             //self.removeFromParent()
         }
     }

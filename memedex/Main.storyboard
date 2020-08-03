@@ -28,10 +28,10 @@
                                 </connections>
                             </slider>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="U9x-wI-Qrz">
-                                <rect key="frame" x="26" y="751" width="37" height="34"/>
+                                <rect key="frame" x="26" y="761" width="26" height="24"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="37" id="TOe-DX-rZ7"/>
-                                    <constraint firstAttribute="height" constant="34" id="aaV-LE-q9Q"/>
+                                    <constraint firstAttribute="width" constant="26" id="TOe-DX-rZ7"/>
+                                    <constraint firstAttribute="height" constant="24" id="aaV-LE-q9Q"/>
                                 </constraints>
                                 <state key="normal" title="Button" image="back"/>
                                 <connections>
@@ -39,10 +39,10 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ktu-rx-elc">
-                                <rect key="frame" x="198.5" y="743" width="17" height="42"/>
+                                <rect key="frame" x="201" y="755" width="12" height="30"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="17" id="SST-JY-kkV"/>
-                                    <constraint firstAttribute="height" constant="42" id="nyY-5q-uSQ"/>
+                                    <constraint firstAttribute="width" constant="12" id="SST-JY-kkV"/>
+                                    <constraint firstAttribute="height" constant="30" id="nyY-5q-uSQ"/>
                                 </constraints>
                                 <state key="normal" image="share"/>
                                 <connections>
@@ -50,10 +50,10 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Qpl-nK-YsW">
-                                <rect key="frame" x="353" y="747" width="35" height="36"/>
+                                <rect key="frame" x="363" y="760" width="25" height="25"/>
                                 <constraints>
-                                    <constraint firstAttribute="width" constant="35" id="aBS-TC-puM"/>
-                                    <constraint firstAttribute="height" constant="36" id="saj-Oe-WYh"/>
+                                    <constraint firstAttribute="width" constant="25" id="aBS-TC-puM"/>
+                                    <constraint firstAttribute="height" constant="25" id="saj-Oe-WYh"/>
                                 </constraints>
                                 <state key="normal" title="Button" image="set"/>
                                 <connections>
@@ -64,18 +64,19 @@
                                 <rect key="frame" x="0.0" y="105" width="417" height="610"/>
                             </scrollView>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="XV1-9E-4xs">
-                                <rect key="frame" x="0.0" y="111.5" width="414" height="597"/>
+                                <rect key="frame" x="0.0" y="111.5" width="414" height="607"/>
                             </imageView>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemBackgroundColor" cocoaTouchSystemColor="whiteColor"/>
                         <constraints>
                             <constraint firstItem="XV1-9E-4xs" firstAttribute="width" secondItem="7wf-kl-Uue" secondAttribute="width" multiplier="0.992806" id="3Ap-Jy-BHS"/>
+                            <constraint firstItem="cJ0-0F-YPD" firstAttribute="top" secondItem="U9x-wI-Qrz" secondAttribute="bottom" constant="25" id="986-8s-buT"/>
                             <constraint firstItem="Ktu-rx-elc" firstAttribute="centerX" secondItem="cMa-ep-yj5" secondAttribute="centerX" id="Axb-4c-d9R"/>
-                            <constraint firstItem="cJ0-0F-YPD" firstAttribute="top" secondItem="Qpl-nK-YsW" secondAttribute="bottom" constant="27" id="Jwq-5o-v1v"/>
+                            <constraint firstItem="cJ0-0F-YPD" firstAttribute="top" secondItem="Qpl-nK-YsW" secondAttribute="bottom" constant="25" id="Jwq-5o-v1v"/>
                             <constraint firstItem="7wf-kl-Uue" firstAttribute="centerX" secondItem="cMa-ep-yj5" secondAttribute="centerX" id="Lui-yd-gyT"/>
                             <constraint firstItem="XV1-9E-4xs" firstAttribute="height" secondItem="7wf-kl-Uue" secondAttribute="height" multiplier="0.978689" id="Nfk-zO-Diw"/>
                             <constraint firstItem="U9x-wI-Qrz" firstAttribute="leading" secondItem="cMa-ep-yj5" secondAttribute="leading" constant="26" id="NkX-dT-htu"/>
-                            <constraint firstItem="cMa-ep-yj5" firstAttribute="bottom" secondItem="7wf-kl-Uue" secondAttribute="bottom" constant="147" id="PL3-dN-4Jq"/>
+                            <constraint firstItem="cMa-ep-yj5" firstAttribute="bottom" secondItem="7wf-kl-Uue" secondAttribute="bottom" constant="137" id="PL3-dN-4Jq"/>
                             <constraint firstItem="cMa-ep-yj5" firstAttribute="trailing" secondItem="cJ0-0F-YPD" secondAttribute="trailing" constant="20" id="YkE-aH-6Xf"/>
                             <constraint firstItem="7wf-kl-Uue" firstAttribute="width" secondItem="KZY-56-BW2" secondAttribute="width" multiplier="1.00725" id="epL-nF-dj7"/>
                             <constraint firstItem="cMa-ep-yj5" firstAttribute="bottom" secondItem="cJ0-0F-YPD" secondAttribute="bottom" constant="22" id="j75-F5-OIh"/>
@@ -85,7 +86,6 @@
                             <constraint firstItem="XV1-9E-4xs" firstAttribute="centerX" secondItem="7wf-kl-Uue" secondAttribute="centerX" id="lI8-rg-kH2"/>
                             <constraint firstItem="cJ0-0F-YPD" firstAttribute="leading" secondItem="cMa-ep-yj5" secondAttribute="leading" constant="20" id="puT-KT-R7K"/>
                             <constraint firstItem="cMa-ep-yj5" firstAttribute="trailing" secondItem="Qpl-nK-YsW" secondAttribute="trailing" constant="26" id="uJt-2B-n6Z"/>
-                            <constraint firstItem="cJ0-0F-YPD" firstAttribute="top" secondItem="U9x-wI-Qrz" secondAttribute="bottom" constant="25" id="zRH-d1-ZeI"/>
                             <constraint firstItem="cJ0-0F-YPD" firstAttribute="top" secondItem="Ktu-rx-elc" secondAttribute="bottom" constant="25" id="zvF-s4-2ac"/>
                         </constraints>
                         <viewLayoutGuide key="safeArea" id="cMa-ep-yj5"/>
@@ -96,7 +96,7 @@
                                 <action selector="logout:" destination="S7V-t3-R7L" id="qZd-eV-VJe"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" image="person.circle.fill" catalog="system" id="GVl-SO-BZF">
+                        <barButtonItem key="rightBarButtonItem" title="Item" image="profile" id="GVl-SO-BZF">
                             <connections>
                                 <segue destination="FmH-ln-IXJ" kind="show" id="2E2-Lv-CfU"/>
                             </connections>
@@ -176,21 +176,16 @@
                         </connections>
                     </tableView>
                     <navigationItem key="navigationItem" id="dsl-WH-KRU">
-                        <barButtonItem key="leftBarButtonItem" image="arrow.left.circle" catalog="system" id="vcA-bP-eoo" userLabel="back">
+                        <barButtonItem key="leftBarButtonItem" image="logout" id="vcA-bP-eoo" userLabel="back">
                             <connections>
                                 <action selector="backToView:" destination="FmH-ln-IXJ" id="RkF-W1-8us"/>
-                            </connections>
-                        </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" image="plus.circle" catalog="system" id="7Tw-CS-ZY7" userLabel="add_group">
-                            <connections>
-                                <action selector="add_group:" destination="FmH-ln-IXJ" id="Hff-8a-vb3"/>
                             </connections>
                         </barButtonItem>
                     </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="84P-Nv-euL" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1936" y="-415"/>
+            <point key="canvasLocation" x="1848" y="-415"/>
         </scene>
         <!--Collection View Controller-->
         <scene sceneID="HK5-7X-kn6">
@@ -222,12 +217,12 @@
                         </connections>
                     </collectionView>
                     <navigationItem key="navigationItem" id="piF-8w-jyR">
-                        <barButtonItem key="leftBarButtonItem" image="arrow.left.circle.fill" catalog="system" id="IK7-k0-m3a">
+                        <barButtonItem key="leftBarButtonItem" image="logout" id="IK7-k0-m3a">
                             <connections>
-                                <segue destination="FmH-ln-IXJ" kind="show" id="F9e-rn-QRY"/>
+                                <segue destination="FmH-ln-IXJ" kind="show" identifier="toGroupView" id="F9e-rn-QRY"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" title="Item" image="moon.stars.fill" catalog="system" id="gyA-ZD-3ud">
+                        <barButtonItem key="rightBarButtonItem" title="Item" image="groupSettings" id="gyA-ZD-3ud">
                             <connections>
                                 <action selector="open_settings:" destination="3wn-le-9t6" id="4Hx-hq-esa"/>
                             </connections>
@@ -491,17 +486,14 @@
     </scenes>
     <inferredMetricsTieBreakers>
         <segue reference="gyI-wS-v5B"/>
-        <segue reference="F9e-rn-QRY"/>
+        <segue reference="2E2-Lv-CfU"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="LoginSignup" width="343" height="48"/>
-        <image name="arrow.left.circle" catalog="system" width="128" height="121"/>
-        <image name="arrow.left.circle.fill" catalog="system" width="128" height="121"/>
         <image name="back" width="39" height="34"/>
-        <image name="logout" width="37" height="36"/>
-        <image name="moon.stars.fill" catalog="system" width="128" height="124"/>
-        <image name="person.circle.fill" catalog="system" width="128" height="121"/>
-        <image name="plus.circle" catalog="system" width="128" height="121"/>
+        <image name="groupSettings" width="25" height="25"/>
+        <image name="logout" width="27" height="27"/>
+        <image name="profile" width="27" height="27"/>
         <image name="set" width="37" height="37"/>
         <image name="share" width="17" height="43"/>
         <image name="textfield" width="343" height="48"/>

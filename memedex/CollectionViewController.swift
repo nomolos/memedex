@@ -29,6 +29,10 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
     var activityIndicator = UIActivityIndicatorView()
     var modification_times = [Date]()
     var date_to_key = [Date:String]()
+    var new_members_textfield = UITextField()
+    let adding_user_semaphore = DispatchSemaphore(value: 0)
+    let waitUserSub = DispatchGroup()
+    var casted_user_sub_item:UserSub?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -54,12 +58,6 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                             print(error)
                             return
                         }
-                        print("printing data collection view")
-                        print(data)
-                        //print(task)
-                        //print(url)
-                        //print(task.result)
-                        //print(data)
                         self.meme_collection_semaphore.signal()
                         self.meme_container.append(data!)
                         return
@@ -72,7 +70,6 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                     self.activityIndicator.stopAnimating()
                 }
             }
-            //self.collectionView.reloadData()
         }
         DispatchQueue.main.async {
             self.collectionView.reloadData()
@@ -115,42 +112,19 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
 //        for subview in cell.subviews{
 //            subview.removeFromSuperview()
 //        }
-        print("printing index path row")
-        print(indexPath.row)
         if(indexPath.row < self.meme_container.count){
             for subview in cell.contentView.subviews{
                 subview.removeFromSuperview()
             }
-            print("printing cell frame")
-            //cell.frame = CGRect(x: 0.0, y: 0.0, width: self.view.frame.width, height: self.view.frame.width*1.42)
-            //cell.contentView.frame = CGRect(x: 0.0, y: 0.0, width: self.view.frame.width, height: self.view.frame.width*1.42)
-            print(cell.frame)
-            print(cell.contentView.frame)
             let image_for_cell = UIImage(data: self.meme_container[indexPath.row])
             var container_for_imageview = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.width*1.1))
-            print("printing container for image view frame")
-            print(container_for_imageview.frame)
-            print("printing imageview frame")
             var imageview_for_cell = UIImageView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: (self.view.frame.width*1.1)))
-            print(imageview_for_cell.frame)
             imageview_for_cell.image = image_for_cell
-            print("printing content clipping rect")
-            print(imageview_for_cell.contentClippingRect)
-            
             // within it's container
             // So we have room underneath for the label superview
             imageview_for_cell.contentMode = .scaleAspectFit
-            
-            //imageview_for_cell.translatesAutoresizingMaskIntoConstraints = false
-            //let label_superview_for_padding = UIView(frame: CGRect(x: 20, y: cell.contentView.frame.maxY - 100, width: self.view.frame.width - 40, height: (100)))
-            //let label_for_cell = UILabel(frame: CGRect(x: 30, y: cell.contentView.frame.maxY - 100, width: self.view.frame.width - 60, height: (100)))
             let label_superview_for_padding = UIView(frame: CGRect(x: 20, y: imageview_for_cell.contentClippingRect.minY + imageview_for_cell.contentClippingRect.height + 20, width: self.view.frame.width - 40, height: (100)))
             let label_for_cell = UILabel(frame: CGRect(x: 30, y: imageview_for_cell.contentClippingRect.minY + imageview_for_cell.contentClippingRect.height + 20, width: self.view.frame.width - 60, height: (100)))
-
-            print("printing image size")
-            print(image_for_cell!.size)
-            print("printing imageview size")
-            print(imageview_for_cell.frame)
             
             label_superview_for_padding.layer.backgroundColor = UIColor.white.cgColor
             label_superview_for_padding.layer.cornerRadius = 10.0
@@ -167,10 +141,6 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             label_for_cell.textColor = UIColor.black
             label_for_cell.isHidden = false
             
-            
-            print("printing content clipping rect22222")
-            print(imageview_for_cell.contentClippingRect)
-            
             container_for_imageview.addSubview(imageview_for_cell)
             label_superview_for_padding.addSubview(label_for_cell)
             label_for_cell.layoutIfNeeded()
@@ -178,32 +148,12 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             cell.contentView.addSubview(container_for_imageview)
             cell.contentView.addSubview(label_superview_for_padding)
             cell.contentView.addSubview(label_for_cell)
-            //cell.contentView.bringSubviewToFront(label_superview_for_padding)
             label_superview_for_padding.bringSubviewToFront(label_for_cell)
             cell.contentView.layoutIfNeeded()
             
             
             label_superview_for_padding.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor, constant:0).isActive = true
             label_for_cell.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor, constant:0).isActive = true
-            //label_for_cell.translatesAutoresizingMaskIntoConstraints = true
-            
-            print("PRINTING LABEL SUPERVIEW FRAME")
-            print(label_superview_for_padding.frame)
-            print("PRINTING LABEL FRAME")
-            print(label_for_cell.frame)
-            print(label_for_cell.text)
-            print(label_for_cell.layer.zPosition)
-            print(label_superview_for_padding.layer.zPosition)
-            print("ATTEMPTING TO PRINT BOUNDS")
-            print(label_for_cell.bounds)
-            print(label_superview_for_padding.bounds)
-            print("printing image size2222")
-            print(image_for_cell!.size)
-            print("printing imageview size2222")
-            print(imageview_for_cell.frame)
-            //label_for_cell.leftAnchor.constraint(equalTo: label_superview_for_padding.leftAnchor, constant: 10).isActive = true
-            //label_for_cell.rightAnchor.constraint(equalTo: label_superview_for_padding.rightAnchor, constant: -10).isActive = true
-            //label_superview_for_padding.bringSubviewToFront(label_for_cell)
         }
         else{
             for subview in cell.subviews{
@@ -212,16 +162,12 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                 casted.removeFromSuperview()
             }
         }
-        //cell.cont
-        //cell.clipsToBounds = true
-        //cell.contentMode = .scaleAspectFit
         cell.clipsToBounds = true
         // Configure the cell
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        print("in this size function")
         self.collectionView.reloadData()
         return CGSize(width: self.view.frame.width, height: (self.view.frame.width*1.42))
     }
@@ -231,14 +177,11 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
 
     // Uncomment this method to specify if the specified item should be highlighted during tracking
     override func collectionView(_ collectionView: UICollectionView, shouldHighlightItemAt indexPath: IndexPath) -> Bool {
-        print("in highlighted")
         return true
     }
 
     // Uncomment this method to specify if the specified item should be selected
     override func collectionView(_ collectionView: UICollectionView, shouldSelectItemAt indexPath: IndexPath) -> Bool {
-        print("in selected")
-        print(indexPath)
         return true
     }
     
@@ -246,9 +189,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
         let s3 = AWSS3.s3(forKey: "defaultKey")
         let listRequest: AWSS3ListObjectsRequest = AWSS3ListObjectsRequest()
         listRequest.bucket = s3bucket
-        print("printing prefix")
         listRequest.prefix = self.group! + "/actualmemes/"
-        print(listRequest.prefix)
         s3.listObjects(listRequest).continueWith { (task) -> AnyObject? in
             let listObjectsOutput = task.result;
             if(task.error != nil || listObjectsOutput == nil || listObjectsOutput?.contents == nil){
@@ -262,35 +203,20 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             }
             var x = 0
             for object in (listObjectsOutput?.contents)! {
-                print("printing key")
-                print(object.key)
-                print("printing modification time")
-                print(object.lastModified)
                 self.modification_times.append(object.lastModified!)
                 self.date_to_key[object.lastModified!] = object.key!
-                //self.keys.append(String(object.key!))
-                print("sizes should be equal")
-                print(self.modification_times.count)
-                print(self.keys.count)
                 x = x + 1
                 if(x == 100){
                     break
                 }
                 //print(String(object.key!))
             }
-            print("pre-sort")
-            print("pre-sort")
-            print(self.modification_times)
-            print("attempting to sort dates")
-            print("attempting to sort dates")
             self.modification_times = self.modification_times.sorted(by: self.sortByDate(time1:time2:))
-            print(self.modification_times)
             for date in self.modification_times{
                 self.keys.append(self.date_to_key[date]!)
             }
             
             for key in self.keys{
-                print("END OF LOAD ALL MEMES, CHECKING DYNAMO")
                 let queryExpression = AWSDynamoDBQueryExpression()
                 queryExpression.keyConditionExpression = "imagepath = :imagepath"
                 queryExpression.expressionAttributeValues = [":imagepath": key]
@@ -317,8 +243,6 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                 }) as! AWSTask<AWSDynamoDBPaginatedOutput>
                 self.meme_caption_semaphore.wait()
             }
-            print("printing captions")
-            print(self.captions)
             self.waitMemeNamesS3.leave()
             return nil
         }
@@ -330,20 +254,197 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
     
     @IBAction func open_settings(_ sender: Any) {
         let popup = UIAlertController(title: "Settings", message: "", preferredStyle: .alert)
-        let leaveAction = UIAlertAction(title: "Leave Group" , style: .destructive)
+        let leaveAction = UIAlertAction(title: "Leave Group" , style: .default) { (action) -> Void in
+            self.presentMemberLeave()
+        }
         let addAction = UIAlertAction(title: "Add Members", style: .default) { (action) -> Void in
             print("add members")
-           //validation logic goes here
-        }
-        let changeAction = UIAlertAction(title: "Change Group Name", style: .default) { (action) -> Void in
-            print("change group name")
+            self.presentMemberAdd()
+            print("popup should have added textfield")
+            
            //validation logic goes here
         }
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
         popup.addAction(leaveAction)
         popup.addAction(addAction)
-        popup.addAction(changeAction)
         popup.addAction(cancelAction)
+        self.present(popup, animated: true, completion: nil)
+    }
+    
+    func presentMemberAdd() {
+        let popup = UIAlertController(title: "Add Members", message: "", preferredStyle: .alert)
+        popup.addTextField(configurationHandler: {(textfield: UITextField!) in
+            textfield.placeholder = "Member emails (comma separated)"
+            self.new_members_textfield = textfield
+        })
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        let saveAction = UIAlertAction(title: "Submit", style: .default) { (action) -> Void in
+            print("saved")
+            let listy = self.new_members_textfield.text!.components(separatedBy: ",")
+            print(listy)
+            let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+            let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+            updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+            var invalid_users = ""
+            self.dispatchQueue.async {
+                // FIRST ENSURE EACH EMAIL EXISTS
+                // GET THEIR CORRESPONDING SUB
+                for user in listy{
+                    let queryExpression = AWSDynamoDBQueryExpression()
+                    queryExpression.keyConditionExpression = "email = :email"
+                    queryExpression.expressionAttributeValues = [":email": String(user)]
+                    dynamoDBObjectMapper.query(Email.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+                        if (task.error != nil){
+                            print("error in querying for this email")
+                            print(task.error)
+                        }
+                        if (task.result != nil){
+                            print("printing result in email query (adding user to group)")
+                            print(task.result?.items)
+                            if(task.result?.items.count == 0){
+                                invalid_users.append(" " + String(user))
+                                print("We have no emails.. likely an incorrect write")
+                                print("Should have an alert here")
+                                self.adding_user_semaphore.signal()
+                            }
+                            else{
+                                // THIS IS A VALID EMAIL IN THE EMAILS TABLE
+                                // LETS FIND ITS CORRESPONDING SUB
+                                let casted = task.result?.items[0] as! Email
+                                let queryExpression = AWSDynamoDBQueryExpression()
+                                queryExpression.keyConditionExpression = "#sub2 = :sub"
+                                queryExpression.expressionAttributeValues = [":sub": String(casted.id!)]
+                                queryExpression.expressionAttributeNames = ["#sub2": "sub"]
+                                self.waitUserSub.enter()
+                                let user_sub_match = dynamoDBObjectMapper.query(UserSub.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+                                    if (task.error != nil){
+                                        print("error in querying for this sub")
+                                        print(task.error)
+                                        self.waitUserSub.leave()
+                                        //self.adding_user_semaphore.signal()
+                                    }
+                                    else if (task.result != nil){
+                                        print("successfully queried for this sub")
+                                        print(task.result?.items)
+                                        self.waitUserSub.leave()
+                                    }
+                                    return task.result
+                                    }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+
+                                self.waitUserSub.notify(queue: .main){
+                                    // WE FOUND THE USER WITH THE NOTED SUB
+                                    // APPEND THIS NEW GROUP NAME TO THAT USER
+                                    // SO THEY CAN ACCESS THE GROUP ON THEIR DEVICE
+                                    if(user_sub_match.result?.items.count != 0){
+                                        self.casted_user_sub_item = user_sub_match.result?.items[0] as! UserSub
+                                        let string_literal = self.group
+                                        self.casted_user_sub_item!.updateGroup(group: string_literal!)
+                                        print("Attempting to re-write to dynamo user_sub table for " + String(casted.id!))
+                                        dynamoDBObjectMapper.save(self.casted_user_sub_item!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
+                                            if let error = task.error as NSError? {
+                                                print("The request failed. Error: \(error)")
+                                                self.adding_user_semaphore.signal()
+                                            } else {
+                                                print("Saved new user sub to dynamo")
+                                                print(task.result)
+                                                //print(task.result?.item)
+                                                // print(task.result?.items)
+                                                self.adding_user_semaphore.signal()
+                                                // Do something with task.result or perform other operations.
+                                            }
+                                            return 0
+                                        })
+                                    }
+                                    else{
+                                       self.adding_user_semaphore.signal()
+                                    }
+                                }
+                            }
+                        }
+                        return task.result
+                    }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+                    self.adding_user_semaphore.wait()
+                }
+                
+                // ONE OF THE USERS ADDED HERE WAS INVALID
+                // SHOW AN ALERT SO THEY KNOW
+                if(invalid_users.count > 0){
+                    DispatchQueue.main.async {
+                        let invalid_user_alert = UIAlertController(title: "Invalid User(s)", message: "The following usernames are not in the memedex database and were not added to the new group : " + invalid_users, preferredStyle: .alert)
+                        let cancelAction = UIAlertAction(title: "Ok" , style: .cancel)
+                        invalid_user_alert.addAction(cancelAction)
+                        self.present(invalid_user_alert,animated: true,completion: nil)
+                    }
+                }
+            }
+        }
+        popup.addAction(cancelAction)
+        popup.addAction(saveAction)
+        self.present(popup, animated: true, completion: nil)
+    }
+    
+    func presentMemberLeave(){
+        let popup = UIAlertController(title: "Leave Group", message: "Are you sure you want to leave this group?", preferredStyle: .alert)
+        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+        let leaveAction = UIAlertAction(title: "Leave", style: .default) { (UIAlertAction) in
+            print("implement leave code here")
+            self.activityIndicator.startAnimating()
+            let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+            let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+            updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+            let queryExpression = AWSDynamoDBQueryExpression()
+            queryExpression.keyConditionExpression = "#sub2 = :sub"
+            var current_user = ""
+            if(AppDelegate.socialLoggedIn!){
+                current_user = AppDelegate.social_username!
+            }
+            else{
+                current_user = AppDelegate.defaultUserPool().currentUser()?.username as! String
+            }
+            queryExpression.expressionAttributeValues = [":sub": current_user]
+            queryExpression.expressionAttributeNames = ["#sub2": "sub"]
+            let temp_dispatch_group = DispatchGroup()
+            temp_dispatch_group.enter()
+            let user_sub_match = dynamoDBObjectMapper.query(UserSub.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+                if (task.error != nil){
+                    print("error in querying for this sub")
+                    print(task.error)
+                    temp_dispatch_group.leave()
+                    //self.adding_user_semaphore.signal()
+                }
+                else if (task.result != nil){
+                    print("successfully queried for this sub")
+                    print(task.result?.items)
+                    temp_dispatch_group.leave()
+                }
+                return task.result
+                }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+            temp_dispatch_group.notify(queue: .main){
+                self.casted_user_sub_item = user_sub_match.result?.items[0] as! UserSub
+                let string_literal = self.group
+                self.casted_user_sub_item!.removeGroup(group: string_literal!)
+                dynamoDBObjectMapper.save(self.casted_user_sub_item!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
+                    if let error = task.error as NSError? {
+                        print("The request failed. Error: \(error)")
+                        self.adding_user_semaphore.signal()
+                    } else {
+                        print("Saved new user sub to dynamo")
+                        print(task.result)
+                        //print(task.result?.item)
+                        // print(task.result?.items)
+                        self.adding_user_semaphore.signal()
+                        // Do something with task.result or perform other operations.
+                    }
+                    DispatchQueue.main.async{
+                        self.activityIndicator.stopAnimating()
+                        self.performSegue(withIdentifier: "toGroupView", sender: self)
+                    }
+                    return 0
+                })
+            }
+        }
+        popup.addAction(cancelAction)
+        popup.addAction(leaveAction)
         self.present(popup, animated: true, completion: nil)
     }
     

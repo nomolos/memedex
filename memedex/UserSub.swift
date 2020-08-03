@@ -27,6 +27,16 @@ class UserSub: AWSDynamoDBObjectModel, AWSDynamoDBModeling {
         }
     }
     
+    func removeGroup(group:String){
+        var count = 0
+        for group2 in self.groups{
+            if(group == (group2 as String)){
+                self.groups.remove(at: count)
+            }
+            count = count + 1
+        }
+    }
+    
     class func hashKeyAttribute() -> String {
         return "sub"
     }

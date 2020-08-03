@@ -73,6 +73,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     var show_share_popup = 0
     var videoPanGesture:UIPanGestureRecognizer?
     var top_sources = [String]()
+    var fromGroups = false
     static let key_1 = "key_1"
     static let key_2 = "key_2"
     static let key_3 = "key_3"
@@ -118,6 +119,19 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
 
     @objc func addMemeToGroup(_ sender:UIButton) {
         print("inside addMemeToGroup")
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+        UIView.animate(withDuration: 2.0,
+                                   delay: 0,
+                                   usingSpringWithDamping: CGFloat(0.20),
+                                   initialSpringVelocity: CGFloat(6.0),
+                                   options: UIView.AnimationOptions.allowUserInteraction,
+                                   animations: {
+                                    sender.transform = CGAffineTransform.identity
+            },
+                                   completion: { Void in()  }
+        )
         self.waitGroupNamesFinal.enter()
         self.loadGroupNames()
         self.waitGroupNamesFinal.notify(queue: .main){
@@ -484,12 +498,16 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     @objc func update_slider() {
-        self.slider.value = ImageZoomView.slider_value!
+        self.slider.value = ImageZoomView.slider_value! - 0.5
         self.sliderValueDidChange(sender: self.slider)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         print("inside viewWillAppear ViewController")
+        if(self.fromGroups){
+            self.fromGroups = false
+            return
+        }
         super.viewWillAppear(animated)
         self.show_share_popup = 0
         let hacky_scene_access = UIApplication.shared.connectedScenes.first
@@ -504,17 +522,17 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             self.meme_link = UIButton()
             self.meme_group_add = UIButton()
             let temp_image = UIImage(named: "link") as UIImage?
-            var temp_image2 = UIImage(systemName: "plus.circle") as UIImage?
-            let new_width_meme_group = temp_image2!.size.width*2
-            let new_height_meme_group = temp_image2!.size.height*2
-            let new_size = CGSize(width: new_width_meme_group, height: new_height_meme_group)
-            temp_image2 = temp_image2?.resizeImage(targetSize: new_size)
+            var temp_image2 = UIImage(named: "addToGroup") as UIImage?
+            //let new_width_meme_group = temp_image2!.size.width*2
+            //let new_height_meme_group = temp_image2!.size.height*2
+            //let new_size = CGSize(width: new_width_meme_group, height: new_height_meme_group)
+            //temp_image2 = temp_image2?.resizeImage(targetSize: new_size)
             self.meme_link?.setImage(temp_image, for: .normal)
             self.meme_group_add?.setImage(temp_image2, for: .normal)
-            self.meme_group_add?.frame = CGRect(x: 100,y: 100,width: 100,height: 100)
+            self.meme_group_add?.frame = CGRect(x: 100,y: 100,width: 27,height: 27)
             
             
-            self.meme_link?.frame = CGRect(x: 100,y: 100,width: 100,height: 100)
+            self.meme_link?.frame = CGRect(x: 100,y: 100,width: 31,height: 27)
             self.meme_group_add?.isHidden = true
             self.meme_link?.isHidden = true
             self.view.addSubview(self.meme_link!)
@@ -1286,23 +1304,27 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         }
         if((self.image) != nil){
             let real_image_rect = AVMakeRect(aspectRatio: self.meme.getImage().size, insideRect: self.meme.bounds)
-            self.meme_link?.widthAnchor.constraint(equalToConstant: 44.0).isActive = true
-            self.meme_group_add?.widthAnchor.constraint(equalToConstant: 44.0).isActive = true
-            self.meme_link?.heightAnchor.constraint(equalToConstant: 37.0).isActive = true
-            self.meme_group_add?.heightAnchor.constraint(equalToConstant: 37.0).isActive = true
-            //print("PRINTING SELF VIEW FRAME ")
+            //self.meme_link?.widthAnchor.constraint(equalToConstant: 31.0).isActive = true
+            //self.meme_group_add?.widthAnchor.constraint(equalToConstant: 44.0).isActive = true
+            //self.meme_link?.heightAnchor.constraint(equalToConstant: 37.0).isActive = true
+            //self.meme_link?.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
+            //self.meme_group_add?.heightAnchor.constraint(equalToConstant: 26.0).isActive = true
+            //self.meme_link?.translatesAutoresizingMaskIntoConstraints = false
+            print("PRINTING meme_link frame ")
+            print(self.meme_link?.frame)
+            print(self.meme_link?.bounds)
             //print(self.view.frame.width)
-            self.meme_link?.frame.origin.x = self.view.frame.width - 85
-            self.meme_group_add?.frame.origin.x = -15
+            self.meme_link?.frame.origin.x = self.view.frame.width - 47
+            self.meme_group_add?.frame.origin.x = 16
             // An image/gif
             if(!self.meme.isHidden){
-                self.meme_link?.frame.origin.y = real_image_rect.origin.y + 80
-                self.meme_group_add?.frame.origin.y = real_image_rect.origin.y + 80
+                self.meme_link?.frame.origin.y = real_image_rect.origin.y + 110
+                self.meme_group_add?.frame.origin.y = real_image_rect.origin.y + 110
             }
             // a video
             else{
-                self.meme_link?.frame.origin.y = self.meme.frame.origin.y - 70
-                self.meme_group_add?.frame.origin.y = self.meme.frame.origin.y - 70
+                self.meme_link?.frame.origin.y = self.meme.frame.origin.y - 32
+                self.meme_group_add?.frame.origin.y = self.meme.frame.origin.y - 32
             }
             self.meme_link?.isHidden = false
             self.meme_group_add?.isHidden = false
@@ -1316,7 +1338,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     func startSpewing(color: Bool) {
         let trackRect =  self.slider.trackRect(forBounds: self.slider.bounds)
         let thumbRect = self.slider.thumbRect(forBounds: self.slider.bounds, trackRect: trackRect, value: self.slider.value)
-        self.emitter.emitterPosition = CGPoint(x: thumbRect.origin.x + self.slider.frame.origin.x - 80, y: self.slider.frame.origin.y + 28)
+        self.emitter.emitterPosition = CGPoint(x: thumbRect.origin.x + self.slider.frame.origin.x - 80, y: self.slider.frame.origin.y + 20)
         self.emitter.emitterShape = CAEmitterLayerEmitterShape.line
         self.emitter.emitterSize = CGSize(width: 70.0, height: 2.0)
         self.emitter.emitterCells = generateEmitterCells(color: color)
@@ -1499,4 +1521,19 @@ extension UIImage {
 
     return newImage!
   }
+}
+
+extension UIButton {
+    open override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
+        print(event)
+        //print(event)
+        print("inside this extension")
+        let newArea = CGRect(
+            x: self.bounds.origin.x - 20.0,
+            y: self.bounds.origin.y - 20.0,
+            width: self.bounds.size.width + 40.0,
+            height: self.bounds.size.height + 40.0
+        )
+        return newArea.contains(point)
+    }
 }
