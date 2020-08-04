@@ -388,7 +388,7 @@ class GroupViewController: UITableViewController {
     
     @IBAction func backToView(_ sender: Any) {
         print("IN BACKTOVIEW")
-        print(self.casted_user_sub_item)
+        //print(self.casted_user_sub_item)
         DispatchQueue.main.async{
             //self.dismiss(animated: true, completion: nil)
             let hacky_scene_access = UIApplication.shared.connectedScenes.first
@@ -396,8 +396,8 @@ class GroupViewController: UITableViewController {
             scene_delegate.viewController?.fromGroups = true
             //scene_delegate.navigationController?.dis
             //self.dismiss(animated: true, completion: nil)
-            scene_delegate.navigationController?.popViewController(animated: true)
-            //setViewControllers([scene_delegate.viewController!], animated: true)
+            //scene_delegate.navigationController?.popViewController(animated: true)
+            scene_delegate.navigationController?.setViewControllers([scene_delegate.viewController!], animated: true)
             //self.removeFromParent()
         }
     }

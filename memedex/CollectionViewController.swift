@@ -71,9 +71,10 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                 }
             }
         }
-        DispatchQueue.main.async {
+        /*DispatchQueue.main.async {
             self.collectionView.reloadData()
-        }
+            self.activityIndicator.stopAnimating()
+        }*/
 
         // Uncomment the following line to preserve selection between presentations
         // self.clearsSelectionOnViewWillAppear = false
@@ -201,6 +202,12 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                 }
                 return nil
             }
+            
+            // Fill up dictionary with [time, memename]
+            // Then fill up an array with the times and sort (most recent comes first)
+            // Loop through the time array, access its key name
+            // Put this keyname into keys
+            // Doing this so the memes appear in order of recency
             var x = 0
             for object in (listObjectsOutput?.contents)! {
                 self.modification_times.append(object.lastModified!)
