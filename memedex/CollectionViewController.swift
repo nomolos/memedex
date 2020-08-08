@@ -33,6 +33,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
     let adding_user_semaphore = DispatchSemaphore(value: 0)
     let waitUserSub = DispatchGroup()
     var casted_user_sub_item:UserSub?
+    let test_textfield = UITextField()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -80,10 +81,118 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
         // self.clearsSelectionOnViewWillAppear = false
 
         // Register cell classes
+        self.collectionView.translatesAutoresizingMaskIntoConstraints = false
+        self.collectionView.isHidden = false
+        self.collectionView.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor).isActive = true
         self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-
+        self.collectionView.heightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.heightAnchor, constant: 30).isActive = true
+        self.collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -70).isActive = true
+        
+        var textfield_container = UIView()
+        self.view.addSubview(textfield_container)
+        textfield_container.widthAnchor.constraint(equalTo: self.view.widthAnchor).isActive = true
+        textfield_container.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        textfield_container.topAnchor.constraint(equalTo: self.collectionView.bottomAnchor, constant: -10).isActive = true
+        textfield_container.backgroundColor = UIColor.white
+        //self.view.addSubview(textfield_container)
+        textfield_container.addSubview(test_textfield)
+        
+        test_textfield.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
+        test_textfield.widthAnchor.constraint(equalTo: self.view.widthAnchor, constant: -40).isActive = true
+        test_textfield.topAnchor.constraint(equalTo: self.collectionView.bottomAnchor).isActive = true
+        test_textfield.heightAnchor.constraint(equalToConstant: 40).isActive = true
+        test_textfield.borderStyle = UITextField.BorderStyle.roundedRect
+        test_textfield.translatesAutoresizingMaskIntoConstraints = false
+        textfield_container.translatesAutoresizingMaskIntoConstraints = false
+        test_textfield.placeholder = "Start Typing"
+        let send_button = UIButton(type: .custom)
+        send_button.imageEdgeInsets = UIEdgeInsets(top: 0, left: -16, bottom: 0, right: 0)
+        send_button.frame = CGRect(x: CGFloat(test_textfield.frame.size.width - 25), y: CGFloat(5), width: CGFloat(25), height: CGFloat(25))
+        send_button.setImage(UIImage(named: "send1.png"), for: .normal)
+        send_button.addTarget(self, action: #selector(self.sendMessage), for: .touchUpInside)
+        test_textfield.rightView = send_button
+        test_textfield.rightViewMode = .whileEditing
+        
+        
+        test_textfield.isHidden = false
+        test_textfield.layoutIfNeeded()
+        textfield_container.layoutIfNeeded()
+        self.view.bringSubviewToFront(textfield_container)
+        self.view.bringSubviewToFront(test_textfield)
+        let tap: UITapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(UIInputViewController.dismissKeyboard))
+        self.view.addGestureRecognizer(tap)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+        //self.collectionView.bottomAnchor.constraint(equalTo: test_textfield.bottomAnchor, constant: -150).isActive = true
         // Do any additional setup after loading the view.
     }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
+    @objc func keyboardWillShow(notification: NSNotification) {
+        if let keyboardSize = (notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? NSValue)?.cgRectValue {
+            if self.view.frame.origin.y == 0 {
+                self.view.frame.origin.y -= keyboardSize.height
+            }
+        }
+    }
+
+    @objc func keyboardWillHide(notification: NSNotification) {
+        if self.view.frame.origin.y != 0 {
+            self.view.frame.origin.y = 0
+        }
+    }
+    
+    @IBAction func sendMessage(_ sender: UIButton) {
+        let generator = UINotificationFeedbackGenerator()
+        generator.notificationOccurred(.success)
+        sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
+        UIView.animate(withDuration: 2.0,
+                                   delay: 0,
+                                   usingSpringWithDamping: CGFloat(0.20),
+                                   initialSpringVelocity: CGFloat(6.0),
+                                   options: UIView.AnimationOptions.allowUserInteraction,
+                                   animations: {
+                                    sender.transform = CGAffineTransform.identity
+            },
+                                   completion: { Void in()  }
+        )
+        let message = self.test_textfield.text
+        let randy = self.randomString(length: 20)
+        let randy_data = Data(base64Encoded: randy)
+        let completionHandler = { (task:AWSS3TransferUtilityUploadTask, error:NSError?) -> Void in
+            if(error != nil){
+                print("Failure uploading file")
+                
+            }else{
+                print("Success uploading file")
+            }
+        } as? AWSS3TransferUtilityUploadCompletionHandlerBlock
+        let expression  = AWSS3TransferUtilityUploadExpression()
+        let transferUtility = AWSS3TransferUtility.default()
+        transferUtility.uploadData(randy_data!, bucket: self.s3bucket, key: (self.group! + "/actualmemes/notameme/" + randy), contentType: "text/html", expression: expression, completionHandler: completionHandler).continueWith { (task) -> Any? in
+            if let error = task.error {
+                print("Error : \(error.localizedDescription)")
+            }
+            if task.result != nil {
+                print(task.result)
+            }
+            return nil
+        }
+        
+        self.test_textfield.text = ""
+        dismissKeyboard()
+        self.view.frame.origin.y = 0
+        //self.key
+    }
+    
+    func randomString(length: Int) -> String {
+      let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+      return String((0..<length).map{ _ in letters.randomElement()! })
+    }
+    
 
     /*
     // MARK: - Navigation

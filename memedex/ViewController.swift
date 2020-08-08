@@ -613,8 +613,10 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                                             print("about to loop through keys and move top sources up")
                                             var current_index = 0
                                             var swap_index = 0
+                                            print("OUR TOP SOURCES BELOW")
+                                            print(self.top_sources)
                                             for keyster in self.keys{
-                                                if keyster.contains(self.top_sources[0]){
+                                                if keyster.contains(self.top_sources[0]) || keyster.contains(self.top_sources[1]) || keyster.contains(self.top_sources[2]){
                                                     print(keyster + " contains substring " + self.top_sources[0])
                                                     self.keys.swapAt(current_index, swap_index)
                                                     swap_index = swap_index + 1
@@ -665,7 +667,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                                         var swap_index = 0
                                         for keyster in self.keys{
                                             // only prioritizing very top source for now
-                                            if keyster.contains(self.top_sources[0]){
+                                            if keyster.contains(self.top_sources[0]) || keyster.contains(self.top_sources[1]) || keyster.contains(self.top_sources[2]){
                                                 print(keyster + " contains substring " + self.top_sources[0])
                                                 self.keys.swapAt(current_index, swap_index)
                                                 swap_index = swap_index + 1
@@ -968,8 +970,8 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             }
             for object in (listObjectsOutput?.contents)! {
                 //print(object.)
-                print("PRINTING WHEN OBJECT WAS MODIFIED")
-                print(object.lastModified)
+                //print("PRINTING WHEN OBJECT WAS MODIFIED")
+                //print(object.lastModified)
                 self.keys.append(String(object.key!))
                 //print(String(object.key!))
             }
@@ -1525,9 +1527,9 @@ extension UIImage {
 
 extension UIButton {
     open override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        print(event)
         //print(event)
-        print("inside this extension")
+        //print(event)
+        //print("inside this extension")
         let newArea = CGRect(
             x: self.bounds.origin.x - 20.0,
             y: self.bounds.origin.y - 20.0,

@@ -25,6 +25,7 @@ class GroupViewController: UITableViewController {
     let group_info_semaphore = DispatchSemaphore(value: 0)
     let dispatchQueue = DispatchQueue(label: "com.queue.Serial")
     let waitUserSub = DispatchGroup()
+    let waitOurSub = DispatchGroup()
     let waitOurGroups = DispatchGroup()
     let waitOurGroupsMemberCount = DispatchGroup()
     var casted_user_sub_item:UserSub?
@@ -50,6 +51,7 @@ class GroupViewController: UITableViewController {
             self.dispatchQueue.async {
                 // FIRST ENSURE EACH EMAIL EXISTS
                 // GET THEIR CORRESPONDING SUB
+                var count = 0
                 for user in group!.usernames{
                     let queryExpression = AWSDynamoDBQueryExpression()
                     queryExpression.keyConditionExpression = "email = :email"
@@ -134,8 +136,6 @@ class GroupViewController: UITableViewController {
                     }) as! AWSTask<AWSDynamoDBPaginatedOutput>
                     self.adding_user_semaphore.wait()
                 }
-                //dynamoDBObjectMapper.
-                //dynamoDBObjectMapper = nil
                 
                 // ONE OF THE USERS ADDED HERE WAS INVALID
                 // SHOW AN ALERT SO THEY KNOW
@@ -160,6 +160,58 @@ class GroupViewController: UITableViewController {
                 }
                 return 0
             })
+            
+            // ADDING THIS PARTICULAR USER TO THE GROUP
+            // CURRENT USER SEPARATE FROM EMAILS ENTERED
+            var our_sub = ""
+            if(AppDelegate.socialLoggedIn!){
+                print("social logged in")
+                our_sub = AppDelegate.social_username!
+            }
+            else{
+                print("No social login, printing regular username")
+                our_sub = AppDelegate.defaultUserPool().currentUser()?.username as! String
+            }
+            let queryExpression = AWSDynamoDBQueryExpression()
+            queryExpression.keyConditionExpression = "#sub2 = :sub"
+            queryExpression.expressionAttributeValues = [":sub": our_sub]
+            queryExpression.expressionAttributeNames = ["#sub2": "sub"]
+            self.waitOurSub.enter()
+            let user_sub_match2 = dynamoDBObjectMapper.query(UserSub.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+                if (task.error != nil){
+                    print("error in querying for this sub")
+                    print(task.error)
+                    self.waitOurSub.leave()
+                }
+                else if (task.result != nil){
+                    print("successfully queried for this sub")
+                    print(task.result?.items)
+                    self.waitOurSub.leave()
+                }
+                return task.result
+            }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+            self.waitOurSub.notify(queue: .main){
+                var casted_user_sub_item2 = user_sub_match2.result?.items[0] as! UserSub
+                let string_literal = self.new_group_textfield.text as! String
+                casted_user_sub_item2.updateGroup(group: string_literal)
+                dynamoDBObjectMapper.save(casted_user_sub_item2, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
+                    if let error = task.error as NSError? {
+                        print("The request failed. Error: \(error)")
+                        self.adding_user_semaphore.signal()
+                    } else {
+                        print("Saved new user sub to dynamo")
+                        print(task.result)
+                        //print(task.result?.item)
+                        // print(task.result?.items)
+                        self.adding_user_semaphore.signal()
+                        // Do something with task.result or perform other operations.
+                    }
+                    return 0
+                })
+            }
+            // ADDING THIS PARTICULAR USER TO THE GROUP
+            // CURRENT USER SEPARATE FROM EMAILS ENTERED
+            
         }
         popup.addAction(cancelAction)
         popup.addAction(saveAction)
