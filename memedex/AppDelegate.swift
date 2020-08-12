@@ -20,13 +20,15 @@ import AmplifyPlugins
 import FBSDKCoreKit
 import AWSPluginsCore
 import AuthenticationServices
+import UserNotifications
+import AWSSNS
 
 
 let userPoolID = "SampleUserPool"
 var pinpoint: AWSPinpoint?
 
 @UIApplicationMain
-class AppDelegate: UIResponder, UIApplicationDelegate {
+class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
     var viewController: UIViewController?
     var loginViewController: LoginViewController?
@@ -37,6 +39,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     static var waitSocialUser = DispatchGroup()
     static var waitSocialUsername = DispatchGroup()
     static var social_username:String?
+    let SNSPlatformApplicationArn = "arn:aws:sns:us-west-1:560871491257:app/APNS_SANDBOX/memedex"
+    
     
     var storyboard: UIStoryboard? {
         return UIStoryboard(name: "Main", bundle: nil)
@@ -175,7 +179,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 break
             }
         }
+        registerForPushNotifications()
+        let notificationOption = launchOptions?[.remoteNotification]
 
+        // 1
+        if let notification = notificationOption as? [String: AnyObject],
+            let aps = notification["aps"] as? [String: AnyObject] {
+            print("we got here from a notification")
+            print(aps)
+            }
         return AWSMobileClient.sharedInstance().interceptApplication(
             application,
             didFinishLaunchingWithOptions: launchOptions)
@@ -377,6 +389,160 @@ extension AppDelegate {
     func application(_ application: UIApplication, didDiscardSceneSessions sceneSessions: Set<UISceneSession>) {
         //..
         print("In third application func AppDelegate")
+    }
+    
+    func getNotificationSettings() {
+      UNUserNotificationCenter.current().getNotificationSettings { settings in
+        print("Notification settings: \(settings)")
+        guard settings.authorizationStatus == .authorized else { return }
+        DispatchQueue.main.async {
+          UIApplication.shared.registerForRemoteNotifications()
+        }
+      }
+    }
+    
+    /*func registerForPushNotifications() {
+      UNUserNotificationCenter.current()
+        .requestAuthorization(options: [.alert, .badge]) {
+          [weak self] granted, error in
+            
+          print("Permission granted: \(granted)")
+          guard granted else { return }
+          self?.getNotificationSettings()
+      }
+    }*/
+    
+    func application(
+      _ application: UIApplication,
+      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
+    ) {
+        print("didRegisterForRemoteNotificationsWithDeviceToken")
+      /// Attach the device token to the user defaults
+      var token = ""
+      for i in 0..<deviceToken.count {
+          token = token + String(format: "%02.2hhx", arguments: [deviceToken[i]])
+      }
+      
+      print("Device token " + token)
+      
+      UserDefaults.standard.set(token, forKey: "deviceTokenForSNS")
+      
+      /// Create a platform endpoint. In this case,  the endpoint is a
+      /// device endpoint ARN
+      let sns = AWSSNS.default()
+      let request = AWSSNSCreatePlatformEndpointInput()
+      request?.token = token
+      request?.platformApplicationArn = SNSPlatformApplicationArn
+      sns.createPlatformEndpoint(request!).continueWith(executor: AWSExecutor.mainThread(), block: { (task: AWSTask!) -> AnyObject? in
+          if task.error != nil {
+              print("Error: \(String(describing: task.error))")
+          } else {
+              let createEndpointResponse = task.result! as AWSSNSCreateEndpointResponse
+              
+              if let endpointArnForSNS = createEndpointResponse.endpointArn {
+                  print("endpointArn: \(endpointArnForSNS)")
+                  UserDefaults.standard.set(endpointArnForSNS, forKey: "endpointArnForSNS")
+                  let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+                  let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+                  updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+                  let snessy = SNSEndpoint()
+                if(AppDelegate.loggedIn!){
+                    snessy!.sub = AppDelegate.defaultUserPool().currentUser()?.username! as! NSString
+                }
+                else if(AppDelegate.socialLoggedIn!){
+                    snessy!.sub = AppDelegate.social_username! as! NSString
+                }
+                snessy?.endpoint = endpointArnForSNS as! NSString
+                  dynamoDBObjectMapper.save(snessy!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
+                      if let error = task.error as NSError? {
+                          print("The request failed. Error: \(error)")
+                      } else {
+                          print("Endpoint should have been sent")
+                          // Do something with task.result or perform other operations.
+                      }
+                      return 0
+                  })
+              }
+          }
+          return nil
+      })
+    }
+
+    func application(
+      _ application: UIApplication,
+      didFailToRegisterForRemoteNotificationsWithError error: Error) {
+      print("Failed to register: \(error)")
+    }
+    
+    func application(
+        _ application: UIApplication,
+        didReceiveRemoteNotification userInfo: [AnyHashable: Any],
+                                    fetchCompletionHandler completionHandler:
+        @escaping (UIBackgroundFetchResult) -> Void) {
+
+        pinpoint!.notificationManager.interceptDidReceiveRemoteNotification(
+            userInfo, fetchCompletionHandler: completionHandler)
+        print("didReceiveRemoteNotification")
+        /*if (application.applicationState == .active) {
+            let alert = UIAlertController(title: "Notification Received",
+                                          message: userInfo.description,
+                                          preferredStyle: .alert)
+            alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
+
+            /*UIApplication.shared.keyWindow?.rootViewController?.present(
+                alert, animated: true, completion:nil)*/
+        }*/
+    }
+    
+    // Request user to grant permissions for the app to use notifications
+    func registerForPushNotifications() {
+        UNUserNotificationCenter.current().delegate = self
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge]) {
+            (granted, error) in
+            print("Permission granted: \(granted)")
+            // 1. Check if permission granted
+            guard granted else { return }
+            // 2. Attempt registration for remote notifications on the main thread
+            DispatchQueue.main.async {
+                UIApplication.shared.registerForRemoteNotifications()
+            }
+        }
+    }
+    
+    /*func registerForPushNotifications(application: UIApplication) {
+        /// The notifications settings
+        if #available(iOS 10.0, *) {
+            UNUserNotificationCenter.current().delegate = self
+            UNUserNotificationCenter.current().requestAuthorization(options: [.badge, .sound, .alert], completionHandler: {(granted, error) in
+                if (granted)
+                {
+                    print("permission granted push notifications")
+                    //UIApplication.shared.registerForRemoteNotifications()
+                }
+                else{
+                    //Do stuff if unsuccessful...
+                }
+            })
+        } else {
+            let settings = UIUserNotificationSettings(types: [UIUserNotificationType.alert, UIUserNotificationType.badge, UIUserNotificationType.sound], categories: nil)
+            application.registerUserNotificationSettings(settings)
+            application.registerForRemoteNotifications()
+        }
+    }*/
+    
+    // Called when a notification is delivered to a foreground app.
+    @available(iOS 10.0, *)
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        print("User Info = ",notification.request.content.userInfo)
+        completionHandler([.alert, .badge, .sound])
+    }
+    
+    // Called to let your app know which action was selected by the user for a given notification.
+    @available(iOS 10.0, *)
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        print("User Info = ",response.notification.request.content.userInfo)
+        
+        completionHandler()
     }
 
 }

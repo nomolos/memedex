@@ -82,6 +82,7 @@
 		BD4B85412442410D00C67E09 /* TextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD4B85402442410D00C67E09 /* TextField.swift */; };
 		BD57D62624955289005C73E3 /* FacebookCore in Frameworks */ = {isa = PBXBuildFile; productRef = BD57D62524955289005C73E3 /* FacebookCore */; };
 		BD57D62824955289005C73E3 /* FacebookLogin in Frameworks */ = {isa = PBXBuildFile; productRef = BD57D62724955289005C73E3 /* FacebookLogin */; };
+		BD64EB0B24E3225700B2E28C /* SNSEndpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = BD64EB0A24E3225700B2E28C /* SNSEndpoint.swift */; };
 		BD767C4424328CE200A813C7 /* CognitoConfig.plist in Resources */ = {isa = PBXBuildFile; fileRef = BD767C4324328CE200A813C7 /* CognitoConfig.plist */; };
 		BD8DB8AC2466009F0066E055 /* AWSAuthCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD8DB8AB2466009F0066E055 /* AWSAuthCore.framework */; };
 		BD8DB8AE246600AA0066E055 /* AWSCore.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BD8DB8AD246600AA0066E055 /* AWSCore.framework */; };
@@ -182,6 +183,7 @@
 		BD4888E424D37A90001DEA7C /* Caption.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Caption.swift; sourceTree = "<group>"; };
 		BD4921FB2468C541004F8408 /* Launch Screen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = "Launch Screen.storyboard"; sourceTree = "<group>"; };
 		BD4B85402442410D00C67E09 /* TextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TextField.swift; sourceTree = "<group>"; };
+		BD64EB0A24E3225700B2E28C /* SNSEndpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SNSEndpoint.swift; sourceTree = "<group>"; };
 		BD767C4324328CE200A813C7 /* CognitoConfig.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = CognitoConfig.plist; sourceTree = "<group>"; };
 		BD8DB8AB2466009F0066E055 /* AWSAuthCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AWSAuthCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		BD8DB8AD246600AA0066E055 /* AWSCore.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = AWSCore.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -296,6 +298,7 @@
 				BD4888DE24C8AE54001DEA7C /* Group.swift */,
 				BD4888E424D37A90001DEA7C /* Caption.swift */,
 				BD4888E224CF9928001DEA7C /* UserSub.swift */,
+				BD64EB0A24E3225700B2E28C /* SNSEndpoint.swift */,
 				BD4888E024CA41D7001DEA7C /* Email.swift */,
 				BD29747D245505E000DBBF9E /* PartnerMatches.swift */,
 				BD4921FB2468C541004F8408 /* Launch Screen.storyboard */,
@@ -591,6 +594,7 @@
 				BD4888E324CF9928001DEA7C /* UserSub.swift in Sources */,
 				BD4888D424C4F58A001DEA7C /* GroupViewController.swift in Sources */,
 				BD220CE123F4B25800D93CBE /* AppDelegate.swift in Sources */,
+				BD64EB0B24E3225700B2E28C /* SNSEndpoint.swift in Sources */,
 				BDA9B85224B27CFA0019FD54 /* TopSources.swift in Sources */,
 				BD4888D224B90C3F001DEA7C /* KeychainItem.swift in Sources */,
 				BDFD177A248DD644005CCC6B /* SceneDelegate.swift in Sources */,
@@ -724,6 +728,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = memedex/memedex.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1.93;
 				DEVELOPMENT_ASSET_PATHS = "\"memedex/Preview Content\"";
@@ -737,6 +742,7 @@
 				MARKETING_VERSION = 1.93;
 				PRODUCT_BUNDLE_IDENTIFIER = solomon.memedex;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -749,6 +755,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = memedex/memedex.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1.93;
 				DEVELOPMENT_ASSET_PATHS = "\"memedex/Preview Content\"";
@@ -762,6 +769,7 @@
 				MARKETING_VERSION = 1.93;
 				PRODUCT_BUNDLE_IDENTIFIER = solomon.memedex;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};

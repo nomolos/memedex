@@ -74,6 +74,7 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
         }
         let square = self.imageView!
         if(!(self.panGesture.state == UIGestureRecognizer.State.ended)){
+            //print("end of swipe ImageZoomView")
             let point = self.panGesture.location(in: self.superview)
             let divisor = (self.superview!.frame.width/2)/0.61
             square.center.x = point.x
@@ -85,7 +86,7 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
             square.transform = CGAffineTransform(rotationAngle: xFromCenter/divisor).scaledBy(x: scale, y: scale)
         }
         else if self.panGesture.state == UIGestureRecognizer.State.ended{
-            print("in ended")
+            print("end of swipe ImageZoomView")
             square.transform = CGAffineTransform.identity
             let nc = NotificationCenter.default
             nc.post(name: NSNotification.Name(rawValue: "next"), object: nil)

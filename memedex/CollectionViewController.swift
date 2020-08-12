@@ -34,6 +34,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
     let waitUserSub = DispatchGroup()
     var casted_user_sub_item:UserSub?
     let test_textfield = UITextField()
+    //let waitMessageSend = DispatchGroup()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -146,6 +147,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
     }
     
     @IBAction func sendMessage(_ sender: UIButton) {
+        //self.waitMessageSend.enter()
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
         sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
@@ -159,9 +161,10 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             },
                                    completion: { Void in()  }
         )
-        let message = self.test_textfield.text
+        self.activityIndicator.startAnimating()
+        let message = self.test_textfield.text?.data(using: .utf8)
         let randy = self.randomString(length: 20)
-        let randy_data = Data(base64Encoded: randy)
+        //let randy_data = randy.
         let completionHandler = { (task:AWSS3TransferUtilityUploadTask, error:NSError?) -> Void in
             if(error != nil){
                 print("Failure uploading file")
@@ -172,20 +175,38 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
         } as? AWSS3TransferUtilityUploadCompletionHandlerBlock
         let expression  = AWSS3TransferUtilityUploadExpression()
         let transferUtility = AWSS3TransferUtility.default()
-        transferUtility.uploadData(randy_data!, bucket: self.s3bucket, key: (self.group! + "/actualmemes/notameme/" + randy), contentType: "text/html", expression: expression, completionHandler: completionHandler).continueWith { (task) -> Any? in
+        transferUtility.uploadData(message!, bucket: self.s3bucket, key: (self.group! + "/actualmemes/notameme/" + randy), contentType: "text/plain;charset=utf-8", expression: expression, completionHandler: completionHandler).continueWith { (task) -> Any? in
             if let error = task.error {
                 print("Error : \(error.localizedDescription)")
             }
             if task.result != nil {
                 print(task.result)
+                //self.collectionView.reloadData()
             }
+            //self.waitMessageSend.leave()
             return nil
         }
-        
         self.test_textfield.text = ""
         dismissKeyboard()
         self.view.frame.origin.y = 0
+        /*self.waitMessageSend.notify(queue: .main){
+            print("should be refreshing.. prolly broken")
+            self.waitMemeNamesS3.enter()
+            self.loadAllS3MemeNames()
+        }*/
         //self.key
+        print("should be reloading data")
+        self.keys.insert((self.group! + "/actualmemes/notameme/" + randy), at: 0)
+        self.meme_container.insert(message!, at: 0)
+        // Prevents captions from crashing due to
+        // indicies not lining up with meme_container and keys
+        self.captions.insert("", at:0)
+        DispatchQueue.main.async{
+            self.collectionView.reloadData()
+            self.collectionView.layoutIfNeeded()
+            self.view.layoutIfNeeded()
+            self.activityIndicator.stopAnimating()
+        }
     }
     
     func randomString(length: Int) -> String {
@@ -226,6 +247,45 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             for subview in cell.contentView.subviews{
                 subview.removeFromSuperview()
             }
+            print("printing our key value at this index")
+            print(self.keys[indexPath.row])
+            
+            if(self.keys[indexPath.row].contains("notameme")){
+                print("this is a message not a meme")
+                let message_to_render = String(decoding: self.meme_container[indexPath.row], as: UTF8.self)
+                print(message_to_render)
+                let label_superview_for_padding = UIView(frame: CGRect(x: 20, y: cell.contentView.frame.minY + 20, width: self.view.frame.width - 40, height: (100)))
+                let label_for_cell = UILabel(frame: CGRect(x: 30, y: cell.contentView.frame.minY, width: self.view.frame.width - 60, height: (100)))
+                
+                label_superview_for_padding.layer.backgroundColor = UIColor.white.cgColor
+                label_superview_for_padding.layer.cornerRadius = 10.0
+                label_superview_for_padding.layer.masksToBounds = true
+                label_superview_for_padding.layer.borderWidth = 1
+                label_superview_for_padding.layer.borderColor = UIColor.lightGray.cgColor
+                
+                label_for_cell.lineBreakMode = .byWordWrapping
+                label_for_cell.numberOfLines = 0
+                label_for_cell.adjustsFontSizeToFitWidth = true
+                label_for_cell.minimumScaleFactor = 0.1
+                label_for_cell.text = message_to_render
+                label_for_cell.font = UIFont.systemFont(ofSize: 20)
+                label_for_cell.textColor = UIColor.black
+                label_for_cell.isHidden = false
+                cell.contentView.addSubview(label_superview_for_padding)
+                label_superview_for_padding.addSubview(label_for_cell)
+                label_superview_for_padding.bringSubviewToFront(label_for_cell)
+                cell.contentView.bringSubviewToFront(label_for_cell)
+                /*cell.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: 200)
+                cell.contentView.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: 200)
+                cell.setNeedsDisplay()
+                cell.contentView.setNeedsDisplay()
+                print("printing cell info")
+                print(cell.frame)
+                print(cell.contentView.frame)
+                print(self.view.frame)*/
+                return cell
+            }
+            
             let image_for_cell = UIImage(data: self.meme_container[indexPath.row])
             var container_for_imageview = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.width*1.1))
             var imageview_for_cell = UIImageView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: (self.view.frame.width*1.1)))
@@ -279,6 +339,9 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         self.collectionView.reloadData()
+        if(self.keys[indexPath.row].contains("notameme")){
+            return CGSize(width: self.view.frame.width, height: (self.view.frame.width*0.4))
+        }
         return CGSize(width: self.view.frame.width, height: (self.view.frame.width*1.42))
     }
 

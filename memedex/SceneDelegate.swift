@@ -108,9 +108,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             to restore the scene back to its current state.
          */
     func sceneDidEnterBackground(_ scene: UIScene) {
-            print("sceneDidEnterBackground SceneDelegate")
-            //..
-        }
+        print("sceneDidEnterBackground SceneDelegate")
+    }
         
         /** Called when the scene "will move" from an active state to an inactive state,
             on window close or in iOS enter background.

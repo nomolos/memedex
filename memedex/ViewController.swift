@@ -15,6 +15,7 @@ import AWSDynamoDB
 import AVKit
 import AVFoundation
 import Amplify
+import AWSSNS
 
 class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate {
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -50,6 +51,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     let waitPartnerMemes = DispatchGroup()
     let waitGroupNames = DispatchGroup()
     let waitGroupNamesFinal = DispatchGroup()
+    let waitUserSubsPushNotification = DispatchGroup()
     let waitMemesUpdated = DispatchGroup()
     let waitPotentialPartners = DispatchGroup()
     let waitPotentialActivePartner = DispatchGroup()
@@ -59,6 +61,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     let waitURL = DispatchGroup()
     let waitTopSources = DispatchGroup()
     let waitNonFBUser = DispatchGroup()
+    let waitCheckMemeNames = DispatchGroup()
     let dispatchQueue = DispatchQueue(label: "com.queue.Serial")
     var emitter = CAEmitterLayer()
     var player: AVPlayer?
@@ -118,7 +121,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
 
     @objc func addMemeToGroup(_ sender:UIButton) {
-        print("inside addMemeToGroup")
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
         sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
@@ -170,7 +172,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                     }
                 } as? AWSS3TransferUtilityUploadCompletionHandlerBlock
                 
-                
+                // Upload meme to S3
                 let expression  = AWSS3TransferUtilityUploadExpression()
                 let transferUtility = AWSS3TransferUtility.default()
                 transferUtility.uploadData(upload_data, bucket: self.s3bucket, key: (self.groupname!.text! + "/" + key), contentType: "image/png", expression: expression, completionHandler: completionHandler).continueWith { (task) -> Any? in
@@ -184,7 +186,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
 
                     return nil
                 }
-                
+                // Upload caption to S3
                 var caption_to_send = Caption()
                 caption_to_send?.caption = caption.text as! NSString
                 caption_to_send?.imagepath = (self.groupname!.text! + "/" + self.keys[self.index]) as! NSString
@@ -200,11 +202,87 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                     }
                     return 0
                 })
- 
+                
+                // Send Push Notifications to others in group
+                self.waitUserSubsPushNotification.enter()
+                let scanExpression = AWSDynamoDBScanExpression()
+                updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+                let user_subs = dynamoDBObjectMapper.scan(UserSub.self, expression: scanExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+                    if (task.error != nil){
+                        print("Error scanning for UserSubs in addMemeToGroup before push notification")
+                        print(task.error)
+                    }
+                    if (task.result != nil){
+                        print("Successfully scanned user_subs table, about to send notifications to a subset of them")
+                    }
+                    self.waitUserSubsPushNotification.leave()
+                    return task.result
+                }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+                
+                self.waitUserSubsPushNotification.notify(queue: .main){
+                    //print("PRINTING WHAT WE HAVE ADDMEMETOGROUP")
+                    DispatchQueue.main.async{
+                        let group_name_temp = (self.groupname?.text)!
+                        let user_subs_returned = user_subs.result?.items
+                        for user1 in user_subs_returned! {
+                            let casted = user1 as! UserSub
+                            print(casted)
+                            if casted.groups != nil && casted.groups.count != 0 && casted.groups.contains((self.groupname?.text) as! NSString){
+                                print(group_name_temp)
+                                print(casted.sub as! String)
+                                print("Should be sending a notification to " + (casted.sub as! String))
+                                self.sendSNSPushNotification(group: group_name_temp, receiverSub: (casted.sub as! String))
+                            }
+                        }
+                    }
+                }
                 print("addToMemeGroup")
             }))
             self.present(alert, animated: true)
         }
+    }
+    
+    func sendSNSPushNotification(group: String, receiverSub: String) {
+        print("inside sendSNSPushNotification")
+        let queryExpression = AWSDynamoDBQueryExpression()
+        queryExpression.keyConditionExpression = "#sub2 = :sub"
+        queryExpression.expressionAttributeNames = ["#sub2": "sub"]
+        queryExpression.expressionAttributeValues = [":sub": receiverSub]
+        let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+        let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+        updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+        var somefin = dynamoDBObjectMapper.query(SNSEndpoint.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+        if (task.error != nil){
+            print("error in querying for User : " + receiverSub + " in sendSNSPushNotification")
+            print(task.error)
+        }
+        if (task.result != nil){
+            print("Successfully queried for User : " + receiverSub + " in sendSNSPushNotification")
+            if(task.result?.items.count != 0){
+                let castedSNSUser = task.result?.items[0] as! SNSEndpoint
+                if(castedSNSUser.endpoint != nil && castedSNSUser.endpoint != ("" as! NSString)){
+                    let sns = AWSSNS.default()
+                    let request = AWSSNSPublishInput()
+                    request?.targetArn = castedSNSUser.endpoint as! String
+                    request?.message = "Someone added a meme to your group : " + group
+                    sns.publish(request!, completionHandler: ({ (response: AWSSNSPublishResponse?, err: Error?) in
+                        if(err != nil){
+                            print("Printing error sendSNSPushNotification")
+                            print(err)
+                        }
+                        else{
+                            print("Printing response sendSNSPushNotification")
+                            print(response)
+                        }
+                    }))
+                }
+            }
+            else{
+                print("We don't have this user's endpoint : " + receiverSub + " either they didn't enable notifications or theres a bug")
+            }
+        }
+        return task.result
+        }) as! AWSTask<AWSDynamoDBPaginatedOutput>
     }
     
     
@@ -411,6 +489,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     
 
     @IBAction func swipeLeft(_ sender: Any) {
+        print("inside swipeLeft")
         self.next(self)
     }
     
@@ -476,6 +555,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             let alert = UIAlertController(title: "Share this meme?", message: "Sharing memes helps us buy groceries", preferredStyle: .alert)
             alert.addAction(UIAlertAction(title: "Heck No", style: .default, handler: { (action: UIAlertAction!) in
                 self.rateCurrentMeme()
+                print("about to call loadNextMeme line 558")
                 self.loadNextMeme(first: false, direction: true)
             }))
             alert.addAction(UIAlertAction(title: "Heck Yes", style: .default, handler: { (action: UIAlertAction!) in
@@ -488,6 +568,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         }
         else{
             self.rateCurrentMeme()
+            print("about to call loadNextMeme line 571")
             self.loadNextMeme(first: false, direction: true)
         }
     }
@@ -497,12 +578,80 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         self.configureSlider()
     }
     
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        print("here inside viewWillDisappear viewcontroller")
+        NotificationCenter.default.removeObserver(self)
+    }
+    
     @objc func update_slider() {
         self.slider.value = ImageZoomView.slider_value! - 0.5
         self.sliderValueDidChange(sender: self.slider)
     }
     
+    @objc func applicationWillEnterForeground(_ notification: NSNotification) {
+        //self.volumeSlider.value = AVAudioSession.sharedInstance().outputVolume
+        print("here inside applicationWillEnterForeground viewcontroller")
+        var temp_keys = [String]()
+        //print(self.keys.count)
+        //print(self.previous_keys.count)
+        self.waitCheckMemeNames.enter()
+        let s3 = AWSS3.s3(forKey: "defaultKey")
+        let listRequest: AWSS3ListObjectsRequest = AWSS3ListObjectsRequest()
+        listRequest.bucket = s3bucket
+        listRequest.prefix = "actualmemes/"
+        s3.listObjects(listRequest).continueWith { (task) -> AnyObject? in
+            let listObjectsOutput = task.result;
+            if(task.error != nil || listObjectsOutput == nil || listObjectsOutput?.contents == nil){
+                print("PRINTING ERROR LOADING S3 MEMES")
+                print(task.error)
+                DispatchQueue.main.sync{
+                    let alert = UIAlertController(title: "No Memes Right Now", message: "memedex is currently searching the internet for the latest memes. Usually this happens around 12AM Central Time (US) and lasts 20 minutes", preferredStyle: .alert)
+                    self.present(alert, animated: true)
+                }
+                return nil
+            }
+            for object in (listObjectsOutput?.contents)! {
+                //print(object.)
+                //print("PRINTING WHEN OBJECT WAS MODIFIED")
+                //print(object.lastModified)
+                temp_keys.append(String(object.key!))
+                //print(String(object.key!))
+            }
+            self.waitCheckMemeNames.leave()
+            return nil
+        }
+        self.waitCheckMemeNames.notify(queue: .main){
+            print("there are this many keys in S3 : " + String(temp_keys.count))
+            print("there are this many keys with us now : " + String(self.keys.count))
+            if(temp_keys.count != self.keys.count){
+                DispatchQueue.main.async{
+                    let alert = UIAlertController(title: "New Day Of Memes", message: "There are new memes available", preferredStyle: .alert)
+                    alert.addAction(UIAlertAction(title: "Go!", style: .default, handler: { (action: UIAlertAction!) in
+                        self.keys = [String]()
+                        self.index = 0
+                        self.downloaded_index = 0
+                        self.index_for_cache = 0
+                        self.meme_cache = [Data]()
+                        self.top_sources = [String]()
+                        let nc = NotificationCenter.default
+                        nc.removeObserver(self)
+                        self.viewWillAppear(true)
+                        //self.loadNextMeme(first: true, direction: true)
+                        //self.updateUI(direction: true)
+                    }))
+                    self.present(alert, animated: true)
+                }
+            }
+        }
+    }
+    
     override func viewWillAppear(_ animated: Bool) {
+        NotificationCenter.default.addObserver(
+        self,
+        selector: #selector(applicationWillEnterForeground(_:)),
+        name: UIApplication.willEnterForegroundNotification,
+        object: nil)
         print("inside viewWillAppear ViewController")
         if(self.fromGroups){
             self.fromGroups = false
@@ -546,6 +695,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         self.activityIndicator.hidesWhenStopped = true
         self.activityIndicator.layer.zPosition = 1
         view.addSubview(self.activityIndicator)
+        self.activityIndicator.startAnimating()
         AppDelegate.loggedIn = true
         self.waitMemeNamesS3.enter()
         self.waitMemesUpdated.enter()
@@ -636,6 +786,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                                             self.waitMemesUpdated.leave()
                                         }
                                         self.waitMemesUpdated.notify(queue: .main){
+                                            print("About to call loadNextMeme line 787")
                                             self.loadNextMeme(first: true, direction: true)
                                         }
                                     }
@@ -647,7 +798,9 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                                 // The previous state was from today
                                 else{
                                     print("This previous state was from today")
+                                    self.activityIndicator.stopAnimating()
                                     self.keys = self.previous_keys
+                                    print("About to call loadNextMeme line 802")
                                     self.loadNextMeme(first: true, direction: true)
                                 }
                             }
@@ -684,9 +837,12 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                                         let alert = UIAlertController(title: "No A.I.", message: "We could not find memes to recommend to you", preferredStyle: .alert)
                                         alert.addAction(UIAlertAction(title: "Continue", style: .default, handler: nil))
                                         self.present(alert, animated: true)
+                                        self.activityIndicator.stopAnimating()
                                         self.waitMemesUpdated.leave()
                                     }
                                     self.waitMemesUpdated.notify(queue: .main){
+                                        self.activityIndicator.stopAnimating()
+                                        print("About to call loadNextMeme line 844")
                                         self.loadNextMeme(first: true, direction: true)
                                     }
                                 }
@@ -953,6 +1109,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     func loadAllS3MemeNames(){
+        //self.keys = [String]()
         let s3 = AWSS3.s3(forKey: "defaultKey")
         let listRequest: AWSS3ListObjectsRequest = AWSS3ListObjectsRequest()
         listRequest.bucket = s3bucket
