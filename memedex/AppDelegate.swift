@@ -22,6 +22,7 @@ import AWSPluginsCore
 import AuthenticationServices
 import UserNotifications
 import AWSSNS
+import AVFoundation
 
 
 let userPoolID = "SampleUserPool"
@@ -76,6 +77,10 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         )
         AppDelegate.loggedIn = false
         AppDelegate.socialLoggedIn = false
+        let audioSession = AVAudioSession.sharedInstance()
+        if audioSession.isOtherAudioPlaying {
+            _ = try? audioSession.setCategory(AVAudioSession.Category.ambient, options: AVAudioSession.CategoryOptions.mixWithOthers)
+        }
         
         // Initialize Pinpoint
         pinpoint = AWSPinpoint(configuration:

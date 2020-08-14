@@ -15,7 +15,7 @@ import AVKit
 import AVFoundation
 import Amplify
 
-class GroupViewController: UITableViewController {
+class GroupViewController: UITableViewController, UITextFieldDelegate {
 
     var group_names = [String]()
     var group_member_count = [Int]()
@@ -30,201 +30,262 @@ class GroupViewController: UITableViewController {
     let waitOurGroupsMemberCount = DispatchGroup()
     var casted_user_sub_item:UserSub?
     var activityIndicator = UIActivityIndicatorView()
+    var waitUserEmailsGroupCreation = DispatchGroup()
+    var user_emails = [String]()
     
     @IBAction func add_group(_ sender: Any) {
-        let popup = UIAlertController(title: "New Group", message: "", preferredStyle: .alert)
-        let cancelAction = UIAlertAction(title: "Cancel" , style: .cancel)
-        let saveAction = UIAlertAction(title: "Submit", style: .default) { (action) -> Void in
-            self.group_names.append(self.new_group_textfield.text!)
-            self.group_member_count.append(1)
-            print("Our group members should be " + self.new_group_users_textfield.text!)
-            self.tableView.reloadData  ()
-            let group = Group()
-            group?.set_usernames(unparsed: self.new_group_users_textfield.text!)
-            group?.group_name = self.new_group_textfield.text as NSString?
-            
-            let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
-            let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
-            updateMapperConfig.saveBehavior = .updateSkipNullAttributes
-            var invalid_users = ""
-            
-            self.dispatchQueue.async {
-                // FIRST ENSURE EACH EMAIL EXISTS
-                // GET THEIR CORRESPONDING SUB
-                var count = 0
-                for user in group!.usernames{
-                    let queryExpression = AWSDynamoDBQueryExpression()
-                    queryExpression.keyConditionExpression = "email = :email"
-                    queryExpression.expressionAttributeValues = [":email": String(user)]
-                    dynamoDBObjectMapper.query(Email.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
-                        if (task.error != nil){
-                            print("error in querying for this email")
-                            print(task.error)
-                        }
-                        if (task.result != nil){
-                            print("printing result in email query (group creation)")
-                            print(task.result?.items)
-                            if(task.result?.items.count == 0){
-                                invalid_users.append(" " + String(user))
-                                print("We have no emails.. likely an incorrect write")
-                                print("Should have an alert here")
-                                self.adding_user_semaphore.signal()
+        self.activityIndicator.startAnimating()
+        self.waitUserEmailsGroupCreation.enter()
+        let scanExpression = AWSDynamoDBScanExpression()
+        let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+        updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+        let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+        let user_subs = dynamoDBObjectMapper.scan(UserSub.self, expression: scanExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+            if (task.error != nil){
+                print("Error scanning for UserSubs in addMemeToGroup before push notification")
+                print(task.error)
+            }
+            if (task.result != nil){
+                print("Successfully got user emails for auto-completing group form")
+                //print("Successfully scanned user_subs table, about to send notifications to a subset of them")
+            }
+            self.waitUserEmailsGroupCreation.leave()
+            return task.result
+        }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+        self.waitUserEmailsGroupCreation.notify(queue: .main){
+            self.activityIndicator.stopAnimating()
+            let email_container = user_subs.result?.items
+            for user in email_container! {
+                let casted = user as! UserSub
+                self.user_emails.append(casted.email as! String)
+            }
+            let popup = UIAlertController(title: "New Group", message: "", preferredStyle: .alert)
+            let cancelAction = UIAlertAction(title: "Cancel" , style: .cancel)
+            let saveAction = UIAlertAction(title: "Submit", style: .default) { (action) -> Void in
+                self.group_names.append(self.new_group_textfield.text!)
+                self.group_member_count.append(1)
+                print("Our group members should be " + self.new_group_users_textfield.text!)
+                self.tableView.reloadData  ()
+                let group = Group()
+                group?.set_usernames(unparsed: self.new_group_users_textfield.text!)
+                group?.group_name = self.new_group_textfield.text as NSString?
+                
+                let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+                let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+                updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+                var invalid_users = ""
+                
+                self.dispatchQueue.async {
+                    // FIRST ENSURE EACH EMAIL EXISTS
+                    // GET THEIR CORRESPONDING SUB
+                    var count = 0
+                    for user in group!.usernames{
+                        let queryExpression = AWSDynamoDBQueryExpression()
+                        queryExpression.keyConditionExpression = "email = :email"
+                        queryExpression.expressionAttributeValues = [":email": String(user)]
+                        dynamoDBObjectMapper.query(Email.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+                            if (task.error != nil){
+                                print("error in querying for this email")
+                                print(task.error)
                             }
-                            else{
-                                // THIS IS A VALID EMAIL IN THE EMAILS TABLE
-                                // LETS FIND ITS CORRESPONDING SUB
-                                let casted = task.result?.items[0] as! Email
-                                print("Should be appending a sub")
-                                print(casted)
-                                print("Appending this : ")
-                                print(casted.id)
-                                let queryExpression = AWSDynamoDBQueryExpression()
-                                queryExpression.keyConditionExpression = "#sub2 = :sub"
-                                queryExpression.expressionAttributeValues = [":sub": String(casted.id!)]
-                                queryExpression.expressionAttributeNames = ["#sub2": "sub"]
-                                self.waitUserSub.enter()
-                                let user_sub_match = dynamoDBObjectMapper.query(UserSub.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
-                                    if (task.error != nil){
-                                        print("error in querying for this sub")
-                                        print(task.error)
-                                        self.waitUserSub.leave()
-                                        //self.adding_user_semaphore.signal()
-                                    }
-                                    else if (task.result != nil){
-                                        print("successfully queried for this sub")
-                                        print(task.result?.items)
-                                        self.waitUserSub.leave()
-                                    }
-                                    return task.result
-                                    }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+                            if (task.result != nil){
+                                print("printing result in email query (group creation)")
+                                print(task.result?.items)
+                                if(task.result?.items.count == 0){
+                                    invalid_users.append(" " + String(user))
+                                    print("We have no emails.. likely an incorrect write")
+                                    print("Should have an alert here")
+                                    self.adding_user_semaphore.signal()
+                                }
+                                else{
+                                    // THIS IS A VALID EMAIL IN THE EMAILS TABLE
+                                    // LETS FIND ITS CORRESPONDING SUB
+                                    let casted = task.result?.items[0] as! Email
+                                    print("Should be appending a sub")
+                                    print(casted)
+                                    print("Appending this : ")
+                                    print(casted.id)
+                                    let queryExpression = AWSDynamoDBQueryExpression()
+                                    queryExpression.keyConditionExpression = "#sub2 = :sub"
+                                    queryExpression.expressionAttributeValues = [":sub": String(casted.id!)]
+                                    queryExpression.expressionAttributeNames = ["#sub2": "sub"]
+                                    self.waitUserSub.enter()
+                                    let user_sub_match = dynamoDBObjectMapper.query(UserSub.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+                                        if (task.error != nil){
+                                            print("error in querying for this sub")
+                                            print(task.error)
+                                            self.waitUserSub.leave()
+                                            //self.adding_user_semaphore.signal()
+                                        }
+                                        else if (task.result != nil){
+                                            print("successfully queried for this sub")
+                                            print(task.result?.items)
+                                            self.waitUserSub.leave()
+                                        }
+                                        return task.result
+                                        }) as! AWSTask<AWSDynamoDBPaginatedOutput>
 
-                                self.waitUserSub.notify(queue: .main){
-                                    // WE FOUND THE USER WITH THE NOTED SUB
-                                    // APPEND THIS NEW GROUP NAME TO THAT USER
-                                    // SO THEY CAN ACCESS THE GROUP ON THEIR DEVICE
-                                    if(user_sub_match.result?.items.count != 0){
-                                        self.casted_user_sub_item = user_sub_match.result?.items[0] as! UserSub
-                                        print("THIS IS WHAT WE'RE UPDATING WITH")
-                                        print(self.new_group_textfield.text)
-                                        let string_literal = self.new_group_textfield.text as! String
-                                        self.casted_user_sub_item!.updateGroup(group: string_literal)
-                                        print("This is the new object")
-                                        print(self.casted_user_sub_item)
-                                        print("Attempting to re-write to dynamo user_sub table for " + String(casted.id!))
-                                        dynamoDBObjectMapper.save(self.casted_user_sub_item!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
-                                            if let error = task.error as NSError? {
-                                                print("The request failed. Error: \(error)")
-                                                self.adding_user_semaphore.signal()
-                                            } else {
-                                                print("Saved new user sub to dynamo")
-                                                print(task.result)
-                                                //print(task.result?.item)
-                                                // print(task.result?.items)
-                                                self.adding_user_semaphore.signal()
-                                                // Do something with task.result or perform other operations.
-                                            }
-                                            return 0
-                                        })
-                                    }
-                                    else{
-                                       self.adding_user_semaphore.signal()
+                                    self.waitUserSub.notify(queue: .main){
+                                        // WE FOUND THE USER WITH THE NOTED SUB
+                                        // APPEND THIS NEW GROUP NAME TO THAT USER
+                                        // SO THEY CAN ACCESS THE GROUP ON THEIR DEVICE
+                                        if(user_sub_match.result?.items.count != 0){
+                                            self.casted_user_sub_item = user_sub_match.result?.items[0] as! UserSub
+                                            print("THIS IS WHAT WE'RE UPDATING WITH")
+                                            print(self.new_group_textfield.text)
+                                            let string_literal = self.new_group_textfield.text as! String
+                                            self.casted_user_sub_item!.updateGroup(group: string_literal)
+                                            print("This is the new object")
+                                            print(self.casted_user_sub_item)
+                                            print("Attempting to re-write to dynamo user_sub table for " + String(casted.id!))
+                                            dynamoDBObjectMapper.save(self.casted_user_sub_item!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
+                                                if let error = task.error as NSError? {
+                                                    print("The request failed. Error: \(error)")
+                                                    self.adding_user_semaphore.signal()
+                                                } else {
+                                                    print("Saved new user sub to dynamo")
+                                                    print(task.result)
+                                                    //print(task.result?.item)
+                                                    // print(task.result?.items)
+                                                    self.adding_user_semaphore.signal()
+                                                    // Do something with task.result or perform other operations.
+                                                }
+                                                return 0
+                                            })
+                                        }
+                                        else{
+                                           self.adding_user_semaphore.signal()
+                                        }
                                     }
                                 }
                             }
-                        }
-                        return task.result
-                    }) as! AWSTask<AWSDynamoDBPaginatedOutput>
-                    self.adding_user_semaphore.wait()
-                }
-                
-                // ONE OF THE USERS ADDED HERE WAS INVALID
-                // SHOW AN ALERT SO THEY KNOW
-                if(invalid_users.count > 0){
-                    DispatchQueue.main.async {
-                        let invalid_user_alert = UIAlertController(title: "Invalid User(s)", message: "The following usernames are not in the memedex database and were not added to the new group : " + invalid_users, preferredStyle: .alert)
-                        let cancelAction = UIAlertAction(title: "Ok" , style: .cancel)
-                        invalid_user_alert.addAction(cancelAction)
-                        self.present(invalid_user_alert,animated: true,completion: nil)
+                            return task.result
+                        }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+                        self.adding_user_semaphore.wait()
                     }
+                    
+                    // ONE OF THE USERS ADDED HERE WAS INVALID
+                    // SHOW AN ALERT SO THEY KNOW
+                    if(invalid_users.count > 0){
+                        DispatchQueue.main.async {
+                            let invalid_user_alert = UIAlertController(title: "Invalid User(s)", message: "The following usernames are not in the memedex database and were not added to the new group : " + invalid_users, preferredStyle: .alert)
+                            let cancelAction = UIAlertAction(title: "Ok" , style: .cancel)
+                            invalid_user_alert.addAction(cancelAction)
+                            self.present(invalid_user_alert,animated: true,completion: nil)
+                        }
+                    }
+                    
+                    
                 }
-                
-                
-            }
-            // THE GROUPS TABLE STILL HOLDS THE INVALID USERS
-            // MIGHT WANT TO EVENTUALLY CHANGE THAT
-            dynamoDBObjectMapper.save(group!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
-                if let error = task.error as NSError? {
-                    print("The request failed. Error: \(error)")
-                } else {
-                    // Do something with task.result or perform other operations.
-                }
-                return 0
-            })
-            
-            // ADDING THIS PARTICULAR USER TO THE GROUP
-            // CURRENT USER SEPARATE FROM EMAILS ENTERED
-            var our_sub = ""
-            if(AppDelegate.socialLoggedIn!){
-                print("social logged in")
-                our_sub = AppDelegate.social_username!
-            }
-            else{
-                print("No social login, printing regular username")
-                our_sub = AppDelegate.defaultUserPool().currentUser()?.username as! String
-            }
-            let queryExpression = AWSDynamoDBQueryExpression()
-            queryExpression.keyConditionExpression = "#sub2 = :sub"
-            queryExpression.expressionAttributeValues = [":sub": our_sub]
-            queryExpression.expressionAttributeNames = ["#sub2": "sub"]
-            self.waitOurSub.enter()
-            let user_sub_match2 = dynamoDBObjectMapper.query(UserSub.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
-                if (task.error != nil){
-                    print("error in querying for this sub")
-                    print(task.error)
-                    self.waitOurSub.leave()
-                }
-                else if (task.result != nil){
-                    print("successfully queried for this sub")
-                    print(task.result?.items)
-                    self.waitOurSub.leave()
-                }
-                return task.result
-            }) as! AWSTask<AWSDynamoDBPaginatedOutput>
-            self.waitOurSub.notify(queue: .main){
-                var casted_user_sub_item2 = user_sub_match2.result?.items[0] as! UserSub
-                let string_literal = self.new_group_textfield.text as! String
-                casted_user_sub_item2.updateGroup(group: string_literal)
-                dynamoDBObjectMapper.save(casted_user_sub_item2, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
+                // THE GROUPS TABLE STILL HOLDS THE INVALID USERS
+                // MIGHT WANT TO EVENTUALLY CHANGE THAT
+                dynamoDBObjectMapper.save(group!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
                     if let error = task.error as NSError? {
                         print("The request failed. Error: \(error)")
-                        self.adding_user_semaphore.signal()
                     } else {
-                        print("Saved new user sub to dynamo")
-                        print(task.result)
-                        //print(task.result?.item)
-                        // print(task.result?.items)
-                        self.adding_user_semaphore.signal()
                         // Do something with task.result or perform other operations.
                     }
                     return 0
                 })
+                
+                // ADDING THIS PARTICULAR USER TO THE GROUP
+                // CURRENT USER SEPARATE FROM EMAILS ENTERED
+                var our_sub = ""
+                if(AppDelegate.socialLoggedIn!){
+                    print("social logged in")
+                    our_sub = AppDelegate.social_username!
+                }
+                else{
+                    print("No social login, printing regular username")
+                    our_sub = AppDelegate.defaultUserPool().currentUser()?.username as! String
+                }
+                let queryExpression = AWSDynamoDBQueryExpression()
+                queryExpression.keyConditionExpression = "#sub2 = :sub"
+                queryExpression.expressionAttributeValues = [":sub": our_sub]
+                queryExpression.expressionAttributeNames = ["#sub2": "sub"]
+                self.waitOurSub.enter()
+                let user_sub_match2 = dynamoDBObjectMapper.query(UserSub.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+                    if (task.error != nil){
+                        print("error in querying for this sub")
+                        print(task.error)
+                        self.waitOurSub.leave()
+                    }
+                    else if (task.result != nil){
+                        print("successfully queried for this sub")
+                        print(task.result?.items)
+                        self.waitOurSub.leave()
+                    }
+                    return task.result
+                }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+                self.waitOurSub.notify(queue: .main){
+                    var casted_user_sub_item2 = user_sub_match2.result?.items[0] as! UserSub
+                    let string_literal = self.new_group_textfield.text as! String
+                    casted_user_sub_item2.updateGroup(group: string_literal)
+                    dynamoDBObjectMapper.save(casted_user_sub_item2, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
+                        if let error = task.error as NSError? {
+                            print("The request failed. Error: \(error)")
+                            self.adding_user_semaphore.signal()
+                        } else {
+                            print("Saved new user sub to dynamo")
+                            print(task.result)
+                            //print(task.result?.item)
+                            // print(task.result?.items)
+                            self.adding_user_semaphore.signal()
+                            // Do something with task.result or perform other operations.
+                        }
+                        return 0
+                    })
+                }
+                // ADDING THIS PARTICULAR USER TO THE GROUP
+                // CURRENT USER SEPARATE FROM EMAILS ENTERED
+                
             }
-            // ADDING THIS PARTICULAR USER TO THE GROUP
-            // CURRENT USER SEPARATE FROM EMAILS ENTERED
-            
+            popup.addAction(cancelAction)
+            popup.addAction(saveAction)
+            popup.addTextField(configurationHandler: {(textfield: UITextField!) in
+                textfield.placeholder = "Group name"
+                self.new_group_textfield = textfield
+            })
+            popup.addTextField(configurationHandler: {(textfield: UITextField!) in
+                textfield.placeholder = "Member emails (comma separated)"
+                self.new_group_users_textfield = textfield
+                self.new_group_users_textfield.delegate = self
+            })
+            self.present(popup, animated: true, completion: nil)
         }
-        popup.addAction(cancelAction)
-        popup.addAction(saveAction)
-        popup.addTextField(configurationHandler: {(textfield: UITextField!) in
-            textfield.placeholder = "Group name"
-            self.new_group_textfield = textfield
-        })
-        popup.addTextField(configurationHandler: {(textfield: UITextField!) in
-            textfield.placeholder = "Member emails (comma separated)"
-            self.new_group_users_textfield = textfield
-        })
-        self.present(popup, animated: true, completion: nil)
     }
+
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        return !autoCompleteText( in : textField, using: string, suggestionsArray: self.user_emails)
+    }
+    
+    func autoCompleteText( in textField: UITextField, using string: String, suggestionsArray: [String]) -> Bool {
+        if !string.isEmpty,
+            let selectedTextRange = textField.selectedTextRange,
+            selectedTextRange.end == textField.endOfDocument,
+            let prefixRange = textField.textRange(from: textField.beginningOfDocument, to: selectedTextRange.start),
+            let text = textField.text( in : prefixRange) {
+            let prefix = text + string
+            let matches = suggestionsArray.filter {
+                $0.hasPrefix(prefix)
+            }
+            if (matches.count > 0) {
+                textField.text = matches[0]
+                if let start = textField.position(from: textField.beginningOfDocument, offset: prefix.count) {
+                    textField.selectedTextRange = textField.textRange(from: start, to: textField.endOfDocument)
+                    return true
+                }
+            }
+        }
+        return false
+    }
+
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+            textField.resignFirstResponder()
+            return true
+    }
+    
+    
     
     
     override func viewDidLoad() {

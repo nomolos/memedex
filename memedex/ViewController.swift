@@ -16,6 +16,7 @@ import AVKit
 import AVFoundation
 import Amplify
 import AWSSNS
+import Photos
 
 class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDelegate {
     func numberOfComponents(in pickerView: UIPickerView) -> Int {
@@ -77,6 +78,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     var videoPanGesture:UIPanGestureRecognizer?
     var top_sources = [String]()
     var fromGroups = false
+    var sliderSignalSentFromSwipe = false
     static let key_1 = "key_1"
     static let key_2 = "key_2"
     static let key_3 = "key_3"
@@ -364,10 +366,35 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             }
         }
         else{
-            print("we have a video, not saving it")
-            let ac = UIAlertController(title: "Can't save videos yet", message: "Haven't implemented this yet - should be available in the next version :)", preferredStyle: .alert)
-            ac.addAction(UIAlertAction(title: "OK", style: .default))
-            present(ac, animated: true)
+            print("we have a video")
+            let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
+            //let temp_url = URL(string: temp0_url)!
+            DispatchQueue.global(qos: .background).async {
+                if let url = URL(string: temp0_url), let urlData = NSData(contentsOf: url) {
+                   let galleryPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0];
+                   let filePath="\(galleryPath)/nameX.mp4"
+                   DispatchQueue.main.async {
+                      urlData.write(toFile: filePath, atomically: true)
+                         PHPhotoLibrary.shared().performChanges({
+                         PHAssetChangeRequest.creationRequestForAssetFromVideo(atFileURL:
+                         URL(fileURLWithPath: filePath))
+                      }) {
+                         success, error in
+                         if success {
+                            DispatchQueue.main.async {
+                                let alertController = UIAlertController(title: "Your video was successfully saved", message: nil, preferredStyle: .alert)
+                                let defaultAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                                alertController.addAction(defaultAction)
+                                self.present(alertController, animated: true, completion: nil)
+                            }
+                            print("Succesfully Saved")
+                         } else {
+                            print(error?.localizedDescription)
+                         }
+                      }
+                   }
+                }
+            }
         }
     }
     
@@ -378,6 +405,12 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             ac.addAction(UIAlertAction(title: "OK", style: .default))
             present(ac, animated: true)
         } else {
+            DispatchQueue.main.async {
+                let alertController = UIAlertController(title: "Your photo was successfully saved", message: nil, preferredStyle: .alert)
+                let defaultAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+                alertController.addAction(defaultAction)
+                self.present(alertController, animated: true, completion: nil)
+            }
             print("Save succeeded")
         }
     }
@@ -482,6 +515,9 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
               self.emitter.removeFromSuperlayer()
               self.slider.minimumTrackTintColor = UIColor(red: 0.82, green: 0.01, blue: 0.11, alpha: 1.00)
          }
+        if(self.meme.imageView != nil && !sliderSignalSentFromSwipe){
+            self.meme.handlePansFromViewControllerSlider(thumbCenter: self.slider.thumbCenterX)
+        }
     }
     
     @IBOutlet weak var slider: CustomSlider!
@@ -496,6 +532,12 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     
     
     @IBAction func next(_ sender: Any) {
+        if(self.meme != nil && self.meme.imageView != nil){
+            //self.meme.imageView.center
+            self.meme.imageView.transform = CGAffineTransform.identity
+            self.meme.ultimate_center_set = false
+        }
+        self.sliderSignalSentFromSwipe = false
         self.slider.isEnabled = false
         // This user is active
         // Send a notification to Dynamo
@@ -586,6 +628,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     
     @objc func update_slider() {
         self.slider.value = ImageZoomView.slider_value! - 0.5
+        self.sliderSignalSentFromSwipe = true
         self.sliderValueDidChange(sender: self.slider)
     }
     
@@ -654,6 +697,10 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         object: nil)
         print("inside viewWillAppear ViewController")
         if(self.fromGroups){
+            let nc = NotificationCenter.default
+            nc.addObserver(self, selector: #selector(swipeLeft(_:)), name: NSNotification.Name(rawValue: "next"), object: nil)
+            nc.addObserver(self, selector: #selector(back(_:)), name: NSNotification.Name(rawValue: "back"), object: nil)
+            nc.addObserver(self, selector: #selector(update_slider), name: NSNotification.Name(rawValue: "update_slider"), object: nil)
             self.fromGroups = false
             return
         }
@@ -672,10 +719,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             self.meme_group_add = UIButton()
             let temp_image = UIImage(named: "link") as UIImage?
             var temp_image2 = UIImage(named: "addToGroup") as UIImage?
-            //let new_width_meme_group = temp_image2!.size.width*2
-            //let new_height_meme_group = temp_image2!.size.height*2
-            //let new_size = CGSize(width: new_width_meme_group, height: new_height_meme_group)
-            //temp_image2 = temp_image2?.resizeImage(targetSize: new_size)
             self.meme_link?.setImage(temp_image, for: .normal)
             self.meme_group_add?.setImage(temp_image2, for: .normal)
             self.meme_group_add?.frame = CGRect(x: 100,y: 100,width: 27,height: 27)
@@ -830,7 +873,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                                     }
                                     self.index = 0
                                     if self.found_match{
-                                        //print("we found a match - the user we're matched with is " + self.user_to_pair_with!)
                                         self.loadMemesRecommendedByPartner()
                                     }
                                     else{
@@ -842,7 +884,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                                     }
                                     self.waitMemesUpdated.notify(queue: .main){
                                         self.activityIndicator.stopAnimating()
-                                        print("About to call loadNextMeme line 844")
                                         self.loadNextMeme(first: true, direction: true)
                                     }
                                 }
@@ -864,8 +905,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         else{
             meme?.username = AppDelegate.defaultUserPool().currentUser()?.username as! NSString
         }
-        print("inside rateCurrentMeme")
-        print(self.index)
         meme?.meme = self.keys[self.index] as NSString
         meme?.rating = slider.value as NSNumber
         let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
@@ -889,17 +928,10 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         let expression = AWSS3TransferUtilityDownloadExpression()
         // Very first meme of the session
         // OR We haven't downloaded the next meme that we want
-        print("printing index")
-        print(self.index)
-        print("printing image name at this index")
-        print(self.keys[self.index])
-        print(self.downloaded_index)
-        print(self.keys.count)
         if(self.index >= self.keys.count){
             print("should not be here... probably due to state restoration bug")
             self.index = 0
         }
-        //print(self.ke)
         if(first || (!(self.downloaded_index > self.index || self.index_for_cache < 0))){
             transferUtility.downloadData(fromBucket: s3bucket, key: self.keys[self.index], expression: expression) { (task, url, data, error) in
                 if error != nil{
@@ -966,13 +998,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                         self.playerViewController?.disableGestureRecognition()
                         self.videoPanGesture = UIPanGestureRecognizer(target: self, action: #selector(self.handleVideoSwipe))
                         self.playerViewController?.view.addGestureRecognizer(self.videoPanGesture!)
-                        //self.playerViewController.addgest
-                        /*let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.next(_:)))
-                        let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.back(_:)))
-                        leftSwipe.direction = UISwipeGestureRecognizer.Direction.left
-                        rightSwipe.direction = UISwipeGestureRecognizer.Direction.right
-                        self.playerViewController!.view.addGestureRecognizer(leftSwipe)
-                        self.playerViewController!.view.addGestureRecognizer(rightSwipe)*/
                         self.playerViewController!.player = self.player
                         self.playerViewController!.view.frame = self.meme.frame
                         self.addChild(self.playerViewController!)
@@ -1049,12 +1074,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 self.playerViewController?.disableGestureRecognition()
                 self.videoPanGesture = UIPanGestureRecognizer(target: self, action: #selector(self.handleVideoSwipe))
                 self.playerViewController?.view.addGestureRecognizer(self.videoPanGesture!)
-                /*let leftSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.next(_:)))
-                let rightSwipe = UISwipeGestureRecognizer(target: self, action: #selector(self.back(_:)))
-                leftSwipe.direction = UISwipeGestureRecognizer.Direction.left
-                rightSwipe.direction = UISwipeGestureRecognizer.Direction.right
-                self.playerViewController!.view.addGestureRecognizer(leftSwipe)
-                self.playerViewController!.view.addGestureRecognizer(rightSwipe)*/
                 self.playerViewController!.player = self.player
                 self.playerViewController!.view.frame = self.meme.frame
                 self.addChild(self.playerViewController!)
@@ -1073,8 +1092,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     @objc func handleVideoSwipe() {
-        //print("printing something in handleVideoSwipe")
-        //print(self.videoPanGesture?.location(in: self.view))
         self.slider.value = Float((self.videoPanGesture?.location(in: self.view).x)!)/60
         self.sliderValueDidChange(sender: self.slider)
         if self.videoPanGesture!.state == UIGestureRecognizer.State.ended{
@@ -1109,7 +1126,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     func loadAllS3MemeNames(){
-        //self.keys = [String]()
         let s3 = AWSS3.s3(forKey: "defaultKey")
         let listRequest: AWSS3ListObjectsRequest = AWSS3ListObjectsRequest()
         listRequest.bucket = s3bucket
@@ -1117,8 +1133,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         s3.listObjects(listRequest).continueWith { (task) -> AnyObject? in
             let listObjectsOutput = task.result;
             if(task.error != nil || listObjectsOutput == nil || listObjectsOutput?.contents == nil){
-                print("PRINTING ERROR LOADING S3 MEMES")
-                print(task.error)
                 DispatchQueue.main.sync{
                     let alert = UIAlertController(title: "No Memes Right Now", message: "memedex is currently searching the internet for the latest memes. Usually this happens around 12AM Central Time (US) and lasts 20 minutes", preferredStyle: .alert)
                     self.present(alert, animated: true)
@@ -1126,11 +1140,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 return nil
             }
             for object in (listObjectsOutput?.contents)! {
-                //print(object.)
-                //print("PRINTING WHEN OBJECT WAS MODIFIED")
-                //print(object.lastModified)
                 self.keys.append(String(object.key!))
-                //print(String(object.key!))
             }
             self.waitMemeNamesS3.leave()
             return nil
@@ -1138,7 +1148,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     func loadGroupNames(){
-        print("inside loadGroupNames")
         self.waitGroupNames.enter()
         let queryExpression = AWSDynamoDBQueryExpression()
         let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
@@ -1146,17 +1155,12 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         updateMapperConfig.saveBehavior = .updateSkipNullAttributes
         queryExpression.keyConditionExpression = "#sub2 = :sub"
         queryExpression.expressionAttributeNames = ["#sub2": "sub"]
-        
-        
         if(AppDelegate.socialLoggedIn!){
             queryExpression.expressionAttributeValues = [":sub": AppDelegate.social_username]
-            print("[in loadGroupNames], our user's sub is : " + AppDelegate.social_username!)
         }
         else{
             queryExpression.expressionAttributeValues = [":sub": AppDelegate.defaultUserPool().currentUser()?.username]
-            print("[in loadGroupNames], our user's sub is : " + (AppDelegate.defaultUserPool().currentUser()?.username)!)
         }
-
         var user_sub_response = dynamoDBObjectMapper.query(UserSub.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
             if (task.error != nil){
                 print("error in loadGroupNames")
@@ -1255,7 +1259,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         if (task.error != nil){
             print("error in findPartnerMAtches")
             print(task.error)
-            //self.waitPotentialPartners.leave()
         }
         if (task.result != nil){
             self.waitPotentialPartners.leave()
@@ -1269,10 +1272,9 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     // Find the person who has labeled the most memes
     // Up until max of 80 [threshold can be changed later]
     func findPartnerMatchesPart2() {
-        print("inside findPartnerMatchesPart2")
         let matches2 = self.matches?.result?.items
         if matches2?.count ?? 0 >= 1 {
-            print("we have a match")
+            print("we have a user match")
             var ten_or_more = [String]()
             var twenty_or_more = [String]()
             var thirty_or_more = [String]()
@@ -1349,13 +1351,19 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             // Nobody with sufficient labels to build out
             // recommendation
             else{
+                print("We don't have a partner")
                 self.waitFinalPartner.leave()
             }
+        }
+        // Nobody with sufficient labels to build out
+        // recommendation
+        else{
+            print("We don't have a partner")
+            self.waitFinalPartner.leave()
         }
     }
     
     func loadMemesRecommendedByPartner() {
-        print("in loadMemesRecommendedByPartner")
         let queryExpression = AWSDynamoDBQueryExpression()
         queryExpression.keyConditionExpression = "username = :username"
         queryExpression.expressionAttributeValues = [":username": self.user_to_pair_with!]
@@ -1416,19 +1424,10 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     func fetchUserAttributes() {
-        print("inside fetchUserAttributes")
         AppDelegate.defaultUserPool().currentUser()?.getDetails().continueOnSuccessWith(block: { (task) -> Any? in
-            //print("inside here in fetchUserAttributes")
             guard task.result != nil else {
-                print("fetchuserattributes failed in viewdidload")
-                //self.waitNonFBUser.leave()
                 return nil
             }
-            print("fetchuserattributes succeded viewdidLoad")
-            //self.waitNonFBUser.leave()
-            /*DispatchQueue.main.async {
-                //print("fetchuserattributes worked in viewdidload")
-            }*/
             return nil
         })
     }
@@ -1437,42 +1436,24 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         self.slider.isContinuous = false
         self.slider.minimumValue = 0
         self.slider.maximumValue = 5
-        self.slider.addTarget(self, action:#selector(sliderValueDidChange(sender:)), for: .allEvents)
+        // The end of the drag is sent directly to next. Otherwise it messes with the animations
+        self.slider.addTarget(self, action:#selector(sliderValueDidChange(sender:)), for: .touchDragInside)
     }
     
     func updateUI(direction: Bool) {
-        print("inside updateUI")
         if(!self.meme.isHidden){
-            /*if(direction){
-                self.imageView.slideInFromRight()
-            }
-            else{
-                self.imageView.slideInFromLeft()
-            }*/
             self.imageView?.image = self.image
             self.meme = ImageZoomView(frame: self.meme.frame, something: true)
             self.view.addSubview(self.meme)
             if(self.imageView.image != nil){
-                print("image not nil")
                 self.meme.updateImage(imageView: self.imageView!)
             }
             else{
-                print("image was nil")
                 self.next(self)
             }
         }
         if((self.image) != nil){
             let real_image_rect = AVMakeRect(aspectRatio: self.meme.getImage().size, insideRect: self.meme.bounds)
-            //self.meme_link?.widthAnchor.constraint(equalToConstant: 31.0).isActive = true
-            //self.meme_group_add?.widthAnchor.constraint(equalToConstant: 44.0).isActive = true
-            //self.meme_link?.heightAnchor.constraint(equalToConstant: 37.0).isActive = true
-            //self.meme_link?.trailingAnchor.constraint(equalTo: self.view.trailingAnchor).isActive = true
-            //self.meme_group_add?.heightAnchor.constraint(equalToConstant: 26.0).isActive = true
-            //self.meme_link?.translatesAutoresizingMaskIntoConstraints = false
-            print("PRINTING meme_link frame ")
-            print(self.meme_link?.frame)
-            print(self.meme_link?.bounds)
-            //print(self.view.frame.width)
             self.meme_link?.frame.origin.x = self.view.frame.width - 47
             self.meme_group_add?.frame.origin.x = 16
             // An image/gif
@@ -1494,6 +1475,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         }
     }
     
+    // For animation of bubbles off of slider
     func startSpewing(color: Bool) {
         let trackRect =  self.slider.trackRect(forBounds: self.slider.bounds)
         let thumbRect = self.slider.thumbRect(forBounds: self.slider.bounds, trackRect: trackRect, value: self.slider.value)
@@ -1504,6 +1486,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         self.view.layer.addSublayer(emitter)
     }
     
+    // For animation of bubbles off of slider
     func generateEmitterCells(color: Bool) -> [CAEmitterCell] {
         var cells:[CAEmitterCell] = [CAEmitterCell]()
         var x = 0
@@ -1537,84 +1520,44 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         return CGFloat(arc4random_uniform(100))
     }
     
-    // STATE RESTORATION SHIT FROM HERE ON OUT
-    // STATE RESTORATION SHIT FROM HERE ON OUT
-    // STATE RESTORATION SHIT FROM HERE ON OUT
-    // STATE RESTORATION SHIT FROM HERE ON OUT
-    // STATE RESTORATION SHIT FROM HERE ON OUT
-    
-    /*
-     Might be for non-scene-based
-     func applyUserActivityEntries(_ activity: NSUserActivity) {
-        print("applyUserActivityEntries DetailViewController")
-
-        // We remember the item's identifier for unsaved changes.
-        let index: [Int: Int] = [ViewController.activityIdentifierKey: detailItem!.identifier]
-        activity.addUserInfoEntries(from: itemIdentifier)
-        
-        // Remember the edit mode state to restore next time (we compare the orignal note with the unsaved note).
-        let originalItem = DataSource.shared().itemFromIdentifier(detailItem!.identifier)
-        let nowEditing = originalItem.title != detailName.text || originalItem.notes != detailNotes.text
-        let nowEditingSaveState: [String: Bool] = [DetailViewController.activityEditStateKey: nowEditing]
-        activity.addUserInfoEntries(from: nowEditingSaveState)
-    }*/
-    
+    // STATE RESTORATION SO WE RETURN TO THE PROPER SPOT IN THE MEME QUEUE
     func restoreItemInterface(_ activityUserInfo: [AnyHashable: Any]) {
         self.show_share_popup = 0
         if(activityUserInfo[ViewController.key_2] != nil){
-            print("printing number of memes from restored state")
             let num_memes = (activityUserInfo[ViewController.key_2] as? Int)
-            print(num_memes)
             self.previous_num_memes = num_memes!
         }
         if(activityUserInfo[ViewController.key_1] != nil){
-            print("printing index from restored state")
             self.index = (activityUserInfo[ViewController.key_1] as? Int)!
-            print(self.index)
         }
         if(activityUserInfo[ViewController.key_3] != nil){
-            //print("printing keys from restored state")
             self.previous_keys = activityUserInfo[ViewController.key_3] as! [String]
-            //print(self.previous_keys)
         }
-        
-        // Store our previous # of memes
-        // In ViewController, check how many memes we load up
-        // If there's a mismatch between this and our previous # of memes
-        // We have a new batch of memes
-        // And the user should start from 0
-        /*if(num_memes != self.keys.count){
-            print("resetting counter because we have a new batch of memes")
-            self.index = 1
-        }*/
     }
-    
-    
+
+    // STATE RESTORATION SO WE RETURN TO THE PROPER SPOT IN THE MEME QUEUE
     class var activityType: String {
-        //print("setting activityType DetailViewController")
         let activityType = ""
-        
         // Load our activity type from our Info.plist.
         if let activityTypes = Bundle.main.infoDictionary?["NSUserActivityTypes"] {
             if let activityArray = activityTypes as? [String] {
                 return activityArray[0]
             }
         }
-        
         return activityType
     }
     
+    // STATE RESTORATION SO WE RETURN TO THE PROPER SPOT IN THE MEME QUEUE
     // Used by our scene delegate to return an instance of this class from our storyboard.
     static func loadFromStoryboard() -> ViewController? {
-        //print("loadFromStoryboard ViewController")
         let storyboard = UIStoryboard(name: "Main", bundle: .main)
         return storyboard.instantiateViewController(withIdentifier: "ViewController") as? ViewController
     }
     
+    // STATE RESTORATION SO WE RETURN TO THE PROPER SPOT IN THE MEME QUEUE
     // Used to construct an NSUserActivity instance for state restoration.
     var detailUserActivity: NSUserActivity {
         self.show_share_popup = 0
-        print("detailUserActivity ViewController")
         let userActivity = NSUserActivity(activityType: ViewController.activityType)
         userActivity.title = "Restore Item"
         let index_temp : [String:Int] = [ViewController.key_1: self.index]
@@ -1623,15 +1566,14 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         userActivity.addUserInfoEntries(from: index_temp)
         userActivity.addUserInfoEntries(from: total_memes_temp)
         userActivity.addUserInfoEntries(from: previous_memes)
-        //applyUserActivityEntries(userActivity)
         return userActivity
     }
 }
  
  extension ViewController {
     
+    // STATE RESTORATION SO WE RETURN TO THE PROPER SPOT IN THE MEME QUEUE
     override func updateUserActivityState(_ activity: NSUserActivity) {
-        print("updateUserActivityState ViewController")
         let userActivity = NSUserActivity(activityType: ViewController.activityType)
         userActivity.title = "Restore Item"
         let index_temp : [String:Int] = [ViewController.key_1: self.index]
@@ -1643,8 +1585,8 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         super.updateUserActivityState(activity)
     }
 
+    // STATE RESTORATION SO WE RETURN TO THE PROPER SPOT IN THE MEME QUEUE
     override func restoreUserActivityState(_ activity: NSUserActivity) {
-        print("restoreUserActivityState ViewController")
         self.show_share_popup = 0
         super.restoreUserActivityState(activity)
         // Check if the activity is of our type.
@@ -1658,6 +1600,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
 }
 
+// Reset gestures whenever a video is playing (Can't swipe it)
 extension AVPlayerViewController {
     func disableGestureRecognition() {
         let contentView = view.value(forKey: "contentView") as? UIView
@@ -1665,28 +1608,10 @@ extension AVPlayerViewController {
     }
 }
 
-extension UIImage {
-  func resizeImage(targetSize: CGSize) -> UIImage {
-    let size = self.size
-    let widthRatio  = targetSize.width  / size.width
-    let heightRatio = targetSize.height / size.height
-    let newSize = widthRatio > heightRatio ?  CGSize(width: size.width * heightRatio, height: size.height * heightRatio) : CGSize(width: size.width * widthRatio,  height: size.height * widthRatio)
-    let rect = CGRect(x: 0, y: 0, width: newSize.width, height: newSize.height)
-
-    UIGraphicsBeginImageContextWithOptions(newSize, false, 1.0)
-    self.draw(in: rect)
-    let newImage = UIGraphicsGetImageFromCurrentImageContext()
-    UIGraphicsEndImageContext()
-
-    return newImage!
-  }
-}
-
+// So that button boxes are larger than the icons themselves
+// Makes it easier to click them
 extension UIButton {
     open override func point(inside point: CGPoint, with event: UIEvent?) -> Bool {
-        //print(event)
-        //print(event)
-        //print("inside this extension")
         let newArea = CGRect(
             x: self.bounds.origin.x - 20.0,
             y: self.bounds.origin.y - 20.0,
@@ -1694,5 +1619,14 @@ extension UIButton {
             height: self.bounds.size.height + 40.0
         )
         return newArea.contains(point)
+    }
+}
+
+extension UISlider {
+    // returns the x coordinate of the thumb in relation to the UISlider's containing view
+    // Used for determine x position when sliding left to right
+    // This x position is passed to ImageZoomView for the swipe animation
+    var thumbCenterX: CGFloat {
+        return thumbRect(forBounds: frame, trackRect: trackRect(forBounds: frame), value: value).midX
     }
 }

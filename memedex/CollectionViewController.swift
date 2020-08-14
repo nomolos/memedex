@@ -12,6 +12,7 @@ import AWSCognito
 import AWSCognitoIdentityProvider
 import AWSCore
 import AWSDynamoDB
+import AWSSNS
 
 private let reuseIdentifier = "Cell"
 
@@ -34,6 +35,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
     let waitUserSub = DispatchGroup()
     var casted_user_sub_item:UserSub?
     let test_textfield = UITextField()
+    let waitUserSubsPushNotification = DispatchGroup()
     //let waitMessageSend = DispatchGroup()
     
     override func viewDidLoad() {
@@ -181,20 +183,12 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             }
             if task.result != nil {
                 print(task.result)
-                //self.collectionView.reloadData()
             }
-            //self.waitMessageSend.leave()
             return nil
         }
         self.test_textfield.text = ""
         dismissKeyboard()
         self.view.frame.origin.y = 0
-        /*self.waitMessageSend.notify(queue: .main){
-            print("should be refreshing.. prolly broken")
-            self.waitMemeNamesS3.enter()
-            self.loadAllS3MemeNames()
-        }*/
-        //self.key
         print("should be reloading data")
         self.keys.insert((self.group! + "/actualmemes/notameme/" + randy), at: 0)
         self.meme_container.insert(message!, at: 0)
@@ -207,11 +201,91 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             self.view.layoutIfNeeded()
             self.activityIndicator.stopAnimating()
         }
+        // Send Push Notifications to others in group
+        self.waitUserSubsPushNotification.enter()
+        let scanExpression = AWSDynamoDBScanExpression()
+        let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+        updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+        let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+        let user_subs = dynamoDBObjectMapper.scan(UserSub.self, expression: scanExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+            if (task.error != nil){
+                print("Error scanning for UserSubs in addMemeToGroup before push notification")
+                print(task.error)
+            }
+            if (task.result != nil){
+                print("Successfully scanned user_subs table, about to send notifications to a subset of them")
+            }
+            self.waitUserSubsPushNotification.leave()
+            return task.result
+        }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+        
+        self.waitUserSubsPushNotification.notify(queue: .main){
+            DispatchQueue.main.async{
+                let group_name_temp = self.group
+                let user_subs_returned = user_subs.result?.items
+                for user1 in user_subs_returned! {
+                    let casted = user1 as! UserSub
+                    print(casted)
+                    if casted.groups != nil && casted.groups.count != 0 && casted.groups.contains((self.group) as! NSString){
+                        print(group_name_temp)
+                        print(casted.sub as! String)
+                        print("Should be sending a notification to " + (casted.sub as! String))
+                        self.sendSNSPushNotification(group: group_name_temp!, receiverSub: (casted.sub as! String))
+                    }
+                }
+            }
+        }
+        
+        
+        
     }
     
     func randomString(length: Int) -> String {
       let letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
       return String((0..<length).map{ _ in letters.randomElement()! })
+    }
+    
+    func sendSNSPushNotification(group: String, receiverSub: String) {
+        print("inside sendSNSPushNotification")
+        let queryExpression = AWSDynamoDBQueryExpression()
+        queryExpression.keyConditionExpression = "#sub2 = :sub"
+        queryExpression.expressionAttributeNames = ["#sub2": "sub"]
+        queryExpression.expressionAttributeValues = [":sub": receiverSub]
+        let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+        let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+        updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+        var somefin = dynamoDBObjectMapper.query(SNSEndpoint.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+        if (task.error != nil){
+            print("error in querying for User : " + receiverSub + " in sendSNSPushNotification")
+            print(task.error)
+        }
+        if (task.result != nil){
+            print("Successfully queried for User : " + receiverSub + " in sendSNSPushNotification")
+            if(task.result?.items.count != 0){
+                let castedSNSUser = task.result?.items[0] as! SNSEndpoint
+                if(castedSNSUser.endpoint != nil && castedSNSUser.endpoint != ("" as! NSString)){
+                    let sns = AWSSNS.default()
+                    let request = AWSSNSPublishInput()
+                    request?.targetArn = castedSNSUser.endpoint as! String
+                    request?.message = "Someone sent a message to your group : " + group
+                    sns.publish(request!, completionHandler: ({ (response: AWSSNSPublishResponse?, err: Error?) in
+                        if(err != nil){
+                            print("Printing error sendSNSPushNotification")
+                            print(err)
+                        }
+                        else{
+                            print("Printing response sendSNSPushNotification")
+                            print(response)
+                        }
+                    }))
+                }
+            }
+            else{
+                print("We don't have this user's endpoint : " + receiverSub + " either they didn't enable notifications or theres a bug")
+            }
+        }
+        return task.result
+        }) as! AWSTask<AWSDynamoDBPaginatedOutput>
     }
     
 

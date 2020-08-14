@@ -67,14 +67,14 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
         addGestureRecognizer(self.panGesture)
     }
     
+    // Called when swiping the image/video
     @objc func handlePans() {
-        if(!ultimate_center_set){
+        if(!self.ultimate_center_set){
             self.ultimate_center = self.imageView.center
             self.ultimate_center_set = true
         }
         let square = self.imageView!
         if(!(self.panGesture.state == UIGestureRecognizer.State.ended)){
-            //print("end of swipe ImageZoomView")
             let point = self.panGesture.location(in: self.superview)
             let divisor = (self.superview!.frame.width/2)/0.61
             square.center.x = point.x
@@ -86,7 +86,6 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
             square.transform = CGAffineTransform(rotationAngle: xFromCenter/divisor).scaledBy(x: scale, y: scale)
         }
         else if self.panGesture.state == UIGestureRecognizer.State.ended{
-            print("end of swipe ImageZoomView")
             square.transform = CGAffineTransform.identity
             let nc = NotificationCenter.default
             nc.post(name: NSNotification.Name(rawValue: "next"), object: nil)
@@ -94,8 +93,23 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
         }
     }
     
+    // View controller calls this function to warp the image without having
+    // to slide the image itself
+    @objc func handlePansFromViewControllerSlider(thumbCenter: CGFloat) {
+        if(!self.ultimate_center_set){
+            self.ultimate_center = self.imageView.center
+            self.ultimate_center_set = true
+        }
+        let square = self.imageView!
+        let divisor = (self.superview!.frame.width/2)/0.61
+        square.center.x = CGFloat(thumbCenter)
+        let xFromCenter = square.center.x - self.ultimate_center!.x
+        let scale = min(50/abs(xFromCenter), 1)
+        square.transform = CGAffineTransform(rotationAngle: xFromCenter/divisor).scaledBy(x: scale, y: scale)
+    }
+    
+    // Zooms in on image
     @IBAction func handleDoubleTap() {
-        print("inside handle double tap")
         self.zoomHere = self.gestureRecognizer.location(in: self)
         if zoomScale == 1 {
             zoom(to: zoomRectForScale(maximumZoomScale, center: self.gestureRecognizer.location(in: self)), animated: true)
