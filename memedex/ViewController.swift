@@ -676,6 +676,14 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        // Don't stop other music (ex: Spotify)
+        do {
+            try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.ambient)
+            try AVAudioSession.sharedInstance().setActive(true)
+        }
+        catch {
+            print("error in AVAudioSession \(error)")
+        }
         NotificationCenter.default.addObserver(
         self,
         selector: #selector(applicationWillEnterForeground(_:)),
@@ -1223,8 +1231,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             }
         return task.result
         }) as! AWSTask<AWSDynamoDBPaginatedOutput>
-        //print("printing response")
-        //print(response)
     }
     
     
