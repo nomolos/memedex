@@ -51,8 +51,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         return AWSCognitoIdentityUserPool(forKey: userPoolID)
     }
     
-    //var window: UIWindow?
-    
     var cognitoConfig:CognitoConfig?
           
     func application(
@@ -70,7 +68,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     }
     
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
-        //AppDelegate.waitFBUser.enter()
         ApplicationDelegate.shared.application(
             application,
             didFinishLaunchingWithOptions: launchOptions
@@ -94,8 +91,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         let configuration = AWSServiceConfiguration(region:.USWest1, credentialsProvider:credentialsProvider)
         AWSServiceManager.default().defaultServiceConfiguration = configuration
         AWSS3.register(with: configuration!, forKey: "defaultKey")
-        //AWSDDLog.sharedInstance.logLevel = .verbose
-        //AWSDDLog.add(AWSDDTTYLogger.sharedInstance)
         self.cognitoConfig = CognitoConfig()
         self.setupCognitoUserPool()
         do {
@@ -106,48 +101,40 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         } catch {
             print("Failed to initialize Amplify with \(error)")
         }
-        print("printing access token AppDelegate")
+        print("printing access token AppDelegate (Amplify)")
         print(AccessToken.current)
         AppDelegate.waitSocialUser.enter()
         self.fetchCurrentAuthSession()
-        
         let appleIDProvider = ASAuthorizationAppleIDProvider()
         appleIDProvider.getCredentialState(forUserID: KeychainItem.currentUserIdentifier) { (credentialState, error) in
             switch credentialState {
             case .authorized:
                 if(self.loginViewController != nil){
                     self.loginViewController?.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-                    //self.loginViewController!.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
                     self.loginViewController?.navigationController?.setViewControllers([self.loginViewController!.viewController!], animated: true)
                 }
                 else{
                     print("ERROR - WE SIGNED IN BUT OUR LOGINVIEW IS NIL")
                 }
-                break // The Apple ID credential is valid.
+                break
             case .revoked, .notFound:
-                // The Apple ID credential is either revoked or was not found, so show the sign-in UI.
-                DispatchQueue.main.async {
-                    //self.navigationController.showLoginViewController()
-                    print("here wtf")
-                }
+                print("Error with SignInWithApple credentials")
             default:
                 break
             }
         }
 
-        
+        // Any Amplify Event (User logins, logouts) will go through here at some point
         _ = Amplify.Hub.listen(to: .auth) { payload in
             switch payload.eventName {
             case HubPayload.EventName.Auth.signedIn:
                 DispatchQueue.main.sync{
-                    //AppDelegate.fbLoggedIn = true
                     print("Amplify has someone signed in")
                     AppDelegate.waitSocialUser.enter()
                     self.fetchCurrentAuthSession()
                     AppDelegate.waitSocialUser.notify(queue: .main){
                         if(self.loginViewController != nil){
                             self.loginViewController?.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
-                            //self.loginViewController!.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as? ViewController
                             self.loginViewController?.navigationController?.setViewControllers([self.loginViewController!.viewController!], animated: true)
                         }
                         else{
@@ -155,31 +142,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
                         }
                     }
                 }
-                // Update UI
-
             case HubPayload.EventName.Auth.sessionExpired:
                 print("Session expired")
                 // Re-authenticate the user
-
             case HubPayload.EventName.Auth.signedOut:
-                print("User signed out")
+                print("Amplify user signed out")
                 if(AppDelegate.loggedIn!){
-                    print("we're logged in, going to navigate to loginView to log out")
-                    //print("printing connected scenes from app delegate in auth")
-                    //print(self.window.rootViewController)
-                    //print(UIApplication.shared.connectedScenes)
-                    //print("printing scene delegate's navigationView and login view")
-                    //print(scene_delegate.navigationController)
-                    //print(scene_delegate.loginViewController)
                     DispatchQueue.main.async {
                         let hacky_scene_access = UIApplication.shared.connectedScenes.first
                         let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
                         scene_delegate.navigationController?.setViewControllers([scene_delegate.loginViewController!], animated: true)
                     }
-                    //self.navigationController!.setViewControllers([self.loginViewController!], animated: true)
                 }
-                // Update UI
-
             default:
                 break
             }
@@ -190,8 +164,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         // 1
         if let notification = notificationOption as? [String: AnyObject],
             let aps = notification["aps"] as? [String: AnyObject] {
-            print("we got here from a notification")
-            print(aps)
+            //print("we got here from a notification")
+            //print(aps)
             }
         return AWSMobileClient.sharedInstance().interceptApplication(
             application,
@@ -202,17 +176,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         self.viewController?.encodeRestorableState(with: NSCoder())
         return true
     }
-    
-    
-    /*func finishedWithAuth(auth: ASAuthorizationAppleIDCredential!, error: NSError!) {
-        if error != nil {
-          print(error.localizedDescription)
-        }
-        else {
-          let idToken = auth.identityToken,
-          credentialsProvider.logins = ["appleid.apple.com": idToken!]
-        }
-    }*/
     
     func application(_ application: UIApplication, shouldSaveApplicationState coder: NSCoder) -> Bool {
         return true
@@ -277,26 +240,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
         }
     }
     
-    /*func fetchCurrentAuthSession() {
-        _ = Amplify.Auth.fetchAuthSession { result in
-            switch result {
-            case .success(let session):
-                print("fbLoggedIn should be set to - \(session.isSignedIn)")
-                print(result)
-                AppDelegate.fbLoggedIn = session.isSignedIn
-                //let session2 = try result.get() as! AWSAuthCognitoSession
-                AppDelegate.waitFBUser.leave()
-            case .failure(let error):
-                print("Fetch session failed with error \(error)")
-                AppDelegate.waitFBUser.leave()
-            }
-        }
-    }*/
-    
     func fetchCurrentAuthSession() {
         _ = Amplify.Auth.fetchAuthSession { result in
             do {
-                print("inside fetchCurrentAuthSession2")
                 let session = try result.get() as! AWSAuthCognitoSession
                 print("fbLoggedIn should be set to - \(session.isSignedIn)")
                 AppDelegate.socialLoggedIn = session.isSignedIn
@@ -336,27 +282,13 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
 // 3. Log out
 extension AppDelegate: AWSCognitoIdentityInteractiveAuthenticationDelegate {
     func startPasswordAuthentication() -> AWSCognitoIdentityPasswordAuthentication {
-        print("inside startPasswordAuthentication AppDelegate")
-        //UIApplication.shared.connectedScenes
         let hacky_scene_access = UIApplication.shared.connectedScenes.first
         let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
         if(AppDelegate.loggedIn!){
-            print("we're logged in, going to navigate to loginView to log out")
-            //print("printing connected scenes from app delegate in auth")
-            //print(self.window.rootViewController)
-            //print(UIApplication.shared.connectedScenes)
-            //print("printing scene delegate's navigationView and login view")
-            //print(scene_delegate.navigationController)
-            //print(scene_delegate.loginViewController)
             DispatchQueue.main.async {
                 scene_delegate.navigationController?.setViewControllers([scene_delegate.loginViewController!], animated: true)
             }
-            //self.navigationController!.setViewControllers([self.loginViewController!], animated: true)
         }
-        //print("printing scene delegate's navigationView and login view")
-        //print(scene_delegate.navigationController)
-        //print(scene_delegate.loginViewController)
-        //print(UIApplication.shared.connectedScenes)
         return scene_delegate.loginViewController!
     }
 }
@@ -406,32 +338,19 @@ extension AppDelegate {
       }
     }
     
-    /*func registerForPushNotifications() {
-      UNUserNotificationCenter.current()
-        .requestAuthorization(options: [.alert, .badge]) {
-          [weak self] granted, error in
-            
-          print("Permission granted: \(granted)")
-          guard granted else { return }
-          self?.getNotificationSettings()
-      }
-    }*/
     
+    // Called when user opts into push notifications
     func application(
       _ application: UIApplication,
       didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
     ) {
-        print("didRegisterForRemoteNotificationsWithDeviceToken")
       /// Attach the device token to the user defaults
       var token = ""
       for i in 0..<deviceToken.count {
           token = token + String(format: "%02.2hhx", arguments: [deviceToken[i]])
       }
-      
-      print("Device token " + token)
-      
+      print("Device token (SNS Push Notifications) " + token)
       UserDefaults.standard.set(token, forKey: "deviceTokenForSNS")
-      
       /// Create a platform endpoint. In this case,  the endpoint is a
       /// device endpoint ARN
       let sns = AWSSNS.default()
@@ -458,6 +377,10 @@ extension AppDelegate {
                     snessy!.sub = AppDelegate.social_username! as! NSString
                 }
                 snessy?.endpoint = endpointArnForSNS as! NSString
+                // VERY IMPORTANT
+                // We need to send our SNS Endpoint to Dynamo
+                // We will use it to send push notifications to a particular device
+                // When memes or messages are added to groups
                   dynamoDBObjectMapper.save(snessy!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
                       if let error = task.error as NSError? {
                           print("The request failed. Error: \(error)")
@@ -487,16 +410,7 @@ extension AppDelegate {
 
         pinpoint!.notificationManager.interceptDidReceiveRemoteNotification(
             userInfo, fetchCompletionHandler: completionHandler)
-        print("didReceiveRemoteNotification")
-        /*if (application.applicationState == .active) {
-            let alert = UIAlertController(title: "Notification Received",
-                                          message: userInfo.description,
-                                          preferredStyle: .alert)
-            alert.addAction(UIAlertAction(title: "Ok", style: .default, handler: nil))
-
-            /*UIApplication.shared.keyWindow?.rootViewController?.present(
-                alert, animated: true, completion:nil)*/
-        }*/
+        print("didReceiveRemoteNotification pinpoint")
     }
     
     // Request user to grant permissions for the app to use notifications
@@ -504,7 +418,7 @@ extension AppDelegate {
         UNUserNotificationCenter.current().delegate = self
         UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge]) {
             (granted, error) in
-            print("Permission granted: \(granted)")
+            print("Permission granted for push notifications: \(granted)")
             // 1. Check if permission granted
             guard granted else { return }
             // 2. Attempt registration for remote notifications on the main thread
@@ -514,30 +428,18 @@ extension AppDelegate {
         }
     }
     
-    /*func registerForPushNotifications(application: UIApplication) {
-        /// The notifications settings
-        if #available(iOS 10.0, *) {
-            UNUserNotificationCenter.current().delegate = self
-            UNUserNotificationCenter.current().requestAuthorization(options: [.badge, .sound, .alert], completionHandler: {(granted, error) in
-                if (granted)
-                {
-                    print("permission granted push notifications")
-                    //UIApplication.shared.registerForRemoteNotifications()
-                }
-                else{
-                    //Do stuff if unsuccessful...
-                }
-            })
-        } else {
-            let settings = UIUserNotificationSettings(types: [UIUserNotificationType.alert, UIUserNotificationType.badge, UIUserNotificationType.sound], categories: nil)
-            application.registerUserNotificationSettings(settings)
-            application.registerForRemoteNotifications()
-        }
-    }*/
-    
     // Called when a notification is delivered to a foreground app.
     @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        print("Got here through notification")
+        
+        let collection_view = self.storyboard?.instantiateViewController(withIdentifier: "CollectionViewController") as? CollectionViewController
+        collection_view!.group = "MITCHELL ROSE CLICK HERE"
+        DispatchQueue.main.async {
+            let hacky_scene_access = UIApplication.shared.connectedScenes.first
+            let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
+            scene_delegate.navigationController?.setViewControllers([collection_view!], animated: true)
+        }
         print("User Info = ",notification.request.content.userInfo)
         completionHandler([.alert, .badge, .sound])
     }
@@ -545,8 +447,15 @@ extension AppDelegate {
     // Called to let your app know which action was selected by the user for a given notification.
     @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        print("Got here through notification")
+        let collection_view = self.storyboard?.instantiateViewController(withIdentifier: "CollectionViewController") as? CollectionViewController
+        collection_view!.group = "MITCHELL ROSE CLICK HERE"
+        DispatchQueue.main.async {
+            let hacky_scene_access = UIApplication.shared.connectedScenes.first
+            let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
+            scene_delegate.navigationController?.setViewControllers([collection_view!], animated: true)
+        }
         print("User Info = ",response.notification.request.content.userInfo)
-        
         completionHandler()
     }
 

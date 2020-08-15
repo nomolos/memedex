@@ -33,6 +33,7 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
     var waitUserEmailsGroupCreation = DispatchGroup()
     var user_emails = [String]()
     
+    // Create new group
     @IBAction func add_group(_ sender: Any) {
         self.activityIndicator.startAnimating()
         self.waitUserEmailsGroupCreation.enter()
@@ -64,17 +65,14 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
             let saveAction = UIAlertAction(title: "Submit", style: .default) { (action) -> Void in
                 self.group_names.append(self.new_group_textfield.text!)
                 self.group_member_count.append(1)
-                print("Our group members should be " + self.new_group_users_textfield.text!)
                 self.tableView.reloadData  ()
                 let group = Group()
                 group?.set_usernames(unparsed: self.new_group_users_textfield.text!)
                 group?.group_name = self.new_group_textfield.text as NSString?
-                
                 let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
                 let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
                 updateMapperConfig.saveBehavior = .updateSkipNullAttributes
                 var invalid_users = ""
-                
                 self.dispatchQueue.async {
                     // FIRST ENSURE EACH EMAIL EXISTS
                     // GET THEIR CORRESPONDING SUB
@@ -89,22 +87,16 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
                                 print(task.error)
                             }
                             if (task.result != nil){
-                                print("printing result in email query (group creation)")
-                                print(task.result?.items)
                                 if(task.result?.items.count == 0){
                                     invalid_users.append(" " + String(user))
                                     print("We have no emails.. likely an incorrect write")
-                                    print("Should have an alert here")
+                                    print("Should have an alert here eventually")
                                     self.adding_user_semaphore.signal()
                                 }
                                 else{
                                     // THIS IS A VALID EMAIL IN THE EMAILS TABLE
                                     // LETS FIND ITS CORRESPONDING SUB
                                     let casted = task.result?.items[0] as! Email
-                                    print("Should be appending a sub")
-                                    print(casted)
-                                    print("Appending this : ")
-                                    print(casted.id)
                                     let queryExpression = AWSDynamoDBQueryExpression()
                                     queryExpression.keyConditionExpression = "#sub2 = :sub"
                                     queryExpression.expressionAttributeValues = [":sub": String(casted.id!)]
@@ -115,11 +107,8 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
                                             print("error in querying for this sub")
                                             print(task.error)
                                             self.waitUserSub.leave()
-                                            //self.adding_user_semaphore.signal()
                                         }
                                         else if (task.result != nil){
-                                            print("successfully queried for this sub")
-                                            print(task.result?.items)
                                             self.waitUserSub.leave()
                                         }
                                         return task.result
@@ -131,24 +120,14 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
                                         // SO THEY CAN ACCESS THE GROUP ON THEIR DEVICE
                                         if(user_sub_match.result?.items.count != 0){
                                             self.casted_user_sub_item = user_sub_match.result?.items[0] as! UserSub
-                                            print("THIS IS WHAT WE'RE UPDATING WITH")
-                                            print(self.new_group_textfield.text)
                                             let string_literal = self.new_group_textfield.text as! String
                                             self.casted_user_sub_item!.updateGroup(group: string_literal)
-                                            print("This is the new object")
-                                            print(self.casted_user_sub_item)
-                                            print("Attempting to re-write to dynamo user_sub table for " + String(casted.id!))
                                             dynamoDBObjectMapper.save(self.casted_user_sub_item!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
                                                 if let error = task.error as NSError? {
                                                     print("The request failed. Error: \(error)")
                                                     self.adding_user_semaphore.signal()
                                                 } else {
-                                                    print("Saved new user sub to dynamo")
-                                                    print(task.result)
-                                                    //print(task.result?.item)
-                                                    // print(task.result?.items)
                                                     self.adding_user_semaphore.signal()
-                                                    // Do something with task.result or perform other operations.
                                                 }
                                                 return 0
                                             })
@@ -211,8 +190,6 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
                         self.waitOurSub.leave()
                     }
                     else if (task.result != nil){
-                        print("successfully queried for this sub")
-                        print(task.result?.items)
                         self.waitOurSub.leave()
                     }
                     return task.result
@@ -226,19 +203,11 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
                             print("The request failed. Error: \(error)")
                             self.adding_user_semaphore.signal()
                         } else {
-                            print("Saved new user sub to dynamo")
-                            print(task.result)
-                            //print(task.result?.item)
-                            // print(task.result?.items)
                             self.adding_user_semaphore.signal()
-                            // Do something with task.result or perform other operations.
                         }
                         return 0
                     })
-                }
-                // ADDING THIS PARTICULAR USER TO THE GROUP
-                // CURRENT USER SEPARATE FROM EMAILS ENTERED
-                
+                }  
             }
             popup.addAction(cancelAction)
             popup.addAction(saveAction)
@@ -259,6 +228,9 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
         return !autoCompleteText( in : textField, using: string, suggestionsArray: self.user_emails)
     }
     
+    // Auto completes emails
+    // To allow for finding other users more easily when creating groups
+    // Privacy concern since you could find user emails. Should change eventually
     func autoCompleteText( in textField: UITextField, using string: String, suggestionsArray: [String]) -> Bool {
         if !string.isEmpty,
             let selectedTextRange = textField.selectedTextRange,
@@ -290,7 +262,6 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        //SET UP THE RIGHT BAR BUTTON
         let rightButton = UIButton(type: .custom)
         rightButton.frame = CGRect(x: 0.0, y: 0.0, width: 27.0, height: 27.0)
         rightButton.setImage(UIImage(named:"addToGroup"), for: .normal)
@@ -301,10 +272,6 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
         let currHeight = rightBarItem.customView?.heightAnchor.constraint(equalToConstant: 27)
         currHeight?.isActive = true
         self.navigationItem.rightBarButtonItem = rightBarItem
-        //SET UP THE RIGHT BAR BUTTON
-        
-        
-        print("In viewDidLoad GroupViewController")
         self.activityIndicator = UIActivityIndicatorView()
         self.activityIndicator.color = UIColor.white
         self.activityIndicator.style = UIActivityIndicatorView.Style.large
@@ -320,38 +287,25 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
             self.tableView.reloadData()
             self.activityIndicator.stopAnimating()
         }
-        // Uncomment the following line to preserve selection between presentations
-        // self.clearsSelectionOnViewWillAppear = false
-
-        // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
-        // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
 
-    // MARK: - Table view data source
-
     override func numberOfSections(in tableView: UITableView) -> Int {
-        // #warning Incomplete implementation, return the number of sections
         return 1
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
         return self.group_names.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "groupCell", for: indexPath)
         cell.textLabel!.text = self.group_names[indexPath.row]
-        //cell.contentView.backgroundColor = UIColor(red: 0.71, green: 0.44, blue: 0.95, alpha: 1.00)
         if(self.group_member_count[indexPath.row] == 1){
             cell.detailTextLabel!.text = String(self.group_member_count[indexPath.row]) + " Member"
         }
         else{
             cell.detailTextLabel!.text = String(self.group_member_count[indexPath.row]) + " Members"
         }
-        
-        // Configure the cell...
-
         return cell
     }
     
@@ -362,7 +316,6 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
         updateMapperConfig.saveBehavior = .updateSkipNullAttributes
         queryExpression.keyConditionExpression = "#sub2 = :sub"
         queryExpression.expressionAttributeNames = ["#sub2": "sub"]
-        
         if(AppDelegate.socialLoggedIn!){
             queryExpression.expressionAttributeValues = [":sub": AppDelegate.social_username]
             print("[in loadOurGroupNames GroupViewController], our user's sub is : " + AppDelegate.social_username!)
@@ -371,21 +324,17 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
             queryExpression.expressionAttributeValues = [":sub": AppDelegate.defaultUserPool().currentUser()?.username]
             print("[in loadOurGroupNames GroupViewController], our user's sub is : " + (AppDelegate.defaultUserPool().currentUser()?.username)!)
         }
-
         var user_sub_response = dynamoDBObjectMapper.query(UserSub.self, expression: queryExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
             if (task.error != nil){
                 print("error in loadOurGroupNames GroupViewController")
                 print(task.error)
             }
             else if (task.result != nil){
-                print("printing result in loadOurGroupNames GroupViewController")
-                print(task.result?.items)
                 if(task.result?.items.count == 0){
                     print("We have no items in loadOurGroupNames GroupViewController, there was no element at this user's sub")
                     return task.result
                 }
             }
-            print("leaving waitOurGroups")
             self.waitOurGroups.leave()
             return task.result
         }) as! AWSTask<AWSDynamoDBPaginatedOutput>
@@ -395,7 +344,6 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
             let dynamoDBObjectMapper2 = AWSDynamoDBObjectMapper.default()
             let updateMapperConfig2 = AWSDynamoDBObjectMapperConfiguration()
             updateMapperConfig2.saveBehavior = .updateSkipNullAttributes
-            print("notified that we got our group info")
             if(user_sub_response.result?.items.count == 0){
                 print("ERROR NO USER FOUND loadOurGroupNames GroupViewController")
                 return
@@ -408,14 +356,9 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
             }
             self.dispatchQueue.async {
                 for group in casted_user_sub.groups{
-                    print("iterating over " + (group as String))
                     self.group_names.append(group as String)
                     queryExpression2.keyConditionExpression = "group_name = :group_name"
                     queryExpression2.expressionAttributeValues = [":group_name":(group as String)]
-                    print("about to query for this groups info")
-                    print(queryExpression2.keyConditionExpression)
-                    print(queryExpression2.expressionAttributeValues)
-                    print(queryExpression2.projectionExpression)
                     var group_response_info = dynamoDBObjectMapper.query(Group.self, expression: queryExpression2).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
                         print("inside the query")
                         if (task.error != nil){
@@ -423,8 +366,6 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
                             print(task.error)
                         }
                         else if (task.result != nil){
-                            print("printing result in loadOurGroupNames GroupViewController Gathering Group Info")
-                            print(task.result?.items)
                             if(task.result?.items.count == 0){
                                 print("We have no items in loadOurGroupNames GroupViewController Gathering Group Info, there was no element at this Group")
                                 return task.result
@@ -437,17 +378,12 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
                         self.group_info_semaphore.signal()
                         return task.result
                     }) as! AWSTask<AWSDynamoDBPaginatedOutput>
-                    print("waiting")
                     self.group_info_semaphore.wait()
                 }
                 self.waitOurGroupsMemberCount.leave()
             }
         }
     }
-    
-    /*func loadOurGroupMemberCounts() {
-        
-    }*/
 
     /*
     // Override to support conditional editing of the table view.
@@ -486,7 +422,7 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
 
     // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    // Heading to collection view for the group we selected
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if(segue.identifier == "toCollection"){
             let collection_view = segue.destination as! CollectionViewController
@@ -498,20 +434,13 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
         }
     }
     
-    
+    // Heading to ViewController
     @IBAction func backToView(_ sender: Any) {
-        print("IN BACKTOVIEW")
-        //print(self.casted_user_sub_item)
         DispatchQueue.main.async{
-            //self.dismiss(animated: true, completion: nil)
             let hacky_scene_access = UIApplication.shared.connectedScenes.first
             let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
             scene_delegate.viewController?.fromGroups = true
-            //scene_delegate.navigationController?.dis
-            //self.dismiss(animated: true, completion: nil)
-            //scene_delegate.navigationController?.popViewController(animated: true)
             scene_delegate.navigationController?.setViewControllers([scene_delegate.viewController!], animated: true)
-            //self.removeFromParent()
         }
     }
     

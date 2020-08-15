@@ -152,7 +152,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                     CGRect(x: 0, y: 50, width: 260, height: 162))
                 pickerView.dataSource = self
                 pickerView.delegate = self
-                // comment this line to use white color
                 pickerView.backgroundColor = UIColor.white
                 textfield.inputView = pickerView
             })
@@ -222,30 +221,24 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 }) as! AWSTask<AWSDynamoDBPaginatedOutput>
                 
                 self.waitUserSubsPushNotification.notify(queue: .main){
-                    //print("PRINTING WHAT WE HAVE ADDMEMETOGROUP")
                     DispatchQueue.main.async{
                         let group_name_temp = (self.groupname?.text)!
                         let user_subs_returned = user_subs.result?.items
                         for user1 in user_subs_returned! {
                             let casted = user1 as! UserSub
-                            print(casted)
                             if casted.groups != nil && casted.groups.count != 0 && casted.groups.contains((self.groupname?.text) as! NSString){
-                                print(group_name_temp)
-                                print(casted.sub as! String)
                                 print("Should be sending a notification to " + (casted.sub as! String))
                                 self.sendSNSPushNotification(group: group_name_temp, receiverSub: (casted.sub as! String))
                             }
                         }
                     }
                 }
-                print("addToMemeGroup")
             }))
             self.present(alert, animated: true)
         }
     }
     
     func sendSNSPushNotification(group: String, receiverSub: String) {
-        print("inside sendSNSPushNotification")
         let queryExpression = AWSDynamoDBQueryExpression()
         queryExpression.keyConditionExpression = "#sub2 = :sub"
         queryExpression.expressionAttributeNames = ["#sub2": "sub"]
@@ -259,7 +252,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             print(task.error)
         }
         if (task.result != nil){
-            print("Successfully queried for User : " + receiverSub + " in sendSNSPushNotification")
             if(task.result?.items.count != 0){
                 let castedSNSUser = task.result?.items[0] as! SNSEndpoint
                 if(castedSNSUser.endpoint != nil && castedSNSUser.endpoint != ("" as! NSString)){
@@ -337,8 +329,9 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
 
-    
+    // Also saves gifs, videos
     @IBAction func saveImage(_ sender: UIButton) {
+        // makes button pop
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
         sender.transform = CGAffineTransform(scaleX: 0.6, y: 0.6)
@@ -355,20 +348,20 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         let imageExtensions = ["png", "jpg","JPG","PNG", "gif", "ifv"]
         let last3 = self.keys[self.index].suffix(3)
         if imageExtensions.contains(String(last3)){
+            // save gif to iPhone/iPad
             if last3.contains("gif") || last3.contains("ifv"){
-                print("we have a gif, not saving it")
                 guard let saveMe = self.image else {return}
                 UIImageWriteToSavedPhotosAlbum(saveMe, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
             }
+            // save image to iPhone/iPad
             else{
                 guard let saveMe = self.meme.imageView.image else { return }
                 UIImageWriteToSavedPhotosAlbum(saveMe, self, #selector(image(_:didFinishSavingWithError:contextInfo:)), nil)
             }
         }
+        // save video to iPhone/iPad
         else{
-            print("we have a video")
             let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
-            //let temp_url = URL(string: temp0_url)!
             DispatchQueue.global(qos: .background).async {
                 if let url = URL(string: temp0_url), let urlData = NSData(contentsOf: url) {
                    let galleryPath = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0];
@@ -398,6 +391,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         }
     }
     
+    // save image to iPhone/iPad
     @objc func image(_ image: UIImage, didFinishSavingWithError error: Error?, contextInfo: UnsafeRawPointer) {
         if let error = error {
             // we got back an error!
@@ -440,6 +434,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 activityViewController.popoverPresentationController?.sourceView = self.view
                 self.present(activityViewController, animated: true, completion: nil)
             }
+            //we've got an image
             else{
                 var share_me = self.meme.imageView.image
                 let text_to_share = "Download memedex on the App Store: "
@@ -451,6 +446,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 self.present(activityViewController, animated: true, completion: nil)
             }
         }
+        // we've got a video (or something else in which case we're faqed)
         else{
             let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
             let temp_url = URL(string: temp0_url)
@@ -482,7 +478,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                                        completion: { Void in()  }
             )
             self.index = self.index - 2
-            // Change something here
             self.index_for_cache = 0
             self.downloaded_index = 0
             self.loadNextMeme(first: false, direction: false)
@@ -515,14 +510,13 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
               self.emitter.removeFromSuperlayer()
               self.slider.minimumTrackTintColor = UIColor(red: 0.82, green: 0.01, blue: 0.11, alpha: 1.00)
          }
+        // Want meme to animate even if we're using the slider and not swiping the meme
         if(self.meme.imageView != nil && !sliderSignalSentFromSwipe){
             self.meme.handlePansFromViewControllerSlider(thumbCenter: self.slider.thumbCenterX)
         }
     }
     
     @IBOutlet weak var slider: CustomSlider!
-    
-    
 
     @IBAction func swipeLeft(_ sender: Any) {
         print("inside swipeLeft")
@@ -532,8 +526,8 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     
     
     @IBAction func next(_ sender: Any) {
+        // Ensure that meme starts in middle of screen
         if(self.meme != nil && self.meme.imageView != nil){
-            //self.meme.imageView.center
             self.meme.imageView.transform = CGAffineTransform.identity
             self.meme.ultimate_center_set = false
         }
@@ -568,6 +562,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         if(self.keys.count == self.index+1){
             let generator = UINotificationFeedbackGenerator()
             generator.notificationOccurred(.error)
+            print("Reached last meme")
             return
         }
         if(self.index + 1 == self.last_recommended_index){
@@ -578,7 +573,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         // vibration indicating success
         let generator = UINotificationFeedbackGenerator()
         generator.notificationOccurred(.success)
-
         // the meme view is hidden because we had a video last time
         // We need to get rid of the AVPlayer used for the video
         // The meme view with either be re-loaded or a video/gif we be loaded
@@ -610,7 +604,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         }
         else{
             self.rateCurrentMeme()
-            print("about to call loadNextMeme line 571")
             self.loadNextMeme(first: false, direction: true)
         }
     }
@@ -632,12 +625,11 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         self.sliderValueDidChange(sender: self.slider)
     }
     
+    // Check if S3 has been updated
+    // We want to refresh our memes if that's the case
     @objc func applicationWillEnterForeground(_ notification: NSNotification) {
-        //self.volumeSlider.value = AVAudioSession.sharedInstance().outputVolume
         print("here inside applicationWillEnterForeground viewcontroller")
         var temp_keys = [String]()
-        //print(self.keys.count)
-        //print(self.previous_keys.count)
         self.waitCheckMemeNames.enter()
         let s3 = AWSS3.s3(forKey: "defaultKey")
         let listRequest: AWSS3ListObjectsRequest = AWSS3ListObjectsRequest()
@@ -655,11 +647,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 return nil
             }
             for object in (listObjectsOutput?.contents)! {
-                //print(object.)
-                //print("PRINTING WHEN OBJECT WAS MODIFIED")
-                //print(object.lastModified)
                 temp_keys.append(String(object.key!))
-                //print(String(object.key!))
             }
             self.waitCheckMemeNames.leave()
             return nil
@@ -680,8 +668,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                         let nc = NotificationCenter.default
                         nc.removeObserver(self)
                         self.viewWillAppear(true)
-                        //self.loadNextMeme(first: true, direction: true)
-                        //self.updateUI(direction: true)
                     }))
                     self.present(alert, animated: true)
                 }
@@ -696,6 +682,8 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         name: UIApplication.willEnterForegroundNotification,
         object: nil)
         print("inside viewWillAppear ViewController")
+        // Don't want to call viewWillAppear in its entirety if we're coming from
+        // The Groups controller
         if(self.fromGroups){
             let nc = NotificationCenter.default
             nc.addObserver(self, selector: #selector(swipeLeft(_:)), name: NSNotification.Name(rawValue: "next"), object: nil)
@@ -705,15 +693,19 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             return
         }
         super.viewWillAppear(animated)
+        // If we get 3 high ratings, we'll prompt the user to share a meme
         self.show_share_popup = 0
         let hacky_scene_access = UIApplication.shared.connectedScenes.first
         let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
         scene_delegate.viewController = self
+        
+        // Ensure that gestures on ImageZoomView trigger functions in this class
         let nc = NotificationCenter.default
         nc.addObserver(self, selector: #selector(swipeLeft(_:)), name: NSNotification.Name(rawValue: "next"), object: nil)
         nc.addObserver(self, selector: #selector(back(_:)), name: NSNotification.Name(rawValue: "back"), object: nil)
         nc.addObserver(self, selector: #selector(update_slider), name: NSNotification.Name(rawValue: "update_slider"), object: nil)
         
+        // Set up buttons above meme
         if(self.meme_link == nil || self.meme_group_add == nil){
             self.meme_link = UIButton()
             self.meme_group_add = UIButton()
@@ -722,8 +714,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             self.meme_link?.setImage(temp_image, for: .normal)
             self.meme_group_add?.setImage(temp_image2, for: .normal)
             self.meme_group_add?.frame = CGRect(x: 100,y: 100,width: 27,height: 27)
-            
-            
             self.meme_link?.frame = CGRect(x: 100,y: 100,width: 31,height: 27)
             self.meme_group_add?.isHidden = true
             self.meme_link?.isHidden = true
@@ -745,11 +735,8 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         self.loadAllS3MemeNames()
         self.waitPotentialPartners.enter()
         self.waitFinalPartner.enter()
-        // Just looks for active users, don't need to know our username yet
         self.findPartnerMatchesPart1()
         self.waitPotentialPartners.notify(queue: .main){
-            print("done waiting to see if we have some active users today")
-            print("done waiting to see if we have a non FB User")
             AppDelegate.waitSocialUser.notify(queue: .main){
                 if(!AppDelegate.socialLoggedIn! && AppDelegate.defaultUserPool().currentUser()?.username == nil){
                     print("we don't have a FB User, Apple User, or regular user.. this is a problem. Signing out")
@@ -783,15 +770,12 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 self.waitTopSources.enter()
                 self.loadTopSources()
                 self.waitFinalPartner.notify(queue: .main){
-                    print("notified about final partner")
                     self.waitMemeNamesS3.notify(queue: .main){
                         self.waitTopSources.notify(queue: .main){
-                            print("have our meme names S3")
                             // We have a previous state
                             // We have a previous state
                             if(self.previous_num_memes != -1){
                                 print("we have a previous state")
-                                // This previous state was from a different day
                                 // This previous state was from a different day
                                 // shuffle and prioritize top sources
                                 // load partners recommended memes afterwards if we have them
@@ -799,9 +783,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                                     print("This previous state was from a different day")
                                     self.keys.shuffle()
                                     self.waitTopSources.notify(queue: .main){
-                                        // only prioritizing very top source for now
-                                        //print("printing our top sources in viewdidappear")
-                                        //print(self.top_sources[0])
+                                        // only prioritizing top 3 sources for now
                                         if self.top_sources.count != 0{
                                             print("about to loop through keys and move top sources up")
                                             var current_index = 0
@@ -856,8 +838,6 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                                 print("we don't have a previous state")
                                 self.keys.shuffle()
                                 self.waitTopSources.notify(queue: .main){
-                                    //print("printing our top sources in viewdidappear")
-                                    //print(self.top_sources[0])
                                     if self.top_sources.count != 0{
                                         var current_index = 0
                                         var swap_index = 0
@@ -929,7 +909,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         // Very first meme of the session
         // OR We haven't downloaded the next meme that we want
         if(self.index >= self.keys.count){
-            print("should not be here... probably due to state restoration bug")
+            print("current index is greater than our number of memes... probably due to state restoration bug")
             self.index = 0
         }
         if(first || (!(self.downloaded_index > self.index || self.index_for_cache < 0))){
