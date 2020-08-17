@@ -234,7 +234,9 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                     }
                 }
             }))
-            self.present(alert, animated: true)
+            DispatchQueue.main.async{
+                self.present(alert, animated: true)
+            }
         }
     }
     
@@ -676,6 +678,8 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        // Send our endpoint to Dynamo
+        self.configureSNSEndpoint()
         // Don't stop other music (ex: Spotify)
         do {
             try AVAudioSession.sharedInstance().setCategory(AVAudioSession.Category.ambient)
@@ -851,10 +855,12 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                                         var swap_index = 0
                                         for keyster in self.keys{
                                             // only prioritizing very top source for now
-                                            if keyster.contains(self.top_sources[0]) || keyster.contains(self.top_sources[1]) || keyster.contains(self.top_sources[2]){
-                                                print(keyster + " contains substring " + self.top_sources[0])
-                                                self.keys.swapAt(current_index, swap_index)
-                                                swap_index = swap_index + 1
+                                            if(self.top_sources.count > 2){
+                                                if keyster.contains(self.top_sources[0]) || keyster.contains(self.top_sources[1]) || keyster.contains(self.top_sources[2]){
+                                                    print(keyster + " contains substring " + self.top_sources[0])
+                                                    self.keys.swapAt(current_index, swap_index)
+                                                    swap_index = swap_index + 1
+                                                }
                                             }
                                             current_index = current_index + 1
                                         }
@@ -1183,6 +1189,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                     self.groups.append(group as! String)
                 }
             }
+            print("should be leaving?")
             self.waitGroupNamesFinal.leave()
         }
     }
@@ -1553,6 +1560,52 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         userActivity.addUserInfoEntries(from: total_memes_temp)
         userActivity.addUserInfoEntries(from: previous_memes)
         return userActivity
+    }
+    
+    func configureSNSEndpoint() {
+        let sns = AWSSNS.default()
+        let request = AWSSNSCreatePlatformEndpointInput()
+        request?.token = AppDelegate.token
+        request?.platformApplicationArn = AppDelegate.SNSPlatformApplicationArn
+        sns.createPlatformEndpoint(request!).continueWith(executor: AWSExecutor.mainThread(), block: { (task: AWSTask!) -> AnyObject? in
+            if task.error != nil {
+                print("Error: \(String(describing: task.error))")
+            } else {
+                let createEndpointResponse = task.result! as AWSSNSCreateEndpointResponse
+                
+                if let endpointArnForSNS = createEndpointResponse.endpointArn {
+                    print("endpointArn: \(endpointArnForSNS)")
+                    UserDefaults.standard.set(endpointArnForSNS, forKey: "endpointArnForSNS")
+                    let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+                    let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+                    updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+                    let snessy = SNSEndpoint()
+                  if(AppDelegate.socialLoggedIn!){
+                      print("endpoint username is " + AppDelegate.social_username!)
+                      snessy!.sub = AppDelegate.social_username! as! NSString
+                  }
+                  else if(AppDelegate.loggedIn!){
+                      print("endpoint username is " + (AppDelegate.defaultUserPool().currentUser()?.username!)!)
+                      snessy!.sub = AppDelegate.defaultUserPool().currentUser()?.username! as! NSString
+                  }
+                  snessy?.endpoint = endpointArnForSNS as! NSString
+                  // VERY IMPORTANT
+                  // We need to send our SNS Endpoint to Dynamo
+                  // We will use it to send push notifications to a particular device
+                  // When memes or messages are added to groups
+                    dynamoDBObjectMapper.save(snessy!, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
+                        if let error = task.error as NSError? {
+                            print("The request failed. Error: \(error)")
+                        } else {
+                            print("Endpoint should have been sent")
+                            // Do something with task.result or perform other operations.
+                        }
+                        return 0
+                    })
+                }
+            }
+            return nil
+        })
     }
 }
  

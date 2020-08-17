@@ -67,6 +67,10 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
                 self.group_member_count.append(1)
                 self.tableView.reloadData  ()
                 let group = Group()
+                // Should eventually display an alert
+                if(self.new_group_users_textfield.text! == ""){
+                    self.new_group_users_textfield.text = "no_user"
+                }
                 group?.set_usernames(unparsed: self.new_group_users_textfield.text!)
                 group?.group_name = self.new_group_textfield.text as NSString?
                 let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
@@ -195,18 +199,21 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
                     return task.result
                 }) as! AWSTask<AWSDynamoDBPaginatedOutput>
                 self.waitOurSub.notify(queue: .main){
-                    var casted_user_sub_item2 = user_sub_match2.result?.items[0] as! UserSub
-                    let string_literal = self.new_group_textfield.text as! String
-                    casted_user_sub_item2.updateGroup(group: string_literal)
-                    dynamoDBObjectMapper.save(casted_user_sub_item2, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
-                        if let error = task.error as NSError? {
-                            print("The request failed. Error: \(error)")
-                            self.adding_user_semaphore.signal()
-                        } else {
-                            self.adding_user_semaphore.signal()
-                        }
-                        return 0
-                    })
+                    print("self.waitOurSub.notify")
+                    if((user_sub_match2.result?.items.count)! > 0){
+                        var casted_user_sub_item2 = user_sub_match2.result?.items[0] as! UserSub
+                        let string_literal = self.new_group_textfield.text as! String
+                        casted_user_sub_item2.updateGroup(group: string_literal)
+                        dynamoDBObjectMapper.save(casted_user_sub_item2, configuration: updateMapperConfig).continueWith(block: { (task:AWSTask<AnyObject>!) -> Any? in
+                            if let error = task.error as NSError? {
+                                print("The request failed. Error: \(error)")
+                                self.adding_user_semaphore.signal()
+                            } else {
+                                self.adding_user_semaphore.signal()
+                            }
+                            return 0
+                        })
+                    }
                 }  
             }
             popup.addAction(cancelAction)
@@ -351,6 +358,12 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
             let casted_user_sub = user_sub_response.result?.items[0] as! UserSub
             if(casted_user_sub.groups == nil || casted_user_sub.groups.count == 0){
                 print("No groups for this user")
+                DispatchQueue.main.async{
+                    let no_group_popup = UIAlertController(title: "No Groups Yet", message: "Click the plus button to make your first group", preferredStyle: .alert)
+                    let okAction = UIAlertAction(title: "Ok", style: .default)
+                    no_group_popup.addAction(okAction)
+                    self.present(no_group_popup, animated: true, completion: nil)
+                }
                 self.waitOurGroupsMemberCount.leave()
                 return
             }

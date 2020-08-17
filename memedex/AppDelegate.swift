@@ -40,7 +40,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     static var waitSocialUser = DispatchGroup()
     static var waitSocialUsername = DispatchGroup()
     static var social_username:String?
-    let SNSPlatformApplicationArn = "arn:aws:sns:us-west-1:560871491257:app/APNS_SANDBOX/memedex"
+    static var token:String?
+    static var SNSPlatformApplicationArn = "arn:aws:sns:us-west-1:560871491257:app/APNS_SANDBOX/memedex"
     
     
     var storyboard: UIStoryboard? {
@@ -349,11 +350,12 @@ extension AppDelegate {
       for i in 0..<deviceToken.count {
           token = token + String(format: "%02.2hhx", arguments: [deviceToken[i]])
       }
+      AppDelegate.token = token
       print("Device token (SNS Push Notifications) " + token)
       UserDefaults.standard.set(token, forKey: "deviceTokenForSNS")
       /// Create a platform endpoint. In this case,  the endpoint is a
       /// device endpoint ARN
-      let sns = AWSSNS.default()
+      /*let sns = AWSSNS.default()
       let request = AWSSNSCreatePlatformEndpointInput()
       request?.token = token
       request?.platformApplicationArn = SNSPlatformApplicationArn
@@ -370,11 +372,13 @@ extension AppDelegate {
                   let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
                   updateMapperConfig.saveBehavior = .updateSkipNullAttributes
                   let snessy = SNSEndpoint()
-                if(AppDelegate.loggedIn!){
-                    snessy!.sub = AppDelegate.defaultUserPool().currentUser()?.username! as! NSString
-                }
-                else if(AppDelegate.socialLoggedIn!){
+                if(AppDelegate.socialLoggedIn!){
+                    print("endpoint username is " + AppDelegate.social_username!)
                     snessy!.sub = AppDelegate.social_username! as! NSString
+                }
+                else if(AppDelegate.loggedIn!){
+                    print("endpoint username is " + (AppDelegate.defaultUserPool().currentUser()?.username!)!)
+                    snessy!.sub = AppDelegate.defaultUserPool().currentUser()?.username! as! NSString
                 }
                 snessy?.endpoint = endpointArnForSNS as! NSString
                 // VERY IMPORTANT
@@ -393,7 +397,7 @@ extension AppDelegate {
               }
           }
           return nil
-      })
+      })*/
     }
 
     func application(
@@ -434,13 +438,20 @@ extension AppDelegate {
         print("Got here through notification")
         
         let collection_view = self.storyboard?.instantiateViewController(withIdentifier: "CollectionViewController") as? CollectionViewController
-        collection_view!.group = "MITCHELL ROSE CLICK HERE"
+        let push_notification_data = notification.request.content.userInfo as! [String: AnyObject]
+        let snippet = push_notification_data["aps"]!["alert"]!
+        if let range = snippet!.range(of: ": ") {
+            let group = snippet![range.upperBound...]
+            print(group) // prints "123.456.7891"
+            collection_view!.group = String(group)
+        }
         DispatchQueue.main.async {
             let hacky_scene_access = UIApplication.shared.connectedScenes.first
             let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
             scene_delegate.navigationController?.setViewControllers([collection_view!], animated: true)
         }
-        print("User Info = ",notification.request.content.userInfo)
+        
+        
         completionHandler([.alert, .badge, .sound])
     }
     
@@ -449,7 +460,13 @@ extension AppDelegate {
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
         print("Got here through notification")
         let collection_view = self.storyboard?.instantiateViewController(withIdentifier: "CollectionViewController") as? CollectionViewController
-        collection_view!.group = "MITCHELL ROSE CLICK HERE"
+        let push_notification_data = response.notification.request.content.userInfo as! [String: AnyObject]
+        let snippet = push_notification_data["aps"]!["alert"]!
+        if let range = snippet!.range(of: ": ") {
+            let group = snippet![range.upperBound...]
+            collection_view!.group = String(group)
+            print(group) // prints "123.456.7891"
+        }
         DispatchQueue.main.async {
             let hacky_scene_access = UIApplication.shared.connectedScenes.first
             let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate

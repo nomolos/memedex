@@ -29,34 +29,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             // Do we have an activity to restore?
             if let userActivity = connectionOptions.userActivities.first ?? session.stateRestorationActivity {
                 // Setup the view controller with it's restoration activity.
-                print("This is the part where we check if we have a userActivity")
-                print(userActivity)
-                print(userActivity.activityType)
-                print(userActivity.delegate)
-                print(self.window?.rootViewController)
                 self.navigationController = self.window?.rootViewController as! UINavigationController
                 self.loginViewController = self.navigationController?.viewControllers[0] as! LoginViewController
-                //let wtf = self.window?.rootViewController as! UINavigationController
-                //print(wtf.viewControllers)
-                //print(userActivity)
-                //self.loginViewController = storyboard.instantiateViewController(identifier: "LoginViewLoginViewController()
-                //self.navigationController = UINavigationController()
-                //print(self.viewController)
-                //print(self.loginViewController)
-                //print(self.navigationController)
                 if !configure(window: window, with: userActivity) {
                     print("Failed to restore DetailViewController from \(userActivity)")
                 }
                 return
             }
-            print("func scene SceneDelegate")
-            print("printing Scenes scene delegate")
-            print(UIApplication.shared.connectedScenes)
-            print("printing window SceneDelegate")
-            print(self.window)
             guard let windowScene = (scene as? UIWindowScene) else { return }
             self.window = UIWindow(windowScene: windowScene)
-            //self.window =  UIWindow(frame: UIScreen.main.bounds)
             let storyboard = UIStoryboard(name: "Main", bundle: nil)
             guard let rootVC = storyboard.instantiateViewController(identifier: "LoginViewController") as? LoginViewController else {
                 print("LoginViewController not found")
@@ -67,9 +48,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             self.window?.rootViewController = rootNC
             var login_view = rootVC as? LoginViewController
             self.loginViewController = login_view
-            //login_view!.navigationController = rootNC
             self.window?.makeKeyAndVisible()
-            //self.navigationController?.setViewControllers([ViewController()], animated: true)
         }
         
     func configure(window: UIWindow?, with activity: NSUserActivity) -> Bool {
@@ -145,14 +124,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     // from FB
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
-        print("herererere")
-        print("herererere")
-        print("herererere")
         guard let url = URLContexts.first?.url else {
             return
         }
-        print(url)
-        print("herererere")
         ApplicationDelegate.shared.application(
             UIApplication.shared,
             open: url,
@@ -162,22 +136,3 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
 }
-
-
-/*extension SceneDelegate: AWSCognitoIdentityInteractiveAuthenticationDelegate {
-    func startPasswordAuthentication() -> AWSCognitoIdentityPasswordAuthentication {
-        print("inside startPasswordAuthentication SceneDelegate")
-        if(AppDelegate.loggedIn!){
-            print("printing root view controller Scene Delegate")
-            print(self.window?.rootViewController)
-            self.navigationController!.setViewControllers([self.loginViewController!], animated: true)
-        }
-        /*else if (self.navigationController == nil) {
-            self.navigationController = self.window?.rootViewController as? UINavigationController
-        }*/
-        else{
-            print("No conditions satisified AppDelegate")
-        }
-        return self.loginViewController!
-    }
-}*/

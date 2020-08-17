@@ -54,8 +54,6 @@ class VerificationViewController: UIViewController, UITextFieldDelegate {
                 }
             } else {
                 DispatchQueue.main.async {
-                    print("verifying did work, showing response below :")
-                    print(response.result)
                     self.activityIndicator.stopAnimating()
                     let appDelegate = UIApplication.shared.delegate as! AppDelegate
                     let authDetails = AWSCognitoIdentityPasswordAuthenticationDetails(username: self.email!, password: self.password!)

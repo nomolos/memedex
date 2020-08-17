@@ -2,8 +2,6 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Save your favorite videos and images to your phone</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -66,6 +64,8 @@
 	<string>We do not use bluetooth data, however we use the Facebook API to authenticate users (which may use this data)</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>This will let you save your favorite memes!</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Save your favorite videos and images to your phone</string>
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>com.bofa.activity</string>
