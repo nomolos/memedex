@@ -41,7 +41,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate, UNUserNotificationCenterD
     static var waitSocialUsername = DispatchGroup()
     static var social_username:String?
     static var token:String?
-    static var SNSPlatformApplicationArn = "arn:aws:sns:us-west-1:560871491257:app/APNS_SANDBOX/memedex"
+    static var SNSPlatformApplicationArn = "arn:aws:sns:us-west-1:560871491257:app/APNS/memedex_test"
     
     
     var storyboard: UIStoryboard? {

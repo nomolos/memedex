@@ -22,7 +22,18 @@ class Group: AWSDynamoDBObjectModel, AWSDynamoDBModeling {
     }
     
     func set_usernames(unparsed: String){
-        let listy = unparsed.components(separatedBy: ",")
+        // Get rid of any commas or whitespace in the usernames
+        var listy = unparsed.components(separatedBy: ",")
+        if(listy.count == 1){
+            let maybe_they_used_spaces = listy[0]
+            listy = maybe_they_used_spaces.components(separatedBy: " ")
+        }
+        var county = 0
+        while county < listy.count{
+            listy[county] = listy[county].trimmingCharacters(in: .whitespacesAndNewlines)
+            county = county + 1
+        }
+        print("Group class usernames")
         print(listy)
         self.usernames = listy as [NSString]
     }

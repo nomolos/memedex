@@ -69,7 +69,11 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
                 let group = Group()
                 // Should eventually display an alert
                 if(self.new_group_users_textfield.text! == ""){
-                    self.new_group_users_textfield.text = "no_user"
+                    let no_user_popup = UIAlertController(title: "Find another memedex user", message: "Add someone else to make a group :)", preferredStyle: .alert)
+                    let okAction = UIAlertAction(title: "Ok", style: .default)
+                    no_user_popup.addAction(okAction)
+                    self.present(no_user_popup, animated: true, completion: nil)
+                    return
                 }
                 group?.set_usernames(unparsed: self.new_group_users_textfield.text!)
                 group?.group_name = self.new_group_textfield.text as NSString?
