@@ -160,32 +160,71 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 caption = textfield
             })
             alert.addAction(UIAlertAction(title: "Done", style: .default, handler: { (action: UIAlertAction!) in
-                let key = self.keys[self.index]
-                let upload_me = self.meme.imageView.image
-                let upload_data : Data = (upload_me?.pngData())!
+                let imageExtensions = ["png", "jpg","JPG","PNG", "gif", "ifv"]
+                let last3 = self.keys[self.index].suffix(3)
+                if imageExtensions.contains(String(last3)){
+                    let key = self.keys[self.index]
+                    let upload_me = self.meme.imageView.image
+                    let upload_data : Data = (upload_me?.pngData())!
 
-                let completionHandler = { (task:AWSS3TransferUtilityUploadTask, error:NSError?) -> Void in
-                    if(error != nil){
-                        print("Failure uploading file")
-                        
-                    }else{
-                        print("Success uploading file")
-                    }
-                } as? AWSS3TransferUtilityUploadCompletionHandlerBlock
-                
-                // Upload meme to S3
-                let expression  = AWSS3TransferUtilityUploadExpression()
-                let transferUtility = AWSS3TransferUtility.default()
-                transferUtility.uploadData(upload_data, bucket: self.s3bucket, key: (self.groupname!.text! + "/" + key), contentType: "image/png", expression: expression, completionHandler: completionHandler).continueWith { (task) -> Any? in
-                    if let error = task.error {
-                        print("Error : \(error.localizedDescription)")
-                    }
+                    let completionHandler = { (task:AWSS3TransferUtilityUploadTask, error:NSError?) -> Void in
+                        if(error != nil){
+                            print("Failure uploading file")
+                            
+                        }else{
+                            print("Success uploading file")
+                        }
+                    } as? AWSS3TransferUtilityUploadCompletionHandlerBlock
+                    
+                    // Upload meme to S3
+                    let expression  = AWSS3TransferUtilityUploadExpression()
+                    let transferUtility = AWSS3TransferUtility.default()
+                    transferUtility.uploadData(upload_data, bucket: self.s3bucket, key: (self.groupname!.text! + "/" + key), contentType: "image/png", expression: expression, completionHandler: completionHandler).continueWith { (task) -> Any? in
+                        if let error = task.error {
+                            print("Error : \(error.localizedDescription)")
+                        }
 
-                    if task.result != nil {
-                        print(task.result)
-                    }
+                        if task.result != nil {
+                            print(task.result)
+                        }
 
-                    return nil
+                        return nil
+                    }
+                }
+                // we're uploading a video
+                else{
+                    let key = self.keys[self.index]
+                    let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
+                    let temp_url = URL(string: temp0_url)
+                    var video_data:Data?
+                    do {
+                        try video_data = Data(contentsOf: temp_url!)
+                    } catch {
+                        print("error in converting video to data \(error)")
+                    }
+                    
+                    let completionHandler = { (task:AWSS3TransferUtilityUploadTask, error:NSError?) -> Void in
+                        if(error != nil){
+                            print("Failure uploading file")
+                            
+                        }else{
+                            print("Success uploading file")
+                        }
+                    } as? AWSS3TransferUtilityUploadCompletionHandlerBlock
+                    // Upload meme (video) to S3
+                    let expression  = AWSS3TransferUtilityUploadExpression()
+                    let transferUtility = AWSS3TransferUtility.default()
+                    transferUtility.uploadData(video_data!, bucket: self.s3bucket, key: (self.groupname!.text! + "/" + key), contentType: "video/mp4", expression: expression, completionHandler: completionHandler).continueWith { (task) -> Any? in
+                        if let error = task.error {
+                            print("Error : \(error.localizedDescription)")
+                        }
+
+                        if task.result != nil {
+                            print(task.result)
+                        }
+
+                        return nil
+                    }
                 }
                 // Upload caption to S3
                 var caption_to_send = Caption()

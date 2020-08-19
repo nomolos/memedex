@@ -13,6 +13,8 @@ import AWSCognitoIdentityProvider
 import AWSCore
 import AWSDynamoDB
 import AWSSNS
+import AVFoundation
+import AVKit
 
 private let reuseIdentifier = "Cell"
 
@@ -328,6 +330,59 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                 label_superview_for_padding.bringSubviewToFront(label_for_cell)
                 cell.contentView.bringSubviewToFront(label_for_cell)
                 return cell
+            }
+            else if(self.keys[indexPath.row].contains(".mp4")){
+                print("we have a video in the collectionview")
+                var container_for_video_view = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.width*1.1))
+                var data_video = self.meme_container[indexPath.row]
+                print(data_video)
+                //let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[indexPath.row])
+                let temp_url = URL(fileURLWithPath:NSTemporaryDirectory()).appendingPathComponent("video").appendingPathExtension("mp4")
+                let wasFileWritten = (try? data_video.write(to: temp_url, options: [.atomic])) != nil
+                if !wasFileWritten{
+                    print("File was NOT Written")
+                }
+                var player = AVPlayer(url: temp_url)
+                //AVPlayer(data)
+                player.isMuted = true
+                var playerViewController = AVPlayerViewController()
+                playerViewController.player = player
+                playerViewController.disableGestureRecognition()
+                playerViewController.view.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: (self.view.frame.width*1.1))
+                
+                let label_superview_for_padding = UIView(frame: CGRect(x: 20, y: playerViewController.view.frame.maxY + 20, width: self.view.frame.width - 40, height: (100)))
+                let label_for_cell = UILabel(frame: CGRect(x: 30, y: playerViewController.view.frame.maxY + 20, width: self.view.frame.width - 60, height: (100)))
+                
+                label_superview_for_padding.layer.backgroundColor = UIColor.white.cgColor
+                label_superview_for_padding.layer.cornerRadius = 10.0
+                label_superview_for_padding.layer.masksToBounds = true
+                label_superview_for_padding.layer.borderWidth = 1
+                label_superview_for_padding.layer.borderColor = UIColor.lightGray.cgColor
+                
+                label_for_cell.lineBreakMode = .byWordWrapping
+                label_for_cell.numberOfLines = 0
+                label_for_cell.adjustsFontSizeToFitWidth = true
+                label_for_cell.minimumScaleFactor = 0.1
+                label_for_cell.text = self.captions[indexPath.row]
+                label_for_cell.font = UIFont.systemFont(ofSize: 20)
+                label_for_cell.textColor = UIColor.black
+                label_for_cell.isHidden = false
+                
+                container_for_video_view.addSubview(playerViewController.view)
+                label_superview_for_padding.addSubview(label_for_cell)
+                label_for_cell.layoutIfNeeded()
+                label_superview_for_padding.layoutIfNeeded()
+                cell.contentView.addSubview(container_for_video_view)
+                cell.contentView.addSubview(label_superview_for_padding)
+                cell.contentView.addSubview(label_for_cell)
+                self.addChild(playerViewController)
+                playerViewController.didMove(toParent: self)
+                cell.contentView.addSubview(playerViewController.view)
+                cell.contentView.bringSubviewToFront(playerViewController.view)
+                cell.contentView.bringSubviewToFront(label_for_cell)
+                cell.contentView.layoutIfNeeded()
+                return cell
+                //player.play()
             }
             
             let image_for_cell = UIImage(data: self.meme_container[indexPath.row])
