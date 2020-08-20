@@ -79,6 +79,9 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     var top_sources = [String]()
     var fromGroups = false
     var sliderSignalSentFromSwipe = false
+    var rightView:UIButton?
+    var leftView:UIButton?
+    var showingVideo = false
     static let key_1 = "key_1"
     static let key_2 = "key_2"
     static let key_3 = "key_3"
@@ -263,11 +266,23 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                     DispatchQueue.main.async{
                         let group_name_temp = (self.groupname?.text)!
                         let user_subs_returned = user_subs.result?.items
+                        var usersub:String?
+                        if(AppDelegate.socialLoggedIn!){
+                            usersub = AppDelegate.social_username
+                        }
+                        else if(AppDelegate.loggedIn!){
+                            usersub = AppDelegate.defaultUserPool().currentUser()?.username
+                        }
+                        else{
+                            print("Issue with finding username before sendSNSPushNotification")
+                        }
                         for user1 in user_subs_returned! {
                             let casted = user1 as! UserSub
                             if casted.groups != nil && casted.groups.count != 0 && casted.groups.contains((self.groupname?.text) as! NSString){
                                 print("Should be sending a notification to " + (casted.sub as! String))
-                                self.sendSNSPushNotification(group: group_name_temp, receiverSub: (casted.sub as! String))
+                                if((casted.sub! as String) != usersub){
+                                    self.sendSNSPushNotification(group: group_name_temp, receiverSub: (casted.sub as! String))
+                                }
                             }
                         }
                     }
@@ -559,12 +574,25 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     
     @IBOutlet weak var slider: CustomSlider!
 
-    @IBAction func swipeLeft(_ sender: Any) {
-        print("inside swipeLeft")
+    
+    /*@IBAction func nextFromImageZoom(_ sender: Any) {
+        print("inside nextFromImageZoom")
+        self.next(self)
+    }*/
+    
+    @objc func nextTap(){
+        print("inside nextTap")
+        self.slider.value = 2.5
+        self.sliderValueDidChange(sender: self.slider)
         self.next(self)
     }
     
-    
+    @objc func backTap(){
+        print("inside backTap")
+        self.slider.value = 2.5
+        self.sliderValueDidChange(sender: self.slider)
+        self.back(self)
+    }
     
     @IBAction func next(_ sender: Any) {
         // Ensure that meme starts in middle of screen
@@ -654,11 +682,11 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         self.configureSlider()
     }
     
-    override func viewWillDisappear(_ animated: Bool) {
+    /*override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         print("here inside viewWillDisappear viewcontroller")
         NotificationCenter.default.removeObserver(self)
-    }
+    }*/
     
     @objc func update_slider() {
         self.slider.value = ImageZoomView.slider_value! - 0.5
@@ -717,6 +745,9 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        if(self.showingVideo){
+            return
+        }
         // Send our endpoint to Dynamo
         self.configureSNSEndpoint()
         // Don't stop other music (ex: Spotify)
@@ -737,9 +768,9 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         // The Groups controller
         if(self.fromGroups){
             let nc = NotificationCenter.default
-            nc.addObserver(self, selector: #selector(swipeLeft(_:)), name: NSNotification.Name(rawValue: "next"), object: nil)
             nc.addObserver(self, selector: #selector(back(_:)), name: NSNotification.Name(rawValue: "back"), object: nil)
             nc.addObserver(self, selector: #selector(update_slider), name: NSNotification.Name(rawValue: "update_slider"), object: nil)
+            nc.addObserver(self, selector: #selector(next(_:)), name: NSNotification.Name(rawValue: "next"), object: nil)
             self.fromGroups = false
             return
         }
@@ -752,9 +783,9 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         
         // Ensure that gestures on ImageZoomView trigger functions in this class
         let nc = NotificationCenter.default
-        nc.addObserver(self, selector: #selector(swipeLeft(_:)), name: NSNotification.Name(rawValue: "next"), object: nil)
         nc.addObserver(self, selector: #selector(back(_:)), name: NSNotification.Name(rawValue: "back"), object: nil)
         nc.addObserver(self, selector: #selector(update_slider), name: NSNotification.Name(rawValue: "update_slider"), object: nil)
+        nc.addObserver(self, selector: #selector(next(_:)), name: NSNotification.Name(rawValue: "next"), object: nil)
         
         // Set up buttons above meme
         if(self.meme_link == nil || self.meme_group_add == nil){
@@ -976,6 +1007,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                     let imageExtensions = ["png", "jpg","JPG","PNG", "gif", "ifv"]
                     let last3 = self.keys[self.index].suffix(3)
                     if imageExtensions.contains(String(last3)){
+                        self.showingVideo = false
                         //we've got a gif
                         if last3.contains("gif") || last3.contains("ifv"){
                             let gif = UIImage.gifImageWithData(data!)
@@ -1013,6 +1045,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                         let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
                         let temp_url = URL(string: temp0_url)
                         print("we have a video")
+                        self.showingVideo = true
                         if(temp_url == nil){
                             print("this video wasn't loading")
                             self.next(self)
@@ -1035,15 +1068,28 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                         self.playerViewController!.view.frame = self.meme.frame
                         self.addChild(self.playerViewController!)
                         self.view.addSubview(self.playerViewController!.view)
+                        self.meme.isHidden = true
+                        
+                        let touchArea = CGSize(width: 80, height: (self.playerViewController?.view.frame.height)!)
+                        self.rightView = UIButton(frame: CGRect(origin: CGPoint(x: (self.view.frame.width) - touchArea.width, y: 0), size: touchArea))
+                        self.rightView!.addTarget(self, action: #selector(self.nextTap), for: .touchUpInside)
+                        self.rightView!.backgroundColor = .clear
+                        self.leftView = UIButton(frame: CGRect(origin: .zero, size: touchArea))
+                        self.leftView!.addTarget(self, action: #selector(self.backTap), for: .touchUpInside)
+                        self.leftView?.backgroundColor = .clear
+                        self.rightView?.layer.zPosition = 1
+                        self.view.addSubview(self.rightView!)
+                        self.view.addSubview(self.leftView!)
                         self.playerViewController!.didMove(toParent: self)
                         self.player?.play()
-                        self.meme.isHidden = true
                         self.imageView.isHidden = true
                         self.updateUI(direction: direction)
                         self.slider.isEnabled = true
                         self.back_button.isEnabled = true
                         self.activityIndicator.stopAnimating()
                         self.background_meme_download()
+                        self.view.bringSubviewToFront(self.rightView!)
+                        self.view.bringSubviewToFront(self.leftView!)
                         return
                     }
                 })
@@ -1055,6 +1101,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             let imageExtensions = ["png", "jpg","JPG","PNG", "gif", "ifv"]
             let last3 = self.keys[self.index].suffix(3)
             if imageExtensions.contains(String(last3)){
+                self.showingVideo = false
                 //we've got a gif
                 if last3.contains("gif") || last3.contains("ifv"){
                     let gif = UIImage.gifImageWithData(self.meme_cache[index_for_cache])
@@ -1090,6 +1137,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[self.index])
                 let temp_url = URL(string: temp0_url)
                 print("we have a video")
+                self.showingVideo = true
                 if(temp_url == nil){
                     print("this video wasn't loading")
                     self.next(self)
@@ -1111,14 +1159,28 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 self.playerViewController!.view.frame = self.meme.frame
                 self.addChild(self.playerViewController!)
                 self.view.addSubview(self.playerViewController!.view)
+                self.meme.isHidden = true
+                let touchArea = CGSize(width: 80, height: (self.playerViewController?.view.frame.height)!)
+                self.rightView = UIButton(frame: CGRect(origin: CGPoint(x: (self.view.frame.width) - touchArea.width, y: 0), size: touchArea))
+                self.rightView!.addTarget(self, action: #selector(self.nextTap), for: .touchUpInside)
+                self.rightView!.backgroundColor = .clear
+                self.playerViewController!.contentOverlayView!.addSubview(self.rightView!)
+                self.leftView = UIButton(frame: CGRect(origin: .zero, size: touchArea))
+                self.leftView!.addTarget(self, action: #selector(self.backTap), for: .touchUpInside)
+                self.leftView?.backgroundColor = .clear
+                self.rightView?.layer.zPosition = 1
+                self.view.addSubview(self.rightView!)
+                self.view.addSubview(self.leftView!)
                 self.playerViewController!.didMove(toParent: self)
                 self.player?.play()
-                self.meme.isHidden = true
                 self.imageView.isHidden = true
                 self.updateUI(direction: direction)
                 self.slider.isEnabled = true
                 self.back_button.isEnabled = true
                 self.activityIndicator.stopAnimating()
+                self.view.bringSubviewToFront(self.rightView!)
+                self.view.bringSubviewToFront(self.leftView!)
+                //self.view.movesu
                 return
             }
         }

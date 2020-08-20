@@ -210,10 +210,23 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             DispatchQueue.main.async{
                 let group_name_temp = self.group
                 let user_subs_returned = user_subs.result?.items
+                var usersub:String?
+                if(AppDelegate.socialLoggedIn!){
+                    usersub = AppDelegate.social_username
+                }
+                else if(AppDelegate.loggedIn!){
+                    usersub = AppDelegate.defaultUserPool().currentUser()?.username
+                }
+                else{
+                    print("Issue with finding username before sendSNSPushNotification")
+                }
                 for user1 in user_subs_returned! {
                     let casted = user1 as! UserSub
                     if casted.groups != nil && casted.groups.count != 0 && casted.groups.contains((self.group) as! NSString){
-                        self.sendSNSPushNotification(group: group_name_temp!, receiverSub: (casted.sub as! String))
+                        if((casted.sub! as String) != usersub){
+                            self.sendSNSPushNotification(group: group_name_temp!, receiverSub: (casted.sub as! String))
+                        }
+                        //self.sendSNSPushNotification(group: group_name_temp!, receiverSub: (casted.sub as! String))
                     }
                 }
             }

@@ -420,7 +420,7 @@
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Verification code" textAlignment="natural" minimumFontSize="17" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="qSx-uT-4qY" customClass="TextField" customModule="memedex" customModuleProvider="target">
-                                <rect key="frame" x="36" y="451" width="343" height="48"/>
+                                <rect key="frame" x="36" y="301" width="343" height="48"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="AjH-z9-10I"/>
                                     <constraint firstAttribute="width" constant="343" id="MW9-Cf-I48"/>
@@ -429,7 +429,7 @@
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ck7-BK-4Fj">
-                                <rect key="frame" x="36" y="550" width="343" height="48"/>
+                                <rect key="frame" x="36" y="400" width="343" height="48"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="343" id="Qdq-uS-GPR"/>
                                     <constraint firstAttribute="height" constant="48" id="uYg-PZ-V7p"/>
@@ -448,7 +448,7 @@
                         <constraints>
                             <constraint firstItem="Ck7-BK-4Fj" firstAttribute="top" secondItem="qSx-uT-4qY" secondAttribute="bottom" constant="51" id="6Cf-Uc-dKi"/>
                             <constraint firstItem="Ck7-BK-4Fj" firstAttribute="leading" secondItem="K3M-jW-5rb" secondAttribute="leading" constant="36" id="6zj-Cy-iW5"/>
-                            <constraint firstItem="qSx-uT-4qY" firstAttribute="centerY" secondItem="K3M-jW-5rb" secondAttribute="centerY" id="9Ee-ON-Eob"/>
+                            <constraint firstItem="qSx-uT-4qY" firstAttribute="centerY" secondItem="K3M-jW-5rb" secondAttribute="centerY" constant="-150" id="9Ee-ON-Eob"/>
                             <constraint firstItem="K3M-jW-5rb" firstAttribute="trailing" secondItem="qSx-uT-4qY" secondAttribute="trailing" constant="35" id="SZu-xl-Qtn"/>
                             <constraint firstItem="K3M-jW-5rb" firstAttribute="trailing" secondItem="Ck7-BK-4Fj" secondAttribute="trailing" constant="35" id="aeu-Nf-Cmj"/>
                             <constraint firstItem="qSx-uT-4qY" firstAttribute="leading" secondItem="K3M-jW-5rb" secondAttribute="leading" constant="36" id="mMx-xV-r5Z"/>

@@ -20,12 +20,40 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
     var ultimate_center:CGPoint?
     var ultimate_center_set = false
     static var slider_value:Float?
+    var rightView:UIView?
+    var leftView:UIView?
     
     convenience init(frame: CGRect, something:Bool) {
         self.init(frame: frame)
         self.frame = frame
         setupGestureRecognizer()
         setupPanGestureRecognizer()
+        // Set up for fast tap to go either forward or backward
+        let touchArea = CGSize(width: 80, height: self.frame.height)
+        self.rightView = UIView(frame: CGRect(origin: CGPoint(x: self.frame.width - touchArea.width, y: 0), size: touchArea))
+        self.rightView!.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(nextTap)))
+        self.rightView!.backgroundColor = .clear
+        self.addSubview(self.rightView!)
+        self.leftView = UIView(frame: CGRect(origin: .zero, size: touchArea))
+        self.leftView!.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(backTap)))
+        self.leftView?.backgroundColor = .clear
+        self.addSubview(self.leftView!)
+        self.bringSubviewToFront(self.rightView!)
+        self.bringSubviewToFront(self.leftView!)
+    }
+    
+    @objc func nextTap(){
+        ImageZoomView.slider_value = 3.0
+        let nc = NotificationCenter.default
+        nc.post(name: NSNotification.Name(rawValue: "update_slider"), object: nil)
+        nc.post(name: NSNotification.Name(rawValue: "next"), object: nil)
+    }
+    
+    @objc func backTap(){
+        ImageZoomView.slider_value = 3.0
+        let nc = NotificationCenter.default
+        nc.post(name: NSNotification.Name(rawValue: "update_slider"), object: nil)
+        nc.post(name: NSNotification.Name(rawValue: "back"), object: nil)
     }
     
     func getImage() -> UIImage {
