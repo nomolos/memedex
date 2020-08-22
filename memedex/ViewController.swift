@@ -745,6 +745,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        edgesForExtendedLayout = []
         if(self.showingVideo){
             return
         }
@@ -961,6 +962,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     
     func rateCurrentMeme() {
         // If they've given
+        print("printing self.index ratecurrentmeme " + String(self.index))
         let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
         let meme = Meme()
         if(AppDelegate.socialLoggedIn!){
@@ -1070,11 +1072,11 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                         self.view.addSubview(self.playerViewController!.view)
                         self.meme.isHidden = true
                         
-                        let touchArea = CGSize(width: 80, height: (self.playerViewController?.view.frame.height)!)
-                        self.rightView = UIButton(frame: CGRect(origin: CGPoint(x: (self.view.frame.width) - touchArea.width, y: 0), size: touchArea))
+                        let touchArea = CGSize(width: 80, height: (self.playerViewController?.view.frame.height)! - 160)
+                        self.rightView = UIButton(frame: CGRect(origin: CGPoint(x: (self.view.frame.width) - touchArea.width, y: (self.playerViewController?.view.frame.minY)! + 80), size: touchArea))
                         self.rightView!.addTarget(self, action: #selector(self.nextTap), for: .touchUpInside)
                         self.rightView!.backgroundColor = .clear
-                        self.leftView = UIButton(frame: CGRect(origin: .zero, size: touchArea))
+                        self.leftView = UIButton(frame: CGRect(origin: CGPoint(x:0, y:(self.playerViewController?.view.frame.minY)! + 80), size: touchArea))
                         self.leftView!.addTarget(self, action: #selector(self.backTap), for: .touchUpInside)
                         self.leftView?.backgroundColor = .clear
                         self.rightView?.layer.zPosition = 1
@@ -1160,12 +1162,12 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 self.addChild(self.playerViewController!)
                 self.view.addSubview(self.playerViewController!.view)
                 self.meme.isHidden = true
-                let touchArea = CGSize(width: 80, height: (self.playerViewController?.view.frame.height)!)
-                self.rightView = UIButton(frame: CGRect(origin: CGPoint(x: (self.view.frame.width) - touchArea.width, y: 0), size: touchArea))
+                let touchArea = CGSize(width: 80, height: (self.playerViewController?.view.frame.height)! - 160)
+                self.rightView = UIButton(frame: CGRect(origin: CGPoint(x: (self.view.frame.width) - touchArea.width, y: (self.playerViewController?.view.frame.minY)! + 80), size: touchArea))
                 self.rightView!.addTarget(self, action: #selector(self.nextTap), for: .touchUpInside)
                 self.rightView!.backgroundColor = .clear
                 self.playerViewController!.contentOverlayView!.addSubview(self.rightView!)
-                self.leftView = UIButton(frame: CGRect(origin: .zero, size: touchArea))
+                self.leftView = UIButton(frame: CGRect(origin: CGPoint(x:0, y:(self.playerViewController?.view.frame.minY)! + 80), size: touchArea))
                 self.leftView!.addTarget(self, action: #selector(self.backTap), for: .touchUpInside)
                 self.leftView?.backgroundColor = .clear
                 self.rightView?.layer.zPosition = 1

@@ -13,6 +13,7 @@ class Meme: AWSDynamoDBObjectModel, AWSDynamoDBModeling {
     @objc var username:NSString?
     @objc var rating:NSNumber?
     @objc var meme:NSString?
+    @objc var link:NSString?
     
     class func dynamoDBTableName() -> String {
         return "users2"

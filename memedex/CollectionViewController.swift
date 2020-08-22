@@ -18,7 +18,7 @@ import AVKit
 
 private let reuseIdentifier = "Cell"
 
-class CollectionViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout {
+class CollectionViewController: UICollectionViewController, UICollectionViewDelegateFlowLayout, UITextFieldDelegate {
 
     var meme_container = [Data]()
     var keys = [String]()
@@ -36,13 +36,23 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
     let adding_user_semaphore = DispatchSemaphore(value: 0)
     let waitUserSub = DispatchGroup()
     var casted_user_sub_item:UserSub?
+    var user_emails=[String]()
     let test_textfield = UITextField()
     let waitUserSubsPushNotification = DispatchGroup()
+    var waitUserEmails1 = DispatchGroup()
+    var waitUserEmails2 = DispatchGroup()
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.navigationController?.navigationBar.layer.backgroundColor = UIColor.white.cgColor
+        self.navigationController?.navigationBar.layer.opacity = 1.0
+        self.navigationController?.navigationBar.layer.shadowColor = UIColor.black.cgColor
+        self.navigationController?.navigationBar.layer.shadowOpacity = 0.2
+        self.navigationController?.navigationBar.layer.shadowOffset = .zero
+        self.navigationController?.navigationBar.layer.shadowRadius = 5
+        self.collectionView.backgroundColor = UIColor(red: 0.73, green: 0.49, blue: 0.97, alpha: 1.00)
         self.activityIndicator = UIActivityIndicatorView()
-        self.activityIndicator.color = UIColor.gray
+        self.activityIndicator.color = UIColor.white
         self.activityIndicator.style = UIActivityIndicatorView.Style.large
         self.activityIndicator.frame = CGRect(x: self.view.bounds.midX - 50, y: self.view.bounds.midY - 100, width: 100, height: 100)
         self.activityIndicator.hidesWhenStopped = true
@@ -84,6 +94,10 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
         self.collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -70).isActive = true
         
         var textfield_container = UIView()
+        textfield_container.layer.shadowColor = UIColor.black.cgColor
+        textfield_container.layer.shadowOpacity = 0.2
+        textfield_container.layer.shadowOffset = .zero
+        textfield_container.layer.shadowRadius = 5
         self.view.addSubview(textfield_container)
         textfield_container.widthAnchor.constraint(equalTo: self.view.widthAnchor).isActive = true
         textfield_container.heightAnchor.constraint(equalToConstant: 100).isActive = true
@@ -322,20 +336,20 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                 let message_to_render = String(decoding: self.meme_container[indexPath.row], as: UTF8.self)
                 print(message_to_render)
                 let label_superview_for_padding = UIView(frame: CGRect(x: 20, y: cell.contentView.frame.minY + 20, width: self.view.frame.width - 40, height: (100)))
-                let label_for_cell = UILabel(frame: CGRect(x: 30, y: cell.contentView.frame.minY, width: self.view.frame.width - 60, height: (100)))
+                let label_for_cell = UILabel(frame: CGRect(x: 10, y: cell.contentView.frame.minY, width: self.view.frame.width - 60, height: (100)))
                 
                 label_superview_for_padding.layer.backgroundColor = UIColor.white.cgColor
                 label_superview_for_padding.layer.cornerRadius = 10.0
                 label_superview_for_padding.layer.masksToBounds = true
-                label_superview_for_padding.layer.borderWidth = 1
-                label_superview_for_padding.layer.borderColor = UIColor.lightGray.cgColor
+                //label_superview_for_padding.layer.borderWidth = 1
+                //label_superview_for_padding.layer.borderColor = UIColor.lightGray.cgColor
                 
                 label_for_cell.lineBreakMode = .byWordWrapping
                 label_for_cell.numberOfLines = 0
                 label_for_cell.adjustsFontSizeToFitWidth = true
                 label_for_cell.minimumScaleFactor = 0.1
                 label_for_cell.text = message_to_render
-                label_for_cell.font = UIFont.systemFont(ofSize: 20)
+                label_for_cell.font = UIFont.systemFont(ofSize: 16)
                 label_for_cell.textColor = UIColor.black
                 label_for_cell.isHidden = false
                 cell.contentView.addSubview(label_superview_for_padding)
@@ -369,15 +383,15 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                 label_superview_for_padding.layer.backgroundColor = UIColor.white.cgColor
                 label_superview_for_padding.layer.cornerRadius = 10.0
                 label_superview_for_padding.layer.masksToBounds = true
-                label_superview_for_padding.layer.borderWidth = 1
-                label_superview_for_padding.layer.borderColor = UIColor.lightGray.cgColor
+                //label_superview_for_padding.layer.borderWidth = 1
+                //label_superview_for_padding.layer.borderColor = UIColor.lightGray.cgColor
                 
                 label_for_cell.lineBreakMode = .byWordWrapping
                 label_for_cell.numberOfLines = 0
                 label_for_cell.adjustsFontSizeToFitWidth = true
                 label_for_cell.minimumScaleFactor = 0.1
                 label_for_cell.text = self.captions[indexPath.row]
-                label_for_cell.font = UIFont.systemFont(ofSize: 20)
+                label_for_cell.font = UIFont.systemFont(ofSize: 16)
                 label_for_cell.textColor = UIColor.black
                 label_for_cell.isHidden = false
                 
@@ -399,27 +413,29 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             }
             
             let image_for_cell = UIImage(data: self.meme_container[indexPath.row])
-            var container_for_imageview = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.width*1.1))
-            var imageview_for_cell = UIImageView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: (self.view.frame.width*1.1)))
+            var container_for_imageview = UIView(frame: CGRect(x: 20, y: 0, width: self.view.frame.width - 40, height: self.view.frame.width*1.3))
+            container_for_imageview.backgroundColor = UIColor.white
+            container_for_imageview.layer.cornerRadius = 10.0
+            var imageview_for_cell = UIImageView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width - 40, height: (self.view.frame.width*1.1)))
             imageview_for_cell.image = image_for_cell
             // within it's container
             // So we have room underneath for the label superview
             imageview_for_cell.contentMode = .scaleAspectFit
-            let label_superview_for_padding = UIView(frame: CGRect(x: 20, y: imageview_for_cell.contentClippingRect.minY + imageview_for_cell.contentClippingRect.height + 20, width: self.view.frame.width - 40, height: (100)))
-            let label_for_cell = UILabel(frame: CGRect(x: 30, y: imageview_for_cell.contentClippingRect.minY + imageview_for_cell.contentClippingRect.height + 20, width: self.view.frame.width - 60, height: (100)))
+            let label_superview_for_padding = UIView(frame: CGRect(x: 20, y: imageview_for_cell.contentClippingRect.minY + imageview_for_cell.contentClippingRect.height, width: self.view.frame.width - 40, height: (100)))
+            let label_for_cell = UILabel(frame: CGRect(x: 30, y: imageview_for_cell.contentClippingRect.minY + imageview_for_cell.contentClippingRect.height, width: self.view.frame.width - 60, height: (100)))
             
             label_superview_for_padding.layer.backgroundColor = UIColor.white.cgColor
             label_superview_for_padding.layer.cornerRadius = 10.0
             label_superview_for_padding.layer.masksToBounds = true
-            label_superview_for_padding.layer.borderWidth = 1
-            label_superview_for_padding.layer.borderColor = UIColor.lightGray.cgColor
+            //label_superview_for_padding.layer.borderWidth = 1
+            //label_superview_for_padding.layer.borderColor = UIColor.lightGray.cgColor
             
             label_for_cell.lineBreakMode = .byWordWrapping
             label_for_cell.numberOfLines = 0
             label_for_cell.adjustsFontSizeToFitWidth = true
             label_for_cell.minimumScaleFactor = 0.1
             label_for_cell.text = self.captions[indexPath.row]
-            label_for_cell.font = UIFont.systemFont(ofSize: 20)
+            label_for_cell.font = UIFont.systemFont(ofSize: 16)
             label_for_cell.textColor = UIColor.black
             label_for_cell.isHidden = false
             
@@ -434,8 +450,8 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             cell.contentView.layoutIfNeeded()
             
             
-            label_superview_for_padding.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor, constant:0).isActive = true
-            label_for_cell.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor, constant:0).isActive = true
+            //label_superview_for_padding.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor, constant:0).isActive = true
+            //label_for_cell.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor, constant:0).isActive = true
         }
         else{
             for subview in cell.subviews{
@@ -542,7 +558,12 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             self.presentMemberLeave()
         }
         let addAction = UIAlertAction(title: "Add Members", style: .default) { (action) -> Void in
-            self.presentMemberAdd()
+            self.getUserEmails()
+            self.activityIndicator.startAnimating()
+            self.waitUserEmails2.notify(queue: .main){
+                self.activityIndicator.stopAnimating()
+                self.presentMemberAdd()
+            }
         }
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
         popup.addAction(leaveAction)
@@ -557,6 +578,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
         popup.addTextField(configurationHandler: {(textfield: UITextField!) in
             textfield.placeholder = "Member emails (comma separated)"
             self.new_members_textfield = textfield
+            self.new_members_textfield.delegate = self
         })
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
         let saveAction = UIAlertAction(title: "Submit", style: .default) { (action) -> Void in
@@ -708,6 +730,69 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
         popup.addAction(cancelAction)
         popup.addAction(leaveAction)
         self.present(popup, animated: true, completion: nil)
+    }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        return !autoCompleteText( in : textField, using: string, suggestionsArray: self.user_emails)
+    }
+    
+    // Auto completes emails
+    // To allow for finding other users more easily when creating groups
+    // Privacy concern since you could find user emails. Should change eventually
+    func autoCompleteText( in textField: UITextField, using string: String, suggestionsArray: [String]) -> Bool {
+        if !string.isEmpty,
+            let selectedTextRange = textField.selectedTextRange,
+            selectedTextRange.end == textField.endOfDocument,
+            let prefixRange = textField.textRange(from: textField.beginningOfDocument, to: selectedTextRange.start),
+            let text = textField.text( in : prefixRange) {
+            let prefix = text + string
+            let matches = suggestionsArray.filter {
+                $0.hasPrefix(prefix)
+            }
+            if (matches.count > 0) {
+                textField.text = matches[0]
+                if let start = textField.position(from: textField.beginningOfDocument, offset: prefix.count) {
+                    textField.selectedTextRange = textField.textRange(from: start, to: textField.endOfDocument)
+                    return true
+                }
+            }
+        }
+        return false
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+            textField.resignFirstResponder()
+            return true
+    }
+    
+    func getUserEmails() {
+        self.waitUserEmails1.enter()
+        let scanExpression = AWSDynamoDBScanExpression()
+        let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
+        updateMapperConfig.saveBehavior = .updateSkipNullAttributes
+        let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
+        let user_subs = dynamoDBObjectMapper.scan(UserSub.self, expression: scanExpression).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
+            if (task.error != nil){
+                print("Error scanning for UserSubs in addMemeToGroup before push notification")
+                print(task.error)
+            }
+            if (task.result != nil){
+                print("Successfully got user emails for auto-completing group form")
+                //print("Successfully scanned user_subs table, about to send notifications to a subset of them")
+            }
+            self.waitUserEmails1.leave()
+            return task.result
+        }) as! AWSTask<AWSDynamoDBPaginatedOutput>
+        self.waitUserEmails1.notify(queue: .main){
+            self.waitUserEmails2.enter()
+            self.activityIndicator.stopAnimating()
+            let email_container = user_subs.result?.items
+            for user in email_container! {
+                let casted = user as! UserSub
+                self.user_emails.append(casted.email as! String)
+            }
+            self.waitUserEmails2.leave()
+        }
     }
     
     
