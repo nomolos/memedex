@@ -12,6 +12,7 @@ import AWSDynamoDB
 class Caption: AWSDynamoDBObjectModel, AWSDynamoDBModeling {
     @objc var imagepath:NSString?
     @objc var caption:NSString?
+    @objc var userEmail:NSString?
     
     class func dynamoDBTableName() -> String {
         return "captions"

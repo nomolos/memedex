@@ -82,6 +82,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     var rightView:UIButton?
     var leftView:UIButton?
     var showingVideo = false
+    var user_email:NSString?
     static let key_1 = "key_1"
     static let key_2 = "key_2"
     static let key_3 = "key_3"
@@ -233,6 +234,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 var caption_to_send = Caption()
                 caption_to_send?.caption = caption.text as! NSString
                 caption_to_send?.imagepath = (self.groupname!.text! + "/" + self.keys[self.index]) as! NSString
+                caption_to_send?.userEmail = self.user_email
                 let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
                 let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
                 updateMapperConfig.saveBehavior = .updateSkipNullAttributes
@@ -745,7 +747,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     override func viewWillAppear(_ animated: Bool) {
-        edgesForExtendedLayout = []
+        self.navigationController?.navigationBar.layer.shadowOpacity = 0.0
         if(self.showingVideo){
             return
         }
@@ -769,6 +771,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         // The Groups controller
         if(self.fromGroups){
             let nc = NotificationCenter.default
+            nc.removeObserver(self)
             nc.addObserver(self, selector: #selector(back(_:)), name: NSNotification.Name(rawValue: "back"), object: nil)
             nc.addObserver(self, selector: #selector(update_slider), name: NSNotification.Name(rawValue: "update_slider"), object: nil)
             nc.addObserver(self, selector: #selector(next(_:)), name: NSNotification.Name(rawValue: "next"), object: nil)
@@ -1063,6 +1066,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                         }
                         self.player?.isMuted = true
                         self.playerViewController = AVPlayerViewController()
+                        self.playerViewController!.view.backgroundColor = UIColor.white
                         self.playerViewController?.disableGestureRecognition()
                         self.videoPanGesture = UIPanGestureRecognizer(target: self, action: #selector(self.handleVideoSwipe))
                         self.playerViewController?.view.addGestureRecognizer(self.videoPanGesture!)
@@ -1154,6 +1158,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                 }
                 self.player?.isMuted = true
                 self.playerViewController = AVPlayerViewController()
+                self.playerViewController!.view.backgroundColor = UIColor.white
                 self.playerViewController?.disableGestureRecognition()
                 self.videoPanGesture = UIPanGestureRecognizer(target: self, action: #selector(self.handleVideoSwipe))
                 self.playerViewController?.view.addGestureRecognizer(self.videoPanGesture!)
@@ -1292,6 +1297,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                     self.groups.append(group as! String)
                 }
             }
+            self.user_email = casted.email
             print("should be leaving?")
             self.waitGroupNamesFinal.leave()
         }

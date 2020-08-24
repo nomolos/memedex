@@ -23,6 +23,8 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
     var meme_container = [Data]()
     var keys = [String]()
     var captions = [String]()
+    // only has portion before @
+    var sender_emails = [String]()
     let s3bucket = "memedexbucket"
     let meme_collection_semaphore = DispatchSemaphore(value: 0)
     let meme_caption_semaphore = DispatchSemaphore(value: 0)
@@ -41,9 +43,10 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
     let waitUserSubsPushNotification = DispatchGroup()
     var waitUserEmails1 = DispatchGroup()
     var waitUserEmails2 = DispatchGroup()
+    var user_email:String?
     
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         self.navigationController?.navigationBar.layer.backgroundColor = UIColor.white.cgColor
         self.navigationController?.navigationBar.layer.opacity = 1.0
         self.navigationController?.navigationBar.layer.shadowColor = UIColor.black.cgColor
@@ -90,25 +93,28 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
         self.collectionView.isHidden = false
         self.collectionView.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor).isActive = true
         self.collectionView!.register(UICollectionViewCell.self, forCellWithReuseIdentifier: reuseIdentifier)
-        self.collectionView.heightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.heightAnchor, constant: 30).isActive = true
+        self.collectionView.heightAnchor.constraint(equalTo: view.safeAreaLayoutGuide.heightAnchor, constant: 70).isActive = true
         self.collectionView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: -70).isActive = true
-        
         var textfield_container = UIView()
+        textfield_container.layer.backgroundColor = UIColor.white.cgColor
         textfield_container.layer.shadowColor = UIColor.black.cgColor
         textfield_container.layer.shadowOpacity = 0.2
         textfield_container.layer.shadowOffset = .zero
-        textfield_container.layer.shadowRadius = 5
+        textfield_container.layer.opacity = 1.0
         self.view.addSubview(textfield_container)
         textfield_container.widthAnchor.constraint(equalTo: self.view.widthAnchor).isActive = true
-        textfield_container.heightAnchor.constraint(equalToConstant: 100).isActive = true
-        textfield_container.topAnchor.constraint(equalTo: self.collectionView.bottomAnchor, constant: -10).isActive = true
+        textfield_container.heightAnchor.constraint(equalToConstant: 150).isActive = true
+        textfield_container.topAnchor.constraint(equalTo: self.collectionView.bottomAnchor, constant: -70).isActive = true
         textfield_container.backgroundColor = UIColor.white
-
         textfield_container.addSubview(test_textfield)
+        
+        
+        let subviewForBugBottomOfScreen = UIView()
+        textfield_container.addSubview(subviewForBugBottomOfScreen)
         
         test_textfield.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         test_textfield.widthAnchor.constraint(equalTo: self.view.widthAnchor, constant: -40).isActive = true
-        test_textfield.topAnchor.constraint(equalTo: self.collectionView.bottomAnchor).isActive = true
+        test_textfield.topAnchor.constraint(equalTo: self.collectionView.bottomAnchor, constant: -60).isActive = true
         test_textfield.heightAnchor.constraint(equalToConstant: 40).isActive = true
         test_textfield.borderStyle = UITextField.BorderStyle.roundedRect
         test_textfield.translatesAutoresizingMaskIntoConstraints = false
@@ -121,8 +127,6 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
         send_button.addTarget(self, action: #selector(self.sendMessage), for: .touchUpInside)
         test_textfield.rightView = send_button
         test_textfield.rightViewMode = .whileEditing
-        
-        
         test_textfield.isHidden = false
         test_textfield.layoutIfNeeded()
         textfield_container.layoutIfNeeded()
@@ -132,6 +136,10 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
         self.view.addGestureRecognizer(tap)
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillShow), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.keyboardWillHide), name: UIResponder.keyboardWillHideNotification, object: nil)
+        subviewForBugBottomOfScreen.frame = CGRect(x: 0.0, y: textfield_container.bounds.height/2 - 10, width: textfield_container.bounds.width, height: textfield_container.bounds.height/2)
+        subviewForBugBottomOfScreen.backgroundColor = UIColor(red: 1.00, green: 1.00, blue: 1.00, alpha: 1.00)
+        subviewForBugBottomOfScreen.layer.opacity = 0.0
+        textfield_container.bringSubviewToFront(subviewForBugBottomOfScreen)
     }
     
     @objc func dismissKeyboard() {
@@ -167,7 +175,8 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                                    completion: { Void in()  }
         )
         self.activityIndicator.startAnimating()
-        let message = self.test_textfield.text?.data(using: .utf8)
+        let user_email_plus_message = self.user_email! + "###" + (self.test_textfield.text)!
+        let message = user_email_plus_message.data(using: .utf8)
         let randy = self.randomString(length: 20)
         let completionHandler = { (task:AWSS3TransferUtilityUploadTask, error:NSError?) -> Void in
             if(error != nil){
@@ -195,6 +204,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
         self.meme_container.insert(message!, at: 0)
         // Prevents captions from crashing due to
         // indicies not lining up with meme_container and keys
+        // Otherwise our # of captions does not equal our # of memes
         self.captions.insert("", at:0)
         DispatchQueue.main.async{
             self.collectionView.reloadData()
@@ -331,18 +341,41 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             for subview in cell.contentView.subviews{
                 subview.removeFromSuperview()
             }
-            
+            // Just a message, not a caption
             if(self.keys[indexPath.row].contains("notameme")){
-                let message_to_render = String(decoding: self.meme_container[indexPath.row], as: UTF8.self)
+                var message_to_render = String(decoding: self.meme_container[indexPath.row], as: UTF8.self)
                 print(message_to_render)
+                let parts = message_to_render.components(separatedBy: "###")
+                var sender_email = String(parts[0].prefix(8))
+                // Since these emails are stored in the message itself
+                // We have to append them to their proper place in 'sender_emails'
+                if(parts.count > 1){
+                    message_to_render = parts[1]
+                    self.sender_emails.insert(sender_email, at: indexPath.row)
+                }
+                else{
+                    message_to_render = parts[0]
+                    sender_email = "unknown"
+                    self.sender_emails.insert(sender_email, at: indexPath.row)
+                }
+
                 let label_superview_for_padding = UIView(frame: CGRect(x: 20, y: cell.contentView.frame.minY + 20, width: self.view.frame.width - 40, height: (100)))
                 let label_for_cell = UILabel(frame: CGRect(x: 10, y: cell.contentView.frame.minY, width: self.view.frame.width - 60, height: (100)))
                 
                 label_superview_for_padding.layer.backgroundColor = UIColor.white.cgColor
                 label_superview_for_padding.layer.cornerRadius = 10.0
                 label_superview_for_padding.layer.masksToBounds = true
-                //label_superview_for_padding.layer.borderWidth = 1
-                //label_superview_for_padding.layer.borderColor = UIColor.lightGray.cgColor
+
+                let sender_label = UILabel(frame: CGRect(x: label_superview_for_padding.frame.maxX - 120, y: label_superview_for_padding.frame.maxY - 20, width: 100, height: 40))
+                sender_label.text = "  " + sender_email
+                sender_label.font = UIFont.boldSystemFont(ofSize: 16)
+                sender_label.textColor = UIColor.black
+                sender_label.layer.cornerRadius = 10
+                sender_label.layer.backgroundColor = UIColor.white.cgColor
+                sender_label.layer.shadowColor = UIColor.black.cgColor
+                sender_label.layer.shadowOpacity = 0.2
+                sender_label.layer.shadowRadius = 1.5
+                sender_label.layer.shadowOffset = .zero
                 
                 label_for_cell.lineBreakMode = .byWordWrapping
                 label_for_cell.numberOfLines = 0
@@ -356,44 +389,57 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                 label_superview_for_padding.addSubview(label_for_cell)
                 label_superview_for_padding.bringSubviewToFront(label_for_cell)
                 cell.contentView.bringSubviewToFront(label_for_cell)
+                cell.contentView.addSubview(sender_label)
+                cell.contentView.bringSubviewToFront(sender_label)
                 return cell
             }
+            // A video or gif with an mp4 format
             else if(self.keys[indexPath.row].contains(".mp4")){
-                print("we have a video in the collectionview")
-                var container_for_video_view = UIView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width, height: self.view.frame.width*1.1))
-                var data_video = self.meme_container[indexPath.row]
+                var container_for_video_view = UIView(frame: CGRect(x: 20, y: 0, width: self.view.frame.width - 40, height: self.view.frame.width*1.3))
+                container_for_video_view.layer.cornerRadius = 10.0
+                container_for_video_view.layer.backgroundColor = UIColor.white.cgColor
+                container_for_video_view.backgroundColor = UIColor.white
+                let data_video = self.meme_container[indexPath.row]
                 print(data_video)
-                //let temp0_url = GetAWSObjectURL().getPreSignedURL(S3DownloadKeyName: self.keys[indexPath.row])
                 let temp_url = URL(fileURLWithPath:NSTemporaryDirectory()).appendingPathComponent("video").appendingPathExtension("mp4")
                 let wasFileWritten = (try? data_video.write(to: temp_url, options: [.atomic])) != nil
                 if !wasFileWritten{
                     print("File was NOT Written")
                 }
-                var player = AVPlayer(url: temp_url)
-                //AVPlayer(data)
+                let player = AVPlayer(url: temp_url)
                 player.isMuted = true
-                var playerViewController = AVPlayerViewController()
+                let playerViewController = AVPlayerViewController()
+                playerViewController.view.layer.cornerRadius = 10.0
+                playerViewController.view.backgroundColor = UIColor.white
                 playerViewController.player = player
                 playerViewController.disableGestureRecognition()
-                playerViewController.view.frame = CGRect(x: 0, y: 0, width: self.view.frame.width, height: (self.view.frame.width*1.1))
-                
-                let label_superview_for_padding = UIView(frame: CGRect(x: 20, y: playerViewController.view.frame.maxY + 20, width: self.view.frame.width - 40, height: (100)))
-                let label_for_cell = UILabel(frame: CGRect(x: 30, y: playerViewController.view.frame.maxY + 20, width: self.view.frame.width - 60, height: (100)))
+                playerViewController.view.frame = CGRect(x: 20, y: 0, width: self.view.frame.width - 40, height: (self.view.frame.width*1.1))
+                let label_superview_for_padding = UIView(frame: CGRect(x: 20, y: playerViewController.view.frame.maxY, width: self.view.frame.width - 40, height: (100)))
+                let label_for_cell = UILabel(frame: CGRect(x: 30, y: playerViewController.view.frame.maxY, width: self.view.frame.width - 60, height: (100)))
                 
                 label_superview_for_padding.layer.backgroundColor = UIColor.white.cgColor
                 label_superview_for_padding.layer.cornerRadius = 10.0
                 label_superview_for_padding.layer.masksToBounds = true
-                //label_superview_for_padding.layer.borderWidth = 1
-                //label_superview_for_padding.layer.borderColor = UIColor.lightGray.cgColor
                 
                 label_for_cell.lineBreakMode = .byWordWrapping
                 label_for_cell.numberOfLines = 0
                 label_for_cell.adjustsFontSizeToFitWidth = true
                 label_for_cell.minimumScaleFactor = 0.1
-                label_for_cell.text = self.captions[indexPath.row]
+                label_for_cell.text = self.captions[indexPath.row] + self.sender_emails[indexPath.row]
                 label_for_cell.font = UIFont.systemFont(ofSize: 16)
                 label_for_cell.textColor = UIColor.black
                 label_for_cell.isHidden = false
+                
+                let sender_label = UILabel(frame: CGRect(x: label_superview_for_padding.frame.maxX - 120, y: container_for_video_view.frame.maxY, width: 100, height: 40))
+                sender_label.text = "  " + self.sender_emails[indexPath.row].prefix(8)
+                sender_label.font = UIFont.boldSystemFont(ofSize: 16)
+                sender_label.textColor = UIColor.black
+                sender_label.layer.cornerRadius = 10
+                sender_label.layer.backgroundColor = UIColor.white.cgColor
+                sender_label.layer.shadowColor = UIColor.black.cgColor
+                sender_label.layer.shadowOpacity = 0.2
+                sender_label.layer.shadowRadius = 1.5
+                sender_label.layer.shadowOffset = .zero
                 
                 container_for_video_view.addSubview(playerViewController.view)
                 label_superview_for_padding.addSubview(label_for_cell)
@@ -407,16 +453,17 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                 cell.contentView.addSubview(playerViewController.view)
                 cell.contentView.bringSubviewToFront(playerViewController.view)
                 cell.contentView.bringSubviewToFront(label_for_cell)
+                cell.contentView.addSubview(sender_label)
+                cell.contentView.bringSubviewToFront(sender_label)
                 cell.contentView.layoutIfNeeded()
                 return cell
-                //player.play()
             }
-            
+            // An image with a caption
             let image_for_cell = UIImage(data: self.meme_container[indexPath.row])
-            var container_for_imageview = UIView(frame: CGRect(x: 20, y: 0, width: self.view.frame.width - 40, height: self.view.frame.width*1.3))
+            let container_for_imageview = UIView(frame: CGRect(x: 20, y: 0, width: self.view.frame.width - 40, height: self.view.frame.width*1.3))
             container_for_imageview.backgroundColor = UIColor.white
             container_for_imageview.layer.cornerRadius = 10.0
-            var imageview_for_cell = UIImageView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width - 40, height: (self.view.frame.width*1.1)))
+            let imageview_for_cell = UIImageView(frame: CGRect(x: 0, y: 0, width: self.view.frame.width - 40, height: (self.view.frame.width*1.1)))
             imageview_for_cell.image = image_for_cell
             // within it's container
             // So we have room underneath for the label superview
@@ -427,8 +474,6 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             label_superview_for_padding.layer.backgroundColor = UIColor.white.cgColor
             label_superview_for_padding.layer.cornerRadius = 10.0
             label_superview_for_padding.layer.masksToBounds = true
-            //label_superview_for_padding.layer.borderWidth = 1
-            //label_superview_for_padding.layer.borderColor = UIColor.lightGray.cgColor
             
             label_for_cell.lineBreakMode = .byWordWrapping
             label_for_cell.numberOfLines = 0
@@ -443,15 +488,25 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             label_superview_for_padding.addSubview(label_for_cell)
             label_for_cell.layoutIfNeeded()
             label_superview_for_padding.layoutIfNeeded()
+            
+            let sender_label = UILabel(frame: CGRect(x: label_superview_for_padding.frame.maxX - 120, y: container_for_imageview.frame.maxY, width: 100, height: 40))
+            sender_label.text = "  " + self.sender_emails[indexPath.row].prefix(8)
+            sender_label.font = UIFont.boldSystemFont(ofSize: 16)
+            sender_label.textColor = UIColor.black
+            sender_label.layer.cornerRadius = 10
+            sender_label.layer.backgroundColor = UIColor.white.cgColor
+            sender_label.layer.shadowColor = UIColor.black.cgColor
+            sender_label.layer.shadowOpacity = 0.2
+            sender_label.layer.shadowRadius = 1.5
+            sender_label.layer.shadowOffset = .zero
+
             cell.contentView.addSubview(container_for_imageview)
             cell.contentView.addSubview(label_superview_for_padding)
             cell.contentView.addSubview(label_for_cell)
+            cell.contentView.addSubview(sender_label)
             label_superview_for_padding.bringSubviewToFront(label_for_cell)
+            cell.contentView.bringSubviewToFront(sender_label)
             cell.contentView.layoutIfNeeded()
-            
-            
-            //label_superview_for_padding.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor, constant:0).isActive = true
-            //label_for_cell.centerXAnchor.constraint(equalTo: cell.contentView.centerXAnchor, constant:0).isActive = true
         }
         else{
             for subview in cell.subviews{
@@ -532,6 +587,18 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                         if(task.result?.items.count != 0){
                             let casted = task.result?.items[0] as! Caption
                             self.captions.append(casted.caption as! String)
+                            if(casted.userEmail != nil && casted.userEmail != ""){
+                                print("printing sender email")
+                                print(casted.userEmail)
+                                var cut_me_up = casted.userEmail as! String
+                                var cut_me_up_list = cut_me_up.components(separatedBy: "@")
+                                cut_me_up = cut_me_up_list[0]
+                                self.sender_emails.append(cut_me_up)
+                            }
+                            else{
+                                print("not printing sender email")
+                                self.sender_emails.append("unknown")
+                            }
                         }
                         else{
                             self.captions.append("")
@@ -836,5 +903,4 @@ extension UIImageView {
         return CGRect(x: x, y: y, width: size.width, height: size.height)
     }
 }
-
 

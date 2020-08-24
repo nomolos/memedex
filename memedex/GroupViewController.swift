@@ -32,6 +32,7 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
     var activityIndicator = UIActivityIndicatorView()
     var waitUserEmailsGroupCreation = DispatchGroup()
     var user_emails = [String]()
+    var user_email:String?
     
     // Create new group
     @IBAction func add_group(_ sender: Any) {
@@ -397,6 +398,7 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
                     }) as! AWSTask<AWSDynamoDBPaginatedOutput>
                     self.group_info_semaphore.wait()
                 }
+                self.user_email = casted_user_sub.email as! String
                 self.waitOurGroupsMemberCount.leave()
             }
         }
@@ -446,6 +448,7 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
             let cell = sender as! UITableViewCell
             print("assinging our collection views group to be : " + (cell.textLabel?.text)!)
             collection_view.group = cell.textLabel!.text
+            collection_view.user_email = self.user_email
             // Get the new view controller using segue.destination.
             // Pass the selected object to the new view controller.
         }

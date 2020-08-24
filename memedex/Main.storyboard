@@ -238,11 +238,11 @@
             <objects>
                 <viewController storyboardIdentifier="LoginViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="vEL-r4-6PM" customClass="LoginViewController" customModule="memedex" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="B4j-ei-U6F">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="808"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Email" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="20" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="xqy-5f-7J6" customClass="TextField" customModule="memedex" customModuleProvider="target">
-                                <rect key="frame" x="35.5" y="160" width="343" height="48"/>
+                                <rect key="frame" x="35.5" y="248" width="343" height="48"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="jVM-sg-VZv"/>
                                     <constraint firstAttribute="width" constant="343" id="jiY-17-CDc"/>
@@ -251,7 +251,7 @@
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Password" textAlignment="justified" adjustsFontSizeToFit="NO" minimumFontSize="17" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="rWd-4i-b0l" customClass="TextField" customModule="memedex" customModuleProvider="target">
-                                <rect key="frame" x="35.5" y="236" width="343" height="48"/>
+                                <rect key="frame" x="35.5" y="324" width="343" height="48"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="343" id="9yE-2c-a6t"/>
                                     <constraint firstAttribute="height" constant="48" id="vkL-xF-ze3"/>
@@ -260,7 +260,7 @@
                                 <textInputTraits key="textInputTraits" secureTextEntry="YES" textContentType="password"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="QuQ-ph-NDW">
-                                <rect key="frame" x="35.5" y="363" width="343" height="48"/>
+                                <rect key="frame" x="35.5" y="451" width="343" height="48"/>
                                 <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="20"/>
                                 <state key="normal" title="Login" backgroundImage="LoginSignup">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -270,7 +270,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hxA-6k-x6W">
-                                <rect key="frame" x="36" y="431" width="343" height="48"/>
+                                <rect key="frame" x="36" y="519" width="343" height="48"/>
                                 <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="20"/>
                                 <state key="normal" title="Sign Up" backgroundImage="LoginSignup">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -280,7 +280,7 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="*password must be 8 characters minimum" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" minimumScaleFactor="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="J54-ih-II0">
-                                <rect key="frame" x="51" y="309" width="312" height="21"/>
+                                <rect key="frame" x="34" y="397" width="346" height="21"/>
                                 <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="17"/>
                                 <color key="textColor" white="0.66666666666666663" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <nil key="highlightedColor"/>
@@ -330,11 +330,11 @@
             <objects>
                 <viewController title="VerifySegue2" id="adW-a7-412" customClass="SignUpViewController" customModule="memedex" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="JlI-Q0-sOr">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="808"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Email" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="EpZ-7G-gqS" customClass="TextField" customModule="memedex" customModuleProvider="target">
-                                <rect key="frame" x="35.5" y="206" width="343" height="48"/>
+                                <rect key="frame" x="35.5" y="294" width="343" height="48"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="343" id="OGK-n5-GVk"/>
                                     <constraint firstAttribute="height" constant="48" id="VCL-J9-IuE"/>
@@ -343,7 +343,7 @@
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Password" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="SL8-rr-PIQ" customClass="TextField" customModule="memedex" customModuleProvider="target">
-                                <rect key="frame" x="35.5" y="282" width="343" height="48"/>
+                                <rect key="frame" x="35.5" y="370" width="343" height="48"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="Gc4-fd-I09"/>
                                     <constraint firstAttribute="width" constant="343" id="tsX-nl-svl"/>
@@ -352,7 +352,7 @@
                                 <textInputTraits key="textInputTraits" secureTextEntry="YES" textContentType="password"/>
                             </textField>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Confirm Password" textAlignment="natural" adjustsFontSizeToFit="NO" minimumFontSize="17" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="9pq-RF-gXl" customClass="TextField" customModule="memedex" customModuleProvider="target">
-                                <rect key="frame" x="35.5" y="363" width="343" height="48"/>
+                                <rect key="frame" x="35.5" y="451" width="343" height="48"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="0NI-0O-Cgp"/>
                                     <constraint firstAttribute="width" constant="343" id="C27-il-vIq"/>
@@ -361,7 +361,7 @@
                                 <textInputTraits key="textInputTraits" secureTextEntry="YES" textContentType="password"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="SNY-bb-xRn">
-                                <rect key="frame" x="36" y="485" width="343" height="48"/>
+                                <rect key="frame" x="36" y="573" width="343" height="48"/>
                                 <fontDescription key="fontDescription" name="SFProText-Medium" family="SF Pro Text" pointSize="20"/>
                                 <state key="normal" title="Sign Up" backgroundImage="LoginSignup">
                                     <color key="titleColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
@@ -371,7 +371,7 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="*password must be 8 characters minimum" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="r4T-Cc-ahH">
-                                <rect key="frame" x="34" y="431" width="346" height="21"/>
+                                <rect key="frame" x="34" y="519" width="346" height="21"/>
                                 <constraints>
                                     <constraint firstAttribute="width" secondItem="r4T-Cc-ahH" secondAttribute="height" multiplier="346:21" id="1e7-y9-Nbd"/>
                                 </constraints>
@@ -416,11 +416,11 @@
             <objects>
                 <viewController id="o4i-G5-4bc" customClass="VerificationViewController" customModule="memedex" customModuleProvider="target" sceneMemberID="viewController">
                     <view key="view" contentMode="scaleToFill" id="1lj-r4-J7b">
-                        <rect key="frame" x="0.0" y="0.0" width="414" height="808"/>
+                        <rect key="frame" x="0.0" y="0.0" width="414" height="896"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
                             <textField opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="center" placeholder="Verification code" textAlignment="natural" minimumFontSize="17" background="textfield" translatesAutoresizingMaskIntoConstraints="NO" id="qSx-uT-4qY" customClass="TextField" customModule="memedex" customModuleProvider="target">
-                                <rect key="frame" x="36" y="213" width="343" height="48"/>
+                                <rect key="frame" x="36" y="301" width="343" height="48"/>
                                 <constraints>
                                     <constraint firstAttribute="height" constant="48" id="AjH-z9-10I"/>
                                     <constraint firstAttribute="width" constant="343" id="MW9-Cf-I48"/>
@@ -429,7 +429,7 @@
                                 <textInputTraits key="textInputTraits"/>
                             </textField>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Ck7-BK-4Fj">
-                                <rect key="frame" x="36" y="312" width="343" height="48"/>
+                                <rect key="frame" x="36" y="400" width="343" height="48"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="343" id="Qdq-uS-GPR"/>
                                     <constraint firstAttribute="height" constant="48" id="uYg-PZ-V7p"/>
@@ -471,7 +471,7 @@
         <scene sceneID="Thc-bx-Nf1">
             <objects>
                 <navigationController id="sru-1l-f0V" sceneMemberID="viewController">
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" translucent="NO" id="F5l-ib-o4O">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" id="F5l-ib-o4O">
                         <rect key="frame" x="0.0" y="44" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                     </navigationBar>
@@ -486,7 +486,7 @@
     </scenes>
     <inferredMetricsTieBreakers>
         <segue reference="gyI-wS-v5B"/>
-        <segue reference="2E2-Lv-CfU"/>
+        <segue reference="F9e-rn-QRY"/>
     </inferredMetricsTieBreakers>
     <resources>
         <image name="LoginSignup" width="343" height="48"/>
