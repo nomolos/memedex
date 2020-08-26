@@ -67,7 +67,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             self.waitMemeNamesS3.enter()
             self.loadAllS3MemeNames()
             self.waitMemeNamesS3.notify(queue: .main){
-                while (x < 100 && x < self.keys.count){
+                while (x < 10 && x < self.keys.count){
                     let transferUtility = AWSS3TransferUtility.default()
                     let expression = AWSS3TransferUtilityDownloadExpression()
                     transferUtility.downloadData(fromBucket: self.s3bucket, key: (self.keys[x] as! String), expression: expression) { (task, url, data, error) in
@@ -330,7 +330,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // #warning Incomplete implementation, return the number of items
-        return self.keys.count
+        return min(10,self.keys.count)
     }
 
     // Formatting for cells
@@ -344,14 +344,21 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             // Just a message, not a caption
             if(self.keys[indexPath.row].contains("notameme")){
                 var message_to_render = String(decoding: self.meme_container[indexPath.row], as: UTF8.self)
-                print(message_to_render)
                 let parts = message_to_render.components(separatedBy: "###")
                 var sender_email = String(parts[0].prefix(8))
                 // Since these emails are stored in the message itself
                 // We have to append them to their proper place in 'sender_emails'
                 if(parts.count > 1){
                     message_to_render = parts[1]
-                    self.sender_emails.insert(sender_email, at: indexPath.row)
+                    var sender_with_at = sender_email.components(separatedBy: "@")
+                    //@ sign removed
+                    if(sender_with_at.count > 1){
+                        self.sender_emails.insert(sender_with_at[0], at: indexPath.row)
+                    }
+                    //if that breaks for some reason
+                    else{
+                        self.sender_emails.insert(sender_email, at: indexPath.row)
+                    }
                 }
                 else{
                     message_to_render = parts[0]
@@ -400,7 +407,6 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                 container_for_video_view.layer.backgroundColor = UIColor.white.cgColor
                 container_for_video_view.backgroundColor = UIColor.white
                 let data_video = self.meme_container[indexPath.row]
-                print(data_video)
                 let temp_url = URL(fileURLWithPath:NSTemporaryDirectory()).appendingPathComponent("video").appendingPathExtension("mp4")
                 let wasFileWritten = (try? data_video.write(to: temp_url, options: [.atomic])) != nil
                 if !wasFileWritten{
@@ -425,7 +431,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                 label_for_cell.numberOfLines = 0
                 label_for_cell.adjustsFontSizeToFitWidth = true
                 label_for_cell.minimumScaleFactor = 0.1
-                label_for_cell.text = self.captions[indexPath.row] + self.sender_emails[indexPath.row]
+                label_for_cell.text = self.captions[indexPath.row]
                 label_for_cell.font = UIFont.systemFont(ofSize: 16)
                 label_for_cell.textColor = UIColor.black
                 label_for_cell.isHidden = false
@@ -489,7 +495,12 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             label_for_cell.layoutIfNeeded()
             label_superview_for_padding.layoutIfNeeded()
             
-            let sender_label = UILabel(frame: CGRect(x: label_superview_for_padding.frame.maxX - 120, y: container_for_imageview.frame.maxY, width: 100, height: 40))
+            var sender_label_y_coordinate = container_for_imageview.frame.maxY - 10
+            if(label_superview_for_padding.frame.maxY > container_for_imageview.frame.maxY){
+                sender_label_y_coordinate = sender_label_y_coordinate + 10
+            }
+            
+            let sender_label = UILabel(frame: CGRect(x: label_superview_for_padding.frame.maxX - 120, y: sender_label_y_coordinate, width: 100, height: 40))
             sender_label.text = "  " + self.sender_emails[indexPath.row].prefix(8)
             sender_label.font = UIFont.boldSystemFont(ofSize: 16)
             sender_label.textColor = UIColor.black
@@ -499,7 +510,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             sender_label.layer.shadowOpacity = 0.2
             sender_label.layer.shadowRadius = 1.5
             sender_label.layer.shadowOffset = .zero
-
+            
             cell.contentView.addSubview(container_for_imageview)
             cell.contentView.addSubview(label_superview_for_padding)
             cell.contentView.addSubview(label_for_cell)
@@ -588,15 +599,12 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                             let casted = task.result?.items[0] as! Caption
                             self.captions.append(casted.caption as! String)
                             if(casted.userEmail != nil && casted.userEmail != ""){
-                                print("printing sender email")
-                                print(casted.userEmail)
                                 var cut_me_up = casted.userEmail as! String
                                 var cut_me_up_list = cut_me_up.components(separatedBy: "@")
                                 cut_me_up = cut_me_up_list[0]
                                 self.sender_emails.append(cut_me_up)
                             }
                             else{
-                                print("not printing sender email")
                                 self.sender_emails.append("unknown")
                             }
                         }
@@ -649,9 +657,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
         })
         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
         let saveAction = UIAlertAction(title: "Submit", style: .default) { (action) -> Void in
-            print("saved")
             let listy = self.new_members_textfield.text!.components(separatedBy: ",")
-            print(listy)
             let dynamoDBObjectMapper = AWSDynamoDBObjectMapper.default()
             let updateMapperConfig = AWSDynamoDBObjectMapperConfiguration()
             updateMapperConfig.saveBehavior = .updateSkipNullAttributes

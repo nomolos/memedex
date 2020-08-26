@@ -49,18 +49,18 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     var image:UIImage?
     var playerViewController:AVPlayerViewController?
     var user_to_pair_with:String?
-    let waitPartnerMemes = DispatchGroup()
+    var waitPartnerMemes = DispatchGroup()
     let waitGroupNames = DispatchGroup()
     let waitGroupNamesFinal = DispatchGroup()
     let waitUserSubsPushNotification = DispatchGroup()
-    let waitMemesUpdated = DispatchGroup()
-    let waitPotentialPartners = DispatchGroup()
+    var waitMemesUpdated = DispatchGroup()
+    var waitPotentialPartners = DispatchGroup()
     let waitPotentialActivePartner = DispatchGroup()
-    let waitFinalPartner = DispatchGroup()
-    let waitMemeNamesS3 = DispatchGroup()
+    var waitFinalPartner = DispatchGroup()
+    var waitMemeNamesS3 = DispatchGroup()
     let waitPotentialActivePartner2 = DispatchGroup()
     let waitURL = DispatchGroup()
-    let waitTopSources = DispatchGroup()
+    var waitTopSources = DispatchGroup()
     let waitNonFBUser = DispatchGroup()
     let waitCheckMemeNames = DispatchGroup()
     let dispatchQueue = DispatchQueue(label: "com.queue.Serial")
@@ -738,7 +738,12 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
                         self.top_sources = [String]()
                         let nc = NotificationCenter.default
                         nc.removeObserver(self)
-                        self.viewWillAppear(true)
+                        DispatchQueue.main.async{
+                            let hacky_scene_access = UIApplication.shared.connectedScenes.first
+                            let scene_delegate = hacky_scene_access?.delegate as! SceneDelegate
+                            scene_delegate.viewController = self.storyboard?.instantiateViewController(withIdentifier: "ViewController") as! ViewController
+                            scene_delegate.navigationController?.setViewControllers([scene_delegate.viewController!], animated: true)
+                        }
                     }))
                     self.present(alert, animated: true)
                 }
@@ -747,6 +752,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
     }
     
     override func viewWillAppear(_ animated: Bool) {
+        print("inside viewWillAppear")
         self.navigationController?.navigationBar.layer.shadowOpacity = 0.0
         if(self.showingVideo){
             return
@@ -806,7 +812,7 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
             self.view.addSubview(self.meme_link!)
             self.view.addSubview(self.meme_group_add!)
         }
-        
+        print("inside viewWillAppear2")
         self.activityIndicator = UIActivityIndicatorView()
         self.activityIndicator.color = UIColor.white
         self.activityIndicator.style = UIActivityIndicatorView.Style.large

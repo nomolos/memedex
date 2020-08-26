@@ -378,7 +378,7 @@ class GroupViewController: UITableViewController, UITextFieldDelegate {
                     queryExpression2.keyConditionExpression = "group_name = :group_name"
                     queryExpression2.expressionAttributeValues = [":group_name":(group as String)]
                     var group_response_info = dynamoDBObjectMapper.query(Group.self, expression: queryExpression2).continueWith(executor: AWSExecutor.mainThread(), block: { (task:AWSTask<AWSDynamoDBPaginatedOutput>) -> Any? in
-                        print("inside the query")
+                        //print("inside the query")
                         if (task.error != nil){
                             print("error in loadOurGroupNames GroupViewController Gathering Group Info")
                             print(task.error)
