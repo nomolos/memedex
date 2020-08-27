@@ -458,7 +458,6 @@ extension AppDelegate {
     // Called to let your app know which action was selected by the user for a given notification.
     @available(iOS 10.0, *)
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
-        print("Got here through notification")
         let collection_view = self.storyboard?.instantiateViewController(withIdentifier: "CollectionViewController") as? CollectionViewController
         let push_notification_data = response.notification.request.content.userInfo as! [String: AnyObject]
         let snippet = push_notification_data["aps"]!["alert"]!

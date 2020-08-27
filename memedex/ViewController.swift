@@ -581,20 +581,24 @@ class ViewController: UIViewController, UIPickerViewDataSource, UIPickerViewDele
         print("inside nextFromImageZoom")
         self.next(self)
     }*/
+
+
     
     @objc func nextTap(){
         print("inside nextTap")
-        self.slider.value = 2.5
+        self.slider.value = 1.5
         self.sliderValueDidChange(sender: self.slider)
         self.next(self)
     }
     
     @objc func backTap(){
         print("inside backTap")
-        self.slider.value = 2.5
+        self.slider.value = 1.5
         self.sliderValueDidChange(sender: self.slider)
         self.back(self)
     }
+    
+    
     
     @IBAction func next(_ sender: Any) {
         // Ensure that meme starts in middle of screen

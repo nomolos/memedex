@@ -43,14 +43,14 @@ class ImageZoomView: UIScrollView, UIScrollViewDelegate, UIGestureRecognizerDele
     }
     
     @objc func nextTap(){
-        ImageZoomView.slider_value = 3.0
+        ImageZoomView.slider_value = 2.0
         let nc = NotificationCenter.default
         nc.post(name: NSNotification.Name(rawValue: "update_slider"), object: nil)
         nc.post(name: NSNotification.Name(rawValue: "next"), object: nil)
     }
     
     @objc func backTap(){
-        ImageZoomView.slider_value = 3.0
+        ImageZoomView.slider_value = 2.0
         let nc = NotificationCenter.default
         nc.post(name: NSNotification.Name(rawValue: "update_slider"), object: nil)
         nc.post(name: NSNotification.Name(rawValue: "back"), object: nil)

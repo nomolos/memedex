@@ -89,6 +89,8 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                 }
             }
         }
+        // Rest of function is about setting up message field
+        // and other small UI things
         self.collectionView.translatesAutoresizingMaskIntoConstraints = false
         self.collectionView.isHidden = false
         self.collectionView.widthAnchor.constraint(equalTo: view.safeAreaLayoutGuide.widthAnchor).isActive = true
@@ -250,7 +252,6 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                         if((casted.sub! as String) != usersub){
                             self.sendSNSPushNotification(group: group_name_temp!, receiverSub: (casted.sub as! String))
                         }
-                        //self.sendSNSPushNotification(group: group_name_temp!, receiverSub: (casted.sub as! String))
                     }
                 }
             }
@@ -342,6 +343,9 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
                 subview.removeFromSuperview()
             }
             // Just a message, not a caption
+            // Messages are stored in S3 as follows
+            // sender@sender'semail.com###messagecontent
+            // the ### separates the sender from the content
             if(self.keys[indexPath.row].contains("notameme")){
                 var message_to_render = String(decoding: self.meme_container[indexPath.row], as: UTF8.self)
                 let parts = message_to_render.components(separatedBy: "###")
@@ -519,6 +523,8 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             cell.contentView.bringSubviewToFront(sender_label)
             cell.contentView.layoutIfNeeded()
         }
+        // Prevents bug where stale images/memes stay inside container
+        // Might be problematic code
         else{
             for subview in cell.subviews{
                 let casted = subview as! UIImageView
@@ -527,10 +533,11 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             }
         }
         cell.clipsToBounds = true
-        // Configure the cell
         return cell
     }
     
+    // The size of a particular cell is the same for images and videos
+    // It's smaller for messages (which contain the string "notameme"
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         self.collectionView.reloadData()
         if(self.keys[indexPath.row].contains("notameme")){
@@ -838,6 +845,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
             return true
     }
     
+    // Used to suggest emails when a user is adding members to a group
     func getUserEmails() {
         self.waitUserEmails1.enter()
         let scanExpression = AWSDynamoDBScanExpression()
@@ -889,6 +897,7 @@ class CollectionViewController: UICollectionViewController, UICollectionViewDele
 }
 
 // Use this to get the edges of an actual image in an imageview
+// Used to know where caption should go (should be based on image bounds not imageview bounds)
 extension UIImageView {
     var contentClippingRect: CGRect {
         guard let image = image else { return bounds }
