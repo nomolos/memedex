@@ -11,7 +11,7 @@
 
 
 
-![logo](https://github.com/nomolos/memedex/tree/gh-pages/logo.png?raw=true)
+![logo](https://github.com/nomolos/memedex/tree/gh-pages/logo.png?raw=100x20)
 
 
 
