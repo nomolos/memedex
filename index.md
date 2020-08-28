@@ -10,7 +10,7 @@ https://apps.apple.com/us/app/memedex/id1513434848
 
 
 ### Screenshots from the app :
-![screenshot1](IMG_3443.PNG) ![screenshot2](IMG_3445.PNG) ![screenshot3](IMG_3446.PNG)
+![screenshot1](1.png) ![screenshot2](2.png) ![screenshot3](3.png) ![screenshot4](4.png) ![screenshot5](5.png) ![screenshot6](6.png)
 
 
 ### Interested in contributing or have feedback/ideas?
