@@ -21,4 +21,21 @@ Reach out to me (Solomon) @ memedex2020@gmail.com
 - Usability improvements
 
 ### Screenshots from the app :
-![screenshot1](1.png) ![screenshot2](2.png) ![screenshot3](3.png) ![screenshot4](4.png) ![screenshot5](5.png) ![screenshot6](6.png)
+
+![screenshot1](1.png)
+## The main view of the app
+
+![screenshot2](2.png) 
+## A group chat
+
+![screenshot3](3.png) 
+## Drafting a message in a group chat
+
+![screenshot4](4.png)
+## Functionality explanation
+
+![screenshot5](5.png)
+## Functionality explanation
+
+![screenshot6](6.png)
+## Functionality explanation
