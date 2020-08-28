@@ -9,10 +9,6 @@ memedex is an open-source meme catalog powered by artificial intelligence. As yo
 https://apps.apple.com/us/app/memedex/id1513434848
 
 
-### Screenshots from the app :
-![screenshot1](1.png) ![screenshot2](2.png) ![screenshot3](3.png) ![screenshot4](4.png) ![screenshot5](5.png) ![screenshot6](6.png)
-
-
 ### Interested in contributing or have feedback/ideas?
 
 Reach out to me (Solomon) @ memedex2020@gmail.com
@@ -23,3 +19,6 @@ Reach out to me (Solomon) @ memedex2020@gmail.com
 - Tutorial for beginners
 - More meme variety
 - Usability improvements
+
+### Screenshots from the app :
+![screenshot1](1.png) ![screenshot2](2.png) ![screenshot3](3.png) ![screenshot4](4.png) ![screenshot5](5.png) ![screenshot6](6.png)
