@@ -6,34 +6,13 @@ memedex is an open-source meme catalog powered by artificial intelligence. As yo
 
 
 
-### Looking forward
+### Interested in contributing or have feedback/ideas?
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+Reach out to me (Solomon) @ memedex2020@gmail.com
 
-```markdown
-Syntax highlighted code block
+### What to expect in early September 2020
 
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/nomolos/memedex/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+- Better meme recommendation
+- Tutorial for beginners
+- More meme variety
+- Usability improvements
