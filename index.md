@@ -23,19 +23,19 @@ Reach out to me (Solomon) @ memedex2020@gmail.com
 ### Screenshots from the app :
 
 ![screenshot1](1.png)
-## The main view of the app
+The main view of the app
 
 ![screenshot2](2.png) 
-## A group chat
+A group chat
 
 ![screenshot3](3.png) 
-## Drafting a message in a group chat
+Drafting a message in a group chat
 
 ![screenshot4](4.png)
-## Functionality explanation
+Functionality explanation
 
 ![screenshot5](5.png)
-## Functionality explanation
+Functionality explanation
 
 ![screenshot6](6.png)
-## Functionality explanation
+Functionality explanation
