@@ -6,7 +6,7 @@
 
 
 ### Download link :
-https://apps.apple.com/us/app/memedex/id1513434848
+(https://apps.apple.com/us/app/memedex/id1513434848)
 
 
 ### Interested in contributing or have feedback/ideas?
